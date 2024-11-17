@@ -2,6 +2,7 @@ import struct
 import binascii
 import logging
 from gzip import GzipFile
+from threading import Thread
 from time import time
 from collections import defaultdict
 from itertools import cycle, count
@@ -66,6 +67,7 @@ class CMClient(EventEmitter):
     cm_servers = None                       #: a instance of :class:`.CMServerList`
     current_server_addr = None              #: (ip, port) tuple
     _seen_logon = False
+    _interval = 0
     _connecting = False
     connected = False                       #: :class:`True` if connected to CM
     channel_secured = False                 #: :class:`True` once secure channel handshake is complete
@@ -179,8 +181,6 @@ class CMClient(EventEmitter):
 
         self.connection.disconnect()
 
-        if self._heartbeat_loop:
-            self._heartbeat_loop.kill()
         self._recv_loop.kill()
 
         self._reset_attributes()
@@ -366,11 +366,13 @@ class CMClient(EventEmitter):
             self._parse_message(data[4:4+size])
             data = data[4+size:]
 
-    def __heartbeat(self, interval):
+    def __heartbeat(self):
         message = MsgProto(EMsg.ClientHeartBeat)
 
         while True:
-            self.sleep(interval)
+            if not self.connected:
+                break
+            self.sleep(self._interval)
             self.send(message)
 
     def _handle_logon(self, msg):
@@ -390,13 +392,11 @@ class CMClient(EventEmitter):
             self.session_id = msg.header.client_sessionid
             self.cell_id = msg.body.cell_id
 
-            if self._heartbeat_loop:
-                self._heartbeat_loop.kill()
-
             self._LOG.debug("Heartbeat started.")
 
-            interval = msg.body.heartbeat_seconds
-            self._heartbeat_loop = gevent.spawn(self.__heartbeat, interval)
+            self._interval = msg.body.heartbeat_seconds
+            self._heartbeat_loop = Thread(target=self.__heartbeat)
+            self._heartbeat_loop.start()
         else:
             self.emit(self.EVENT_ERROR, EResult(result))
             self.disconnect()
@@ -503,7 +503,6 @@ class CMServerList:
                 params={
                     'cellid': cell_id,
                     'cmtype': cmtype,
-                    'http_timeout': 3
                 }
             )
         except Exception as exp:

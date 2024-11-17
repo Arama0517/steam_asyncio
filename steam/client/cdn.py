@@ -983,10 +983,10 @@ class CDNClient:
         app_id = ws_app_id = wf.consumer_appid
 
         try:
-            manifest_code = self.get_manifest_request_code(app_id, ws_app_id, int(wf.hcontent_file))
+            manifest_code = self.get_manifest_request_code(app_id, ws_app_id, wf.hcontent_file)
             manifest = self.get_manifest(app_id, ws_app_id, wf.hcontent_file, manifest_request_code=manifest_code)
         except SteamError as exc:
-            return ManifestError("Failed to acquire manifest", app_id, depot_id, manifest_gid, exc)
+            return ManifestError("Failed to acquire manifest", app_id, ws_app_id, wf.hcontent_file, exc)
 
         manifest.name = wf.title
         return manifest
