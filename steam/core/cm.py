@@ -67,7 +67,6 @@ class CMClient(EventEmitter):
     cm_servers = None                       #: a instance of :class:`.CMServerList`
     current_server_addr = None              #: (ip, port) tuple
     _seen_logon = False
-    _interval = 0
     _connecting = False
     connected = False                       #: :class:`True` if connected to CM
     channel_secured = False                 #: :class:`True` once secure channel handshake is complete
@@ -366,13 +365,13 @@ class CMClient(EventEmitter):
             self._parse_message(data[4:4+size])
             data = data[4+size:]
 
-    def __heartbeat(self):
+    def __heartbeat(self, interval):
         message = MsgProto(EMsg.ClientHeartBeat)
 
         while True:
             if not self.connected:
                 break
-            self.sleep(self._interval)
+            self.sleep(interval)
             self.send(message)
 
     def _handle_logon(self, msg):
@@ -394,8 +393,7 @@ class CMClient(EventEmitter):
 
             self._LOG.debug("Heartbeat started.")
 
-            self._interval = msg.body.heartbeat_seconds
-            self._heartbeat_loop = Thread(target=self.__heartbeat)
+            self._heartbeat_loop = Thread(target=self.__heartbeat, daemon=True, args=(msg.body.heartbeat_seconds,))
             self._heartbeat_loop.start()
         else:
             self.emit(self.EVENT_ERROR, EResult(result))
