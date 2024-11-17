@@ -79,7 +79,7 @@ class CMClient(EventEmitter):
     cell_id = 0                             #: cell id provided by CM
 
     _recv_loop = None
-    _heartbeat_loop = None
+    # _heartbeat_loop = None
     _LOG = logging.getLogger("CMClient")
 
     def __init__(self, protocol=PROTOCOL_TCP):
@@ -195,7 +195,7 @@ class CMClient(EventEmitter):
                      'session_id',
                      '_seen_logon',
                      '_recv_loop',
-                     '_heartbeat_loop',
+                     # '_heartbeat_loop',
                      ]:
             self.__dict__.pop(name, None)
 
@@ -365,14 +365,14 @@ class CMClient(EventEmitter):
             self._parse_message(data[4:4+size])
             data = data[4+size:]
 
-    def __heartbeat(self, interval):
-        message = MsgProto(EMsg.ClientHeartBeat)
-
-        while True:
-            if not self.connected:
-                break
-            self.sleep(interval)
-            self.send(message)
+    # def __heartbeat(self, interval):
+    #     message = MsgProto(EMsg.ClientHeartBeat)
+    #
+    #     while True:
+    #         if not self.connected:
+    #             break
+    #         self.sleep(interval)
+    #         self.send(message)
 
     def _handle_logon(self, msg):
         result = msg.body.eresult
@@ -391,10 +391,10 @@ class CMClient(EventEmitter):
             self.session_id = msg.header.client_sessionid
             self.cell_id = msg.body.cell_id
 
-            self._LOG.debug("Heartbeat started.")
-
-            self._heartbeat_loop = Thread(target=self.__heartbeat, daemon=True, args=(msg.body.heartbeat_seconds,))
-            self._heartbeat_loop.start()
+            # self._LOG.debug("Heartbeat started.")
+            #
+            # self._heartbeat_loop = Thread(target=self.__heartbeat, daemon=True, args=(msg.body.heartbeat_seconds,))
+            # self._heartbeat_loop.start()
         else:
             self.emit(self.EVENT_ERROR, EResult(result))
             self.disconnect()
