@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import re
 from keyword import kwlist
 from pathlib import Path
@@ -11,51 +9,7 @@ from tools.protobuf import protobufs_dir, source_code_dir
 
 kwlist = set(kwlist + ['None'])
 
-_proto_modules = [
-    'enums_pb2',
-    # 'steammessages_auth_pb2',
-    # 'steammessages_broadcast_pb2',
-    # 'steammessages_chat_pb2',
-    # 'steammessages_cloud_pb2',
-    # 'steammessages_contentsystem_pb2',
-    # 'steammessages_credentials_pb2',
-    # 'steammessages_datapublisher_pb2',
-    # 'steammessages_depotbuilder_pb2',
-    # 'steammessages_deviceauth_pb2',
-    # 'steammessages_econ_pb2',
-    # 'steammessages_friendmessages_pb2',
-    # 'steammessages_gamenotifications_pb2',
-    # 'steammessages_gameservers_pb2',
-    # 'steammessages_inventory_pb2',
-    # 'steammessages_linkfilter_pb2',
-    # 'steammessages_lobbymatchmaking_pb2',
-    # 'steammessages_marketingmessages_pb2',
-    # 'steammessages_market_pb2',
-    # 'steammessages_offline_pb2',
-    # 'steammessages_parental_pb2',
-    # 'steammessages_parties_pb2',
-    # 'steammessages_partnerapps_pb2',
-    # 'steammessages_physicalgoods_pb2',
-    # 'steammessages_player_pb2',
-    # 'steammessages_publishedfile_pb2',
-    # 'steammessages_qms_pb2',
-    # 'steammessages_remoteplay_pb2',
-    # 'steammessages_secrets_pb2',
-    # 'steammessages_shader_pb2',
-    # 'steammessages_site_license_pb2',
-    # 'steammessages_star_pb2',
-    # 'steammessages_steamtv_pb2',
-    # 'steammessages_storebrowse_pb2',
-    # 'steammessages_store_pb2',
-    # 'steammessages_timedtrial_pb2',
-    # 'steammessages_twofactor_pb2',
-    # 'steammessages_unified_base_pb2',
-    # 'steammessages_unified_test_pb2',
-    # 'steammessages_useraccount_pb2',
-    # 'steammessages_video_pb2',
-    # 'steammessages_webui_friends_pb2',
-    # 'steammessages_workshop_pb2',
-]
+_proto_modules = ['enums_pb2']
 
 for file in protobufs_dir.rglob('*.proto'):
     file: Path

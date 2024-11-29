@@ -5,7 +5,6 @@ description = "Module for interacting with various Steam features"
 readme = "README.rst"
 requires-python = ">=3.12"
 dependencies = [
-    "aiohttp>=3.11.7",
     "cachetools>=5.5.0",
     "gevent-eventemitter>=2.1",
     "gevent>=24.11.1",
@@ -13,14 +12,12 @@ dependencies = [
     "requests>=2.32.3",
     "urllib3>=2.2.3",
     "vdf",
-    "websockets>=14.1",
     "wsproto>=1.2.0",
     "protobuf>=5.29.0",
 ]
 
 [dependency-groups]
 dev = [
-    "aiofiles>=24.1.0",
     "coverage>=7.6.7",
     "coveralls>=4.0.1",
     "mock>=5.1.0",

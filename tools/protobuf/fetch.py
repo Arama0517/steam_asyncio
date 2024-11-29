@@ -1,32 +1,10 @@
 import os
 import shutil
 import subprocess
-import warnings
-
-from urllib3.exceptions import InsecureRequestWarning
 
 from tools.protobuf import current_dir, protobufs_dir
 
-warnings.filterwarnings('ignore', category=InsecureRequestWarning)
-
 protobufs_dir.mkdir(parents=True, exist_ok=True)
-
-# with (current_dir / 'protobuf_list.txt').open('r') as file_list:
-#     for url in file_list:
-#         url = url.strip()
-#         if not url:
-#             continue
-#
-#         file_name = protobufs_dir / url.split('/')[-1]
-#         response = requests.get(url, stream=True)
-#         if response.status_code == 200:
-#             with open(file_name, 'wb') as f:
-#                 f.write(response.content)
-#             print(f'Downloaded: {file_name}')
-#         else:
-#             print(f'Failed to download: {url}')
-
-
 temp_dir = current_dir / 'SteamTracking'
 
 
@@ -44,13 +22,11 @@ def remove_read_only(func, path, exc_info):
 if temp_dir.exists():
     shutil.rmtree(temp_dir, onerror=remove_read_only)
 
-print(temp_dir.parent)
 git(
     'clone',
     '--filter=tree:0',
     '--no-checkout',
     '--depth=1',
-    '--no-recurse-submodules',
     '--config',
     'core.sparsecheckout=true',
     'https://github.com/SteamDatabase/SteamTracking.git',
