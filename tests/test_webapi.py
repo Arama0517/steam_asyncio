@@ -1,21 +1,23 @@
 import unittest
-from unittest import mock
-import vcr
 
+import vcr
 from steam import webapi
 from steam.webapi import WebAPI
-from steam.enums import EType, EUniverse
+
 
 # setup VCR
 def scrub_req(r):
     r.headers.pop('Cookie', None)
     r.headers.pop('date', None)
     return r
+
+
 def scrub_resp(r):
     r['headers'].pop('set-cookie', None)
     r['headers'].pop('date', None)
     r['headers'].pop('expires', None)
     return r
+
 
 test_api_key = 'test_api_key'
 
@@ -28,6 +30,7 @@ test_vcr = vcr.VCR(
     before_record_request=scrub_req,
     before_record_response=scrub_resp,
 )
+
 
 class TCwebapi(unittest.TestCase):
     @test_vcr.use_cassette('webapi.yaml')
@@ -55,7 +58,7 @@ class TCwebapi(unittest.TestCase):
 
     @test_vcr.use_cassette('webapi.yaml')
     def test_post_publishedfile(self):
-        resp = self.api.ISteamRemoteStorage.GetPublishedFileDetails(itemcount=5, publishedfileids=[1,1,1,1,1])
+        resp = self.api.ISteamRemoteStorage.GetPublishedFileDetails(itemcount=5, publishedfileids=[1, 1, 1, 1, 1])
         self.assertEqual(resp['response']['resultcount'], 5)
 
     @test_vcr.use_cassette('webapi.yaml')
@@ -74,6 +77,6 @@ class TCwebapi(unittest.TestCase):
                            session=self.api.session, params={
                                'key': test_api_key,
                                'itemcount': 5,
-                               'publishedfileids': [1,1,1,1,1],
+                               'publishedfileids': [1, 1, 1, 1, 1],
                                })
         self.assertEqual(resp['response']['resultcount'], 5)

@@ -1,0 +1,56 @@
+[project]
+name = "steam"
+version = "1.6.1"
+description = "Module for interacting with various Steam features"
+readme = "README.rst"
+requires-python = ">=3.12"
+dependencies = [
+    "aiohttp>=3.11.7",
+    "cachetools>=5.5.0",
+    "gevent-eventemitter>=2.1",
+    "gevent>=24.11.1",
+    "pycryptodomex>=3.21.0",
+    "requests>=2.32.3",
+    "urllib3>=2.2.3",
+    "vdf",
+    "websockets>=14.1",
+    "wsproto>=1.2.0",
+    "protobuf>=5.29.0",
+]
+
+[dependency-groups]
+dev = [
+    "aiofiles>=24.1.0",
+    "coverage>=7.6.7",
+    "coveralls>=4.0.1",
+    "mock>=5.1.0",
+    "pytest-cov>=6.0.0",
+    "pyyaml>=6.0.2",
+    "ruff>=0.8.0",
+    "vcrpy>=5.1.0",
+]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.uv.sources]
+vdf = { git = "https://github.com/solsticegamestudios/vdf.git", rev = "v4.0" }
+
+[tool.ruff]
+preview = true
+fix = true
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "N", "I"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/steam/protobufs/*" = ["ALL"]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "space"
+docstring-code-format = true

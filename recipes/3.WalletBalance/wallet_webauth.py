@@ -1,7 +1,7 @@
 import re
 from getpass import getpass
-import steam.webauth as wa
 
+import steam.webauth as wa
 
 username = input("Username: ")
 password = getpass("Password: ")

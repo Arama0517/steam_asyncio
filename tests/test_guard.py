@@ -1,7 +1,7 @@
 import unittest
-from unittest import mock
 
 from steam import guard as g
+
 
 class TCguard(unittest.TestCase):
     def test_generate_twofactor_code_for_time(self):

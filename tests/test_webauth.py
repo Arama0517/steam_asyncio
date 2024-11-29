@@ -1,15 +1,17 @@
 ######################################################
 ####
-#### NOT TO BE RAN WITHOUT GENERATING A VCR FIRST
-#### use ....
+# NOT TO BE RAN WITHOUT GENERATING A VCR FIRST
+# use ....
 ####
 ######################################################
-import vcr
 import unittest
 from unittest import mock
+
 import requests
 
+import vcr
 from steam import webauth as wa
+
 
 class WACase(unittest.TestCase):
     @mock.patch('steam.webauth.make_requests_session')
@@ -36,9 +38,9 @@ class WACase(unittest.TestCase):
         self.assertIsInstance(s, requests.Session)
 
         for domain in s.cookies.list_domains():
-            self.assertEqual(s.cookies.get('steamLogin', domain=domain), '0%7C%7C{}'.format('A'*16))
-            self.assertEqual(s.cookies.get('steamLoginSecure', domain=domain), '0%7C%7C{}'.format('B'*16))
-            self.assertEqual(s.cookies.get('steamMachineAuth0', domain=domain), 'C'*16)
+            self.assertEqual(s.cookies.get('steamLogin', domain=domain), '0%7C%7C{}'.format('A' * 16))
+            self.assertEqual(s.cookies.get('steamLoginSecure', domain=domain), '0%7C%7C{}'.format('B' * 16))
+            self.assertEqual(s.cookies.get('steamMachineAuth0', domain=domain), 'C' * 16)
 
         self.assertEqual(s, user.login())
 

@@ -1,9 +1,11 @@
 import unittest
 from unittest.mock import patch
+
 import gevent
 import gevent.queue
 
 from steam.core.cm import CMClient
+
 
 class CMClient_Scenarios(unittest.TestCase):
     test_channel_key = b'SESSION KEY LOL'
@@ -45,7 +47,7 @@ class CMClient_Scenarios(unittest.TestCase):
         patcher = patch('steam.core.cm.CMServerList', autospec=True)
         self.addCleanup(patcher.stop)
         self.server_list = patcher.start().return_value
-        self.server_list.__iter__.return_value = [(127001, 20000+i) for i in range(10)]
+        self.server_list.__iter__.return_value = [(127001, 20000 + i) for i in range(10)]
         self.server_list.bootstrap_from_webapi.return_value = False
         self.server_list.bootstrap_from_dns.return_value = False
 
@@ -136,5 +138,3 @@ class CMClient_Scenarios(unittest.TestCase):
         self.conn_in.put(b'\x19\x05\x00\x00\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\x01\x00\x00\x00')
 
         cm.wait_event('channel_secured', timeout=2, raises=True)
-
-        

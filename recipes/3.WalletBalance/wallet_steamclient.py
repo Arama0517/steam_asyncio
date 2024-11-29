@@ -1,7 +1,8 @@
-from steam.client import SteamClient, EMsg
-from steam.enums import EResult, ECurrencyCode
+from steam.client import EMsg, SteamClient
+from steam.enums import ECurrencyCode
 
 client = SteamClient()
+
 
 @client.on(EMsg.ClientWalletInfoUpdate)
 def print_balance(msg):
@@ -10,6 +11,7 @@ def print_balance(msg):
                                                        cents,
                                                        ECurrencyCode(msg.body.currency).name
                                                        ))
+
 
 client.cli_login()
 client.disconnect()

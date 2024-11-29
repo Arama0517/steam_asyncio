@@ -1,6 +1,5 @@
 import unittest
 from unittest import mock
-from binascii import hexlify
 
 from steam.core import crypto
 
@@ -24,13 +23,13 @@ class crypto_testcase(unittest.TestCase):
 #                          b'c4e207fba822d523028d3c04e812abdc2247aa8d8e6e4a89c7a65671c5bcb329'
 #                          b'51c6d721ccf57cc2920d6ff3b69bfb2c611b1275badcd3e37fe024c9a25bf4b0'
 #                          )
-# 
+#
 #         key, ekey = crypto.generate_session_key()
 #         ekey = hexlify(ekey)
-# 
+#
 #         self.assertEqual(key, expected_key)
 #         self.assertEqual(ekey, expected_ekey)
-# 
+#
 #     def test_keygen_with_challenge(self):
 #         expected_key = b'1' * 32
 #         expected_ekey = (b'd710c55122f9bf772ec9c0f21d75c05055764d5445902577340029b4707e1725'
@@ -38,10 +37,10 @@ class crypto_testcase(unittest.TestCase):
 #                          b'0babc859c55b6ac94497b5dc9b0bc89629290dc038274af4377771e088e92887'
 #                          b'30d3906f6b698fd113ba36e3d28a5e1ce0283b27a1adda538df5dc5b179cf84f'
 #                          )
-# 
+#
 #         key, ekey = crypto.generate_session_key(b'5'*16)
 #         ekey = hexlify(ekey)
-# 
+#
 #         self.assertEqual(key, expected_key)
 #         self.assertEqual(ekey, expected_ekey)
 
@@ -75,8 +74,8 @@ class crypto_testcase(unittest.TestCase):
 
         # failing HMAC check
         with self.assertRaises(RuntimeError):
-            crypto.symmetric_decrypt_HMAC(cyphertext, key, b'4'*16)
+            crypto.symmetric_decrypt_HMAC(cyphertext, key, b'4' * 16)
 
     def test_sha1_hash(self):
-        self.assertEqual(crypto.sha1_hash(b'123'),    b'@\xbd\x00\x15c\x08_\xc3Qe2\x9e\xa1\xff\\^\xcb\xdb\xbe\xef')
+        self.assertEqual(crypto.sha1_hash(b'123'), b'@\xbd\x00\x15c\x08_\xc3Qe2\x9e\xa1\xff\\^\xcb\xdb\xbe\xef')
         self.assertEqual(crypto.sha1_hash(b'999999'), b'\x1fU#\xa8\xf55(\x9b4\x01\xb2\x99X\xd0\x1b)f\xeda\xd2')

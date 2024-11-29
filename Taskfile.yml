@@ -1,0 +1,59 @@
+version: 3
+
+tasks:
+  init:
+    desc: install python dependancies
+    cmd: uv sync
+
+  check:
+    aliases:
+      - default
+    cmd: uv run -m ruff check
+
+  format:
+    aliases:
+      - fmt
+    cmd: uv run -m ruff format
+
+  test:
+    desc: pytest
+    cmd: uv run -m pytest
+
+  protobuf_fetch:
+    aliases:
+      - pb_fetch
+    desc: fetch protobufs from SteamRE
+    cmd: uv run -m tools.protobuf.fetch
+
+  protobuf_compile:
+    aliases:
+      - pb_compile
+    desc: compile with protoc
+    cmd: uv run -m tools.protobuf.compile
+
+  protobuf_clean:
+    aliases:
+      - pb_clean
+    desc: removes *.proto
+    cmd: uv run -m tools.protobuf.clean
+
+  protobuf_services:
+    aliases:
+      - pb_services
+    cmd: uv run -m tools.protobuf.services
+
+  protobuf_generate_enums:
+    aliases:
+      - pb_gen_enums
+    cmd: uv run -m tools.protobuf.generate_enums
+
+  protobuf_update:
+    aliases:
+      - pb_update
+    desc: pb_fetch + pb_compile
+    cmds:
+      - task: protobuf_clean
+      - task: protobuf_fetch
+      - task: protobuf_compile
+      - task: protobuf_services
+      - task: protobuf_generate_enums
