@@ -3,7 +3,7 @@ name = "steam"
 version = "1.6.1"
 description = "Module for interacting with various Steam features"
 readme = "README.rst"
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 dependencies = [
     "cachetools>=5.5.0",
     "gevent-eventemitter>=2.1",
