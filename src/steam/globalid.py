@@ -6,6 +6,7 @@ class GlobalID(int):
     Represents a globally unique identifier within the Steam network.
     Guaranteed to be unique across all racks and servers for a given Steam universe.
     """
+
     def __new__(cls, *args, **kwargs):
         if len(args) == 1:
             return super().__new__(cls, *args)
@@ -32,19 +33,24 @@ class GlobalID(int):
             start_time = datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S')
         start_time_seconds = int((start_time - datetime(2005, 1, 1)).total_seconds())
 
-        return (box_id << 54) | (process_id << 50) | (start_time_seconds << 20) | sequence_count
+        return (
+            (box_id << 54)
+            | (process_id << 50)
+            | (start_time_seconds << 20)
+            | sequence_count
+        )
 
     def __init__(self, *args, **kwargs):
         pass
 
     def __repr__(self):
-        return "{}(sequence_count={}, start_time={}, process_id={}, box_id={})".format(
+        return '{}(sequence_count={}, start_time={}, process_id={}, box_id={})'.format(
             self.__class__.__name__,
             self.sequence_count,
             repr(str(self.start_time)),
             self.process_id,
             self.box_id,
-            )
+        )
 
     @property
     def sequence_count(self):

@@ -13,6 +13,7 @@ Implementation of Steam client based on ``gevent``
     Optional features are available as :mod:`.mixins`. This allows the client to remain light yet flexible.
 
 """
+
 import json
 import logging
 import os
@@ -38,11 +39,11 @@ class SteamClient(CMClient, BuiltinBase):
     EVENT_LOGGED_ON = 'logged_on'
     """After successful login"""
 
-    _LOG = logging.getLogger("SteamClient")
+    _LOG = logging.getLogger('SteamClient')
     _reconnect_backoff_c = 0
     current_jobid = 0
-    username = None                    #: username when logged on
-    chat_mode = 2                      #: chat mode (0=old chat, 2=new chat)
+    username = None  #: username when logged on
+    chat_mode = 2  #: chat mode (0=old chat, 2=new chat)
 
     def __init__(self, protocol=CMClient.PROTOCOL_TCP):
         CMClient.__init__(self, protocol=protocol)
@@ -57,10 +58,11 @@ class SteamClient(CMClient, BuiltinBase):
         BuiltinBase.__init__(self)
 
     def __repr__(self):
-        return "<{}({}) {}>".format(self.__class__.__name__,
-                              repr(self.current_server_addr),
-                              'online' if self.connected else 'offline',
-                              )
+        return '<{}({}) {}>'.format(
+            self.__class__.__name__,
+            repr(self.current_server_addr),
+            'online' if self.connected else 'offline',
+        )
 
     def connect(self, *args, **kwargs):
         """Attempt to establish connection, see :meth:`.CMClient.connect`"""
@@ -86,20 +88,26 @@ class SteamClient(CMClient, BuiltinBase):
             jobid = msg.header.targetJobID
 
         if jobid not in (-1, 18446744073709551615):
-            jobid = "job_%d" % jobid
+            jobid = 'job_%d' % jobid
             if msg.body is None and self.count_listeners(jobid):
                 msg.parse()
             self.emit(jobid, msg)
 
         # emit UMs
-        if emsg in (EMsg.ServiceMethod, EMsg.ServiceMethodResponse, EMsg.ServiceMethodSendToClient):
+        if emsg in (
+            EMsg.ServiceMethod,
+            EMsg.ServiceMethodResponse,
+            EMsg.ServiceMethodSendToClient,
+        ):
             if msg.body is None and self.count_listeners(msg.header.target_job_name):
                 msg.parse()
             self.emit(msg.header.target_job_name, msg)
 
     def _handle_cm_list(self, msg):
-        if (self.cm_servers.last_updated + 3600 * 24 > time()
-           and self.cm_servers.cell_id != 0):
+        if (
+            self.cm_servers.last_updated + 3600 * 24 > time()
+            and self.cm_servers.cell_id != 0
+        ):
             return
         CMClient._handle_cm_list(self, msg)  # clear and merge
 
@@ -169,7 +177,7 @@ class SteamClient(CMClient, BuiltinBase):
         :type body_params: dict
         """
         if not self.connected:
-            self._LOG.debug("Trying to send message when not connected. (discarded)")
+            self._LOG.debug('Trying to send message when not connected. (discarded)')
         else:
             if body_params and isinstance(message, MsgProto):
                 proto_fill_from_dict(message.body, body_params)
@@ -210,7 +218,7 @@ class SteamClient(CMClient, BuiltinBase):
 
         self.send(message, body_params)
 
-        return "job_%d" % jobid
+        return 'job_%d' % jobid
 
     def send_job_and_wait(self, message, body_params=None, timeout=None, raises=False):
         """Send a message as a job and wait for the response.
@@ -236,7 +244,9 @@ class SteamClient(CMClient, BuiltinBase):
             return None
         return response[0].body
 
-    def send_message_and_wait(self, message, response_emsg, body_params=None, timeout=None, raises=False):
+    def send_message_and_wait(
+        self, message, response_emsg, body_params=None, timeout=None, raises=False
+    ):
         """Send a message to CM and wait for a defined answer.
 
         :param message: a message instance
@@ -261,8 +271,8 @@ class SteamClient(CMClient, BuiltinBase):
 
     def _pre_login(self):
         if self.logged_on:
-            self._LOG.debug("Trying to login while logged on???")
-            raise RuntimeError("Already logged on")
+            self._LOG.debug('Trying to login while logged on???')
+            raise RuntimeError('Already logged on')
 
         if not self.connected and not self._connecting:
             if not self.connect():
@@ -311,9 +321,9 @@ class SteamClient(CMClient, BuiltinBase):
             In [5]: client.login(webauth.username, access_token=webauth.refresh_token)
             Out[5]: <EResult.OK: 1>
         """
-        self._LOG.debug("Attempting steam client login from webauth")
+        self._LOG.debug('Attempting steam client login from webauth')
         if not password and not access_token:
-            raise RuntimeError("Must provide either password or access token")
+            raise RuntimeError('Must provide either password or access token')
 
         eresult = self._pre_login()
         if eresult != EResult.OK:
@@ -325,13 +335,15 @@ class SteamClient(CMClient, BuiltinBase):
         message.header.steamid = SteamID(type='Individual', universe='Public')
         message.body.protocol_version = 65580
         message.body.client_os_type = EOSType.Windows10
-        message.body.client_language = "english"
+        message.body.client_language = 'english'
         message.body.should_remember_password = True
         message.body.supports_rate_limit_response = True
         message.body.chat_mode = self.chat_mode
 
         if login_id is None:
-            message.body.obfuscated_private_ip.v4 = ip4_to_int(self.connection.local_address) ^ 0xBAADF00D
+            message.body.obfuscated_private_ip.v4 = (
+                ip4_to_int(self.connection.local_address) ^ 0xBAADF00D
+            )
         else:
             message.body.obfuscated_private_ip.v4 = login_id
 
@@ -357,7 +369,7 @@ class SteamClient(CMClient, BuiltinBase):
         :return: logon result, see `CMsgClientLogonResponse.eresult <https://github.com/ValvePython/steam/blob/513c68ca081dc9409df932ad86c66100164380a6/protobufs/steammessages_clientserver.proto#L95-L118>`_
         :rtype: :class:`.EResult`
         """
-        self._LOG.debug("Attempting Anonymous login")
+        self._LOG.debug('Attempting Anonymous login')
 
         eresult = self._pre_login()
 

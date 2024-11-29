@@ -1,4 +1,4 @@
-r""" Master Server Query Protocol
+r"""Master Server Query Protocol
 
 This module implements the legacy Steam master server protocol.
 
@@ -48,7 +48,6 @@ Query HL Master
 
     >>> for server_addr in gs.query_master(r'\appid\730\white\1', max_servers=3):
     ...     print(server_addr)
-    ...
     ('146.66.152.197', 27073)
     ('146.66.153.124', 27057)
     ('146.66.152.56', 27053)
@@ -58,7 +57,9 @@ Team Fortress 2 (Source)
 .. code:: python
 
     >>> from steam import game_servers as gs
-    >>> server_addr = next(gs.query_master(r'\appid\40\empty\1\secure\1'))  # single TF2 Server
+    >>> server_addr = next(
+    ...     gs.query_master(r'\appid\40\empty\1\secure\1')
+    ... )  # single TF2 Server
     >>> gs.a2s_ping(server_addr)
     68.60899925231934
     >>> gs.a2s_info(server_addr)
@@ -96,8 +97,10 @@ Ricohet (GoldSrc)
 .. code:: python
 
     >>> from steam import game_servers as gs
-    >>> server_addr = next(gs.query_master(r'\appid\60'))  # get a single ip from hl2 master
-    >>> gs.a2s_info(server_addr, force_goldsrc=True)       # only accept goldsrc response
+    >>> server_addr = next(
+    ...     gs.query_master(r'\appid\60')
+    ... )  # get a single ip from hl2 master
+    >>> gs.a2s_info(server_addr, force_goldsrc=True)  # only accept goldsrc response
     {'_ping': 26.59320831298828,
      '_type': 'goldsrc',
      'address': '127.0.0.1:27050',
@@ -124,6 +127,7 @@ Ricohet (GoldSrc)
 API
 ---
 """
+
 import socket
 from binascii import crc32
 from bz2 import decompress as _bz2_decompress
@@ -164,10 +168,16 @@ class MSRegion(IntEnum):
 class MSServer:
     GoldSrc = ('hl1master.steampowered.com', 27010)  #: These have been shutdown
     Source = ('hl2master.steampowered.com', 27011)
-    Source_27015 = ('208.64.200.65', 27015)          #: ``hl2master`` but on different port
+    Source_27015 = ('208.64.200.65', 27015)  #: ``hl2master`` but on different port
 
 
-def query_master(filter_text=r'\nappid\500', max_servers=20, region=MSRegion.World, master=MSServer.Source, timeout=2):
+def query_master(
+    filter_text=r'\nappid\500',
+    max_servers=20,
+    region=MSRegion.World,
+    master=MSServer.Source,
+    timeout=2,
+):
     r"""Generator that returns (IP,port) pairs of servers
 
     .. warning::
@@ -192,7 +202,7 @@ def query_master(filter_text=r'\nappid\500', max_servers=20, region=MSRegion.Wor
     """
 
     if not isinstance(region, MSRegion):
-        raise TypeError("region_code is not of type MSRegion")
+        raise TypeError('region_code is not of type MSRegion')
 
     ms = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     ms.connect(master)
@@ -209,14 +219,14 @@ def query_master(filter_text=r'\nappid\500', max_servers=20, region=MSRegion.Wor
         data = StructReader(ms.recv(8196))  # chunk size needs to be multiple of 6
 
         # verify response header
-        if data.read(6) != b'\xFF\xFF\xFF\xFF\x66\x0A':
+        if data.read(6) != b'\xff\xff\xff\xff\x66\x0a':
             ms.close()
-            raise RuntimeError("Invalid response from master server")
+            raise RuntimeError('Invalid response from master server')
 
         # read list of servers
         while data.rlen():
             ip = '.'.join(map(str, data.unpack('>BBBB')))
-            port, = data.unpack('>H')
+            (port,) = data.unpack('>H')
             n += 1
 
             # check if we've reached the end of the list
@@ -237,7 +247,7 @@ def query_master(filter_text=r'\nappid\500', max_servers=20, region=MSRegion.Wor
 
 def _handle_a2s_response(sock):
     packet = sock.recv(2048)
-    header, = _unpack_from('<l', packet)
+    (header,) = _unpack_from('<l', packet)
 
     if header == -1:  # single packet response
         return packet
@@ -245,7 +255,7 @@ def _handle_a2s_response(sock):
         sock.settimeout(0.3)
         return _handle_a2s_multi_packet_response(sock, packet)
     else:
-        raise RuntimeError("Invalid response header - %d" % header)
+        raise RuntimeError('Invalid response header - %d' % header)
 
 
 def _handle_a2s_multi_packet_response(sock, packet):
@@ -269,17 +279,20 @@ def _handle_a2s_multi_packet_response(sock, packet):
     pkt_idx, num_pkts, compressed = _unpack_multipacket_header(payload_offset, packet)
 
     if pkt_idx != 0:
-        raise RuntimeError("Unexpected first packet index")
+        raise RuntimeError('Unexpected first packet index')
 
     # recv any remaining packets
     while len(packets) < num_pkts:
         packets.append(sock.recv(2048))
 
     # ensure packets are in correct order
-    packets = sorted(map(lambda pkt: (_unpack_multipacket_header(payload_offset, pkt)[0], pkt),
-                         packets,
-                         ),
-                     key=lambda x: x[0])
+    packets = sorted(
+        map(
+            lambda pkt: (_unpack_multipacket_header(payload_offset, pkt)[0], pkt),
+            packets,
+        ),
+        key=lambda x: x[0],
+    )
 
     # reconstruct full response
     data = b''.join(map(lambda x: x[1][payload_offset:], packets))
@@ -290,22 +303,28 @@ def _handle_a2s_multi_packet_response(sock, packet):
         data = _bz2_decompress(data)
 
         if len(data) != size:
-            raise RuntimeError("Response size mismatch - %d %d" % (len(data), size))
+            raise RuntimeError('Response size mismatch - %d %d' % (len(data), size))
         if checksum != crc32(data):
-            raise RuntimeError("Response checksum mismatch - %d %d" % (checksum, crc32(data)))
+            raise RuntimeError(
+                'Response checksum mismatch - %d %d' % (checksum, crc32(data))
+            )
 
     return data
 
 
 def _unpack_multipacket_header(payload_offset, packet):
     if payload_offset == 9:  # GoldSrc
-        pkt_byte, = _unpack_from('<B', packet, 8)
+        (pkt_byte,) = _unpack_from('<B', packet, 8)
         return pkt_byte >> 2, pkt_byte & 0xF, False  # idx, total, compressed
     elif payload_offset in (10, 12, 18):  # Source
-        pkt_id, num_pkts, pkt_idx, = _unpack_from('<LBB', packet, 4)
-        return pkt_idx, num_pkts, (pkt_id & 0x80000000) != 0   # idx, total, compressed
+        (
+            pkt_id,
+            num_pkts,
+            pkt_idx,
+        ) = _unpack_from('<LBB', packet, 4)
+        return pkt_idx, num_pkts, (pkt_id & 0x80000000) != 0  # idx, total, compressed
     else:
-        raise RuntimeError("Unexpected payload_offset - %d" % payload_offset)
+        raise RuntimeError('Unexpected payload_offset - %d' % payload_offset)
 
 
 def a2s_info(server_addr, timeout=2, force_goldsrc=False, challenge=0):
@@ -335,7 +354,10 @@ def a2s_info(server_addr, timeout=2, force_goldsrc=False, challenge=0):
 
     # request server info
     payload = _pack('<lc', -1, b'T') + b'Source Engine Query\x00'
-    if challenge not in (-1, 0):  # If a valid challenge was supplied, append it to the payload
+    if challenge not in (
+        -1,
+        0,
+    ):  # If a valid challenge was supplied, append it to the payload
         payload += _pack('<i', challenge)
 
     ss.send(payload)
@@ -365,11 +387,11 @@ def a2s_info(server_addr, timeout=2, force_goldsrc=False, challenge=0):
 
     ss.close()
     data = StructReader(data)
-    header, = data.unpack('<4xc')
+    (header,) = data.unpack('<4xc')
 
     # invalid header
     if header not in b'mIA':
-        raise RuntimeError("Invalid response header - %s" % repr(header))
+        raise RuntimeError('Invalid response header - %s' % repr(header))
     # GoldSrc response
     elif header == b'm':
         info = {
@@ -382,14 +404,15 @@ def a2s_info(server_addr, timeout=2, force_goldsrc=False, challenge=0):
             'game': data.read_cstring(),
         }
 
-        (info['players'],
-         info['max_players'],
-         info['protocol'],
-         info['server_type'],
-         info['environment'],
-         info['visibility'],
-         info['mod'],
-         ) = data.unpack('<BBBccBB')
+        (
+            info['players'],
+            info['max_players'],
+            info['protocol'],
+            info['server_type'],
+            info['environment'],
+            info['visibility'],
+            info['mod'],
+        ) = data.unpack('<BBBccBB')
 
         info['server_type'] = _u(info['server_type'])
         info['environment'] = _u(info['environment'])
@@ -398,11 +421,12 @@ def a2s_info(server_addr, timeout=2, force_goldsrc=False, challenge=0):
             info['link'] = data.read_cstring()
             info['download_link'] = data.read_cstring()
 
-            (info['version'],
-             info['size'],
-             info['type'],
-             info['ddl'],
-             ) = data.unpack('<xLLBB')
+            (
+                info['version'],
+                info['size'],
+                info['type'],
+                info['ddl'],
+            ) = data.unpack('<xLLBB')
 
         info['vac'], info['bots'] = data.unpack('<BB')
     # Source response
@@ -417,50 +441,60 @@ def a2s_info(server_addr, timeout=2, force_goldsrc=False, challenge=0):
             'game': data.read_cstring(),
         }
 
-        (info['app_id'],
-         info['players'],
-         info['max_players'],
-         info['bots'],
-         info['server_type'],
-         info['environment'],
-         info['visibility'],
-         info['vac'],
-         ) = data.unpack('<HBBBccBB')
+        (
+            info['app_id'],
+            info['players'],
+            info['max_players'],
+            info['bots'],
+            info['server_type'],
+            info['environment'],
+            info['visibility'],
+            info['vac'],
+        ) = data.unpack('<HBBBccBB')
 
         info['server_type'] = _u(info['server_type'])
         info['environment'] = _u(info['environment'])
 
         if info['app_id'] == 2400:
-            (info['mode'],
-             info['witnesses'],
-             info['duration'],
-             ) = data.unpack('<BBB')
+            (
+                info['mode'],
+                info['witnesses'],
+                info['duration'],
+            ) = data.unpack('<BBB')
 
         info['version'] = data.read_cstring()
 
         if data.rlen():
-            edf, = data.unpack('<B')
+            (edf,) = data.unpack('<B')
             info['edf'] = edf
 
             if edf & 0x80:
-                info['port'], = data.unpack('<H')
+                (info['port'],) = data.unpack('<H')
             if edf & 0x10:
-                info['steam_id'], = data.unpack('<Q')
+                (info['steam_id'],) = data.unpack('<Q')
             if edf & 0x40:
-                info['sourcetv_port'], = data.unpack('<H')
+                (info['sourcetv_port'],) = data.unpack('<H')
                 info['sourcetv_name'] = data.read_cstring()
             if edf & 0x20:
                 info['keywords'] = data.read_cstring()
             if edf & 0x01:
-                info['game_id'], = data.unpack('<Q')
+                (info['game_id'],) = data.unpack('<Q')
                 info['app_id'] = info['game_id'] & 0xFFFFFF
     # Challenge response
     elif header == b'A':
         if challenge not in (-1, 0):
-            raise RuntimeError("Invalid response header for request containing challenge answer - %s" % repr(header))
+            raise RuntimeError(
+                'Invalid response header for request containing challenge answer - %s'
+                % repr(header)
+            )
 
         challenge = data.unpack('<l')
-        return a2s_info(server_addr=server_addr, timeout=timeout, force_goldsrc=force_goldsrc, challenge=challenge[0])
+        return a2s_info(
+            server_addr=server_addr,
+            timeout=timeout,
+            force_goldsrc=force_goldsrc,
+            challenge=challenge[0],
+        )
 
     return info
 
@@ -495,7 +529,7 @@ def a2s_players(server_addr, timeout=2, challenge=0):
             raise
 
         if header not in b'AD':  # work around for CSGO sending only max players
-            raise RuntimeError("Unexpected challenge response - %s" % repr(header))
+            raise RuntimeError('Unexpected challenge response - %s' % repr(header))
 
     # request player info
     if header == b'D':  # work around for CSGO sending only max players
@@ -511,7 +545,7 @@ def a2s_players(server_addr, timeout=2, challenge=0):
     header, num_players = data.unpack('<4xcB')
 
     if header != b'D':
-        raise RuntimeError("Invalid response header - %s" % repr(header))
+        raise RuntimeError('Invalid response header - %s' % repr(header))
 
     players = []
 
@@ -558,7 +592,7 @@ def a2s_rules(server_addr, timeout=2, challenge=0, binary=False):
             raise
 
         if header != b'A':
-            raise RuntimeError("Unexpected challenge response")
+            raise RuntimeError('Unexpected challenge response')
 
     # request player info
     ss.send(_pack('<lci', -1, b'V', challenge))
@@ -571,7 +605,7 @@ def a2s_rules(server_addr, timeout=2, challenge=0, binary=False):
     header, num_rules = data.unpack('<4xcH')
 
     if header != b'E':
-        raise RuntimeError("Invalid response header - %s" % repr(header))
+        raise RuntimeError('Invalid response header - %s' % repr(header))
 
     rules = {}
 

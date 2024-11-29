@@ -22,6 +22,7 @@ def patch_minimal():
     It calls :meth:`gevent.monkey.patch_socket()` and :meth:`gevent.monkey.patch_ssl()`
     """
     import gevent.monkey
+
     gevent.monkey.patch_socket()
     gevent.monkey.patch_ssl()
     gevent.monkey.patch_dns()

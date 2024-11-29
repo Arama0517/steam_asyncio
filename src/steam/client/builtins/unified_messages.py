@@ -25,6 +25,7 @@ The backend might error out, but we still get response. Here is how to check for
         print(response.header.error_message)
 
 """
+
 from steam.core.msg import MsgProto, get_um
 from steam.enums.emsg import EMsg
 from steam.utils.proto import proto_fill_from_dict
@@ -49,7 +50,7 @@ class UnifiedMessages:
         proto = get_um(method_name)
 
         if proto is None:
-            raise ValueError("Failed to find method named: %s" % method_name)
+            raise ValueError('Failed to find method named: %s' % method_name)
 
         message = MsgProto(EMsg.ServiceMethodCallFromClient)
         message.header.target_job_name = method_name

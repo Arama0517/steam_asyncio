@@ -1,6 +1,7 @@
 """
 Web related features
 """
+
 from steam import webapi
 from steam.core.crypto import generate_session_key, symmetric_encrypt
 from steam.core.msg import MsgProto
@@ -30,24 +31,30 @@ class Web:
         :return: dict with authentication cookies
         :rtype: :class:`dict`, :class:`None`
         """
-        if not self.logged_on: return None
+        if not self.logged_on:
+            return None
 
-        resp = self.send_job_and_wait(MsgProto(EMsg.ClientRequestWebAPIAuthenticateUserNonce), timeout=7)
+        resp = self.send_job_and_wait(
+            MsgProto(EMsg.ClientRequestWebAPIAuthenticateUserNonce), timeout=7
+        )
 
-        if resp is None: return None
+        if resp is None:
+            return None
 
         skey, ekey = generate_session_key()
 
         data = {
             'steamid': self.steam_id,
             'sessionkey': ekey,
-            'encrypted_loginkey': symmetric_encrypt(resp.webapi_authenticate_user_nonce.encode('ascii'), skey),
+            'encrypted_loginkey': symmetric_encrypt(
+                resp.webapi_authenticate_user_nonce.encode('ascii'), skey
+            ),
         }
 
         try:
             resp = webapi.post('ISteamUserAuth', 'AuthenticateUser', 1, params=data)
         except Exception as exp:
-            self._LOG.debug("get_web_session_cookies error: %s" % str(exp))
+            self._LOG.debug('get_web_session_cookies error: %s' % str(exp))
             return None
 
         return {
@@ -81,9 +88,13 @@ class Web:
         self._web_session = session = make_requests_session()
         session_id = generate_session_id()
 
-        for domain in ['store.steampowered.com', 'help.steampowered.com', 'steamcommunity.com']:
+        for domain in [
+            'store.steampowered.com',
+            'help.steampowered.com',
+            'steamcommunity.com',
+        ]:
             for name, val in cookies.items():
-                secure = (name == 'steamLoginSecure')
+                secure = name == 'steamLoginSecure'
                 session.cookies.set(name, val, domain=domain, secure=secure)
 
             session.cookies.set('Steam_Language', language, domain=domain)

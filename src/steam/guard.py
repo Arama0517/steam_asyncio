@@ -62,6 +62,7 @@ Format of ``secrets.json`` file:
         "uri": "otpauth://totp/Steam:<username>?secret=<base32 encoded shared seceret>&issuer=Steam"
     }
 """
+
 import json
 import struct
 import subprocess
@@ -81,12 +82,13 @@ from steam.webauth import MobileWebAuth
 
 class SteamAuthenticator:
     """Add/Remove authenticator from an account. Generate 2FA and confirmation codes."""
+
     _finalize_attempts = 5
-    backend = None               #: instance of :class:`.MobileWebAuth` or :class:`.SteamClient`
-    steam_time_offset = None     #: offset from steam server time
-    align_time_every = 0         #: how often to align time with Steam (``0`` never, otherwise interval in seconds)
+    backend = None  #: instance of :class:`.MobileWebAuth` or :class:`.SteamClient`
+    steam_time_offset = None  #: offset from steam server time
+    align_time_every = 0  #: how often to align time with Steam (``0`` never, otherwise interval in seconds)
     _offset_last_check = 0
-    secrets = None               #: :class:`dict` with authenticator secrets
+    secrets = None  #: :class:`dict` with authenticator secrets
 
     def __init__(self, secrets=None, backend=None):
         """
@@ -100,7 +102,7 @@ class SteamAuthenticator:
 
     def __getattr__(self, key):
         if key not in self.secrets:
-            raise AttributeError("No %s attribute" % repr(key))
+            raise AttributeError('No %s attribute' % repr(key))
         return self.secrets[key]
 
     def get_time(self):
@@ -108,9 +110,10 @@ class SteamAuthenticator:
         :return: Steam aligned timestamp
         :rtype: int
         """
-        if (self.steam_time_offset is None
-           or (self.align_time_every and (time() - self._offset_last_check) > self.align_time_every)
-           ):
+        if self.steam_time_offset is None or (
+            self.align_time_every
+            and (time() - self._offset_last_check) > self.align_time_every
+        ):
             self.steam_time_offset = get_time_offset()
 
             if self.steam_time_offset is not None:
@@ -125,8 +128,10 @@ class SteamAuthenticator:
         :return: two factor code
         :rtype: str
         """
-        return generate_twofactor_code_for_time(b64decode(self.shared_secret),
-                                                self.get_time() if timestamp is None else timestamp)
+        return generate_twofactor_code_for_time(
+            b64decode(self.shared_secret),
+            self.get_time() if timestamp is None else timestamp,
+        )
 
     def get_confirmation_key(self, tag='', timestamp=None):
         """
@@ -137,15 +142,18 @@ class SteamAuthenticator:
         :return: trade confirmation key
         :rtype: str
         """
-        return generate_confirmation_key(b64decode(self.identity_secret), tag,
-                                         self.get_time() if timestamp is None else timestamp)
+        return generate_confirmation_key(
+            b64decode(self.identity_secret),
+            tag,
+            self.get_time() if timestamp is None else timestamp,
+        )
 
     def _send_request(self, action, params):
         backend = self.backend
 
         if isinstance(backend, MobileWebAuth):
             if not backend.logged_on:
-                raise SteamAuthenticatorError("MobileWebAuth instance not logged in")
+                raise SteamAuthenticatorError('MobileWebAuth instance not logged in')
 
             params['access_token'] = backend.oauth_token
             params['http_timeout'] = 10
@@ -153,21 +161,25 @@ class SteamAuthenticator:
             try:
                 resp = webapi.post('ITwoFactorService', action, 1, params=params)
             except requests.exceptions.RequestException as exp:
-                raise SteamAuthenticatorError("Error adding via WebAPI: %s" % str(exp))
+                raise SteamAuthenticatorError('Error adding via WebAPI: %s' % str(exp))
 
             resp = resp['response']
         else:
             if not backend.logged_on:
-                raise SteamAuthenticatorError("SteamClient instance not logged in")
+                raise SteamAuthenticatorError('SteamClient instance not logged in')
 
-            resp = backend.send_um_and_wait("TwoFactor.%s#1" % action,
-                                            params, timeout=10)
+            resp = backend.send_um_and_wait(
+                'TwoFactor.%s#1' % action, params, timeout=10
+            )
 
             if resp is None:
-                raise SteamAuthenticatorError("Failed. Request timeout")
+                raise SteamAuthenticatorError('Failed. Request timeout')
             if resp.header.eresult != EResult.OK:
-                raise SteamAuthenticatorError("Failed: {} ({})".format(resp.header.error_message,
-                                                                   repr(resp.header.eresult)))
+                raise SteamAuthenticatorError(
+                    'Failed: {} ({})'.format(
+                        resp.header.error_message, repr(resp.header.eresult)
+                    )
+                )
 
             resp = proto_to_dict(resp.body)
 
@@ -184,18 +196,25 @@ class SteamAuthenticator:
         :raises: :class:`SteamAuthenticatorError`
         """
         if not self.has_phone_number():
-            raise SteamAuthenticatorError("Account doesn't have a verified phone number")
+            raise SteamAuthenticatorError(
+                "Account doesn't have a verified phone number"
+            )
 
-        resp = self._send_request('AddAuthenticator', {
-            'steamid': self.backend.steam_id,
-            'authenticator_time': int(time()),
-            'authenticator_type': int(ETwoFactorTokenType.ValveMobileApp),
-            'device_identifier': generate_device_id(self.backend.steam_id),
-            'sms_phone_id': '1',
-        })
+        resp = self._send_request(
+            'AddAuthenticator',
+            {
+                'steamid': self.backend.steam_id,
+                'authenticator_time': int(time()),
+                'authenticator_type': int(ETwoFactorTokenType.ValveMobileApp),
+                'device_identifier': generate_device_id(self.backend.steam_id),
+                'sms_phone_id': '1',
+            },
+        )
 
         if resp['status'] != EResult.OK:
-            raise SteamAuthenticatorError("Failed to add authenticator. Error: %s" % repr(EResult(resp['status'])))
+            raise SteamAuthenticatorError(
+                'Failed to add authenticator. Error: %s' % repr(EResult(resp['status']))
+            )
 
         self.secrets = resp
         self.steam_time_offset = int(resp['server_time']) - time()
@@ -207,21 +226,31 @@ class SteamAuthenticator:
         :type activation_code: str
         :raises: :class:`SteamAuthenticatorError`
         """
-        resp = self._send_request('FinalizeAddAuthenticator', {
-            'steamid': self.backend.steam_id,
-            'authenticator_time': int(time()),
-            'authenticator_code': self.get_code(),
-            'activation_code': activation_code,
-        })
+        resp = self._send_request(
+            'FinalizeAddAuthenticator',
+            {
+                'steamid': self.backend.steam_id,
+                'authenticator_time': int(time()),
+                'authenticator_code': self.get_code(),
+                'activation_code': activation_code,
+            },
+        )
 
-        if resp['status'] != EResult.TwoFactorActivationCodeMismatch and resp.get('want_more', False) and self._finalize_attempts:
+        if (
+            resp['status'] != EResult.TwoFactorActivationCodeMismatch
+            and resp.get('want_more', False)
+            and self._finalize_attempts
+        ):
             self.steam_time_offset += 30
             self._finalize_attempts -= 1
             self.finalize(activation_code)
             return
         elif not resp['success']:
             self._finalize_attempts = 5
-            raise SteamAuthenticatorError("Failed to finalize authenticator. Error: %s" % repr(EResult(resp['status'])))
+            raise SteamAuthenticatorError(
+                'Failed to finalize authenticator. Error: %s'
+                % repr(EResult(resp['status']))
+            )
 
         self.steam_time_offset = int(resp['server_time']) - time()
 
@@ -240,20 +269,27 @@ class SteamAuthenticator:
         :raises: :class:`SteamAuthenticatorError`
         """
         if not self.secrets:
-            raise SteamAuthenticatorError("No authenticator secrets available?")
+            raise SteamAuthenticatorError('No authenticator secrets available?')
         if not isinstance(self.backend, MobileWebAuth):
-            raise SteamAuthenticatorError("Only available via MobileWebAuth")
+            raise SteamAuthenticatorError('Only available via MobileWebAuth')
 
-        resp = self._send_request('RemoveAuthenticator', {
-            'steamid': self.backend.steam_id,
-            'revocation_code': revocation_code if revocation_code else self.revocation_code,
-            'steamguard_scheme': 1,
-        })
+        resp = self._send_request(
+            'RemoveAuthenticator',
+            {
+                'steamid': self.backend.steam_id,
+                'revocation_code': revocation_code
+                if revocation_code
+                else self.revocation_code,
+                'steamguard_scheme': 1,
+            },
+        )
 
         if not resp['success']:
-            raise SteamAuthenticatorError("Failed to remove authenticator. (attempts remaining: {})".format(
-                resp['revocation_attempts_remaining'],
-                ))
+            raise SteamAuthenticatorError(
+                'Failed to remove authenticator. (attempts remaining: {})'.format(
+                    resp['revocation_attempts_remaining'],
+                )
+            )
 
         self.secrets.clear()
 
@@ -285,7 +321,9 @@ class SteamAuthenticator:
             sa.create_emergency_codes(code='12345')  # creates emergency codes
         """
         if code:
-            return self._send_request('createemergencycodes', {'code': code}).get('codes', [])
+            return self._send_request('createemergencycodes', {'code': code}).get(
+                'codes', []
+            )
         else:
             self._send_request('createemergencycodes', {})
             return None
@@ -310,11 +348,13 @@ class SteamAuthenticator:
                 sess = self.backend.get_web_session()
 
                 if sess is None:
-                    raise RuntimeError("Failed to get a web session. Try again in a few minutes")
+                    raise RuntimeError(
+                        'Failed to get a web session. Try again in a few minutes'
+                    )
                 else:
                     return sess
             else:
-                raise RuntimeError("SteamClient instance is not connected")
+                raise RuntimeError('SteamClient instance is not connected')
 
     def add_phone_number(self, phone_number):
         """Add phone number to account
@@ -344,15 +384,19 @@ class SteamAuthenticator:
         sess = self._get_web_session()
 
         try:
-            resp = sess.post('https://steamcommunity.com/steamguard/phoneajax',
-                             data={
-                                 'op': 'add_phone_number',
-                                 'arg': phone_number,
-                                 'checkfortos': 0,
-                                 'skipvoip': 0,
-                                 'sessionid': sess.cookies.get('sessionid', domain='steamcommunity.com'),
-                                 },
-                             timeout=15).json()
+            resp = sess.post(
+                'https://steamcommunity.com/steamguard/phoneajax',
+                data={
+                    'op': 'add_phone_number',
+                    'arg': phone_number,
+                    'checkfortos': 0,
+                    'skipvoip': 0,
+                    'sessionid': sess.cookies.get(
+                        'sessionid', domain='steamcommunity.com'
+                    ),
+                },
+                timeout=15,
+            ).json()
         except:
             return {'success': False}
 
@@ -377,15 +421,19 @@ class SteamAuthenticator:
         sess = self._get_web_session()
 
         try:
-            resp = sess.post('https://steamcommunity.com/steamguard/phoneajax',
-                             data={
-                                 'op': 'email_confirmation',
-                                 'arg': '',
-                                 'checkfortos': 1,
-                                 'skipvoip': 1,
-                                 'sessionid': sess.cookies.get('sessionid', domain='steamcommunity.com'),
-                                 },
-                             timeout=15).json()
+            resp = sess.post(
+                'https://steamcommunity.com/steamguard/phoneajax',
+                data={
+                    'op': 'email_confirmation',
+                    'arg': '',
+                    'checkfortos': 1,
+                    'skipvoip': 1,
+                    'sessionid': sess.cookies.get(
+                        'sessionid', domain='steamcommunity.com'
+                    ),
+                },
+                timeout=15,
+            ).json()
         except:
             return {'fatal': True, 'success': False}
 
@@ -408,15 +456,19 @@ class SteamAuthenticator:
         sess = self._get_web_session()
 
         try:
-            resp = sess.post('https://steamcommunity.com/steamguard/phoneajax',
-                             data={
-                                 'op': 'check_sms_code',
-                                 'arg': sms_code,
-                                 'checkfortos': 1,
-                                 'skipvoip': 1,
-                                 'sessionid': sess.cookies.get('sessionid', domain='steamcommunity.com'),
-                                 },
-                             timeout=15).json()
+            resp = sess.post(
+                'https://steamcommunity.com/steamguard/phoneajax',
+                data={
+                    'op': 'check_sms_code',
+                    'arg': sms_code,
+                    'checkfortos': 1,
+                    'skipvoip': 1,
+                    'sessionid': sess.cookies.get(
+                        'sessionid', domain='steamcommunity.com'
+                    ),
+                },
+                timeout=15,
+            ).json()
         except:
             return {'success': False}
 
@@ -438,15 +490,19 @@ class SteamAuthenticator:
         sess = self._get_web_session()
 
         try:
-            resp = sess.post('https://steamcommunity.com/steamguard/phoneajax',
-                             data={
-                                 'op': 'has_phone',
-                                 'arg': '0',
-                                 'checkfortos': 0,
-                                 'skipvoip': 1,
-                                 'sessionid': sess.cookies.get('sessionid', domain='steamcommunity.com'),
-                                 },
-                             timeout=15).json()
+            resp = sess.post(
+                'https://steamcommunity.com/steamguard/phoneajax',
+                data={
+                    'op': 'has_phone',
+                    'arg': '0',
+                    'checkfortos': 0,
+                    'skipvoip': 1,
+                    'sessionid': sess.cookies.get(
+                        'sessionid', domain='steamcommunity.com'
+                    ),
+                },
+                timeout=15,
+            ).json()
         except:
             return {'success': False}
 
@@ -471,13 +527,17 @@ class SteamAuthenticator:
         sess = self._get_web_session()
 
         try:
-            resp = sess.post('https://store.steampowered.com/phone/validate',
-                             data={
-                                'phoneNumber': phone_number,
-                                'sessionID': sess.cookies.get('sessionid', domain='store.steampowered.com'),
-                                },
-                             allow_redirects=False,
-                             timeout=15).json()
+            resp = sess.post(
+                'https://store.steampowered.com/phone/validate',
+                data={
+                    'phoneNumber': phone_number,
+                    'sessionID': sess.cookies.get(
+                        'sessionid', domain='store.steampowered.com'
+                    ),
+                },
+                allow_redirects=False,
+                timeout=15,
+            ).json()
         except:
             resp = {'success': False}
 
@@ -496,7 +556,9 @@ def generate_twofactor_code(shared_secret):
     :return: steam two factor code
     :rtype: str
     """
-    return generate_twofactor_code_for_time(shared_secret, time() + (get_time_offset() or 0))
+    return generate_twofactor_code_for_time(
+        shared_secret, time() + (get_time_offset() or 0)
+    )
 
 
 def generate_twofactor_code_for_time(shared_secret, timestamp):
@@ -509,11 +571,12 @@ def generate_twofactor_code_for_time(shared_secret, timestamp):
     :return: steam two factor code
     :rtype: str
     """
-    hmac = hmac_sha1(bytes(shared_secret),
-                     struct.pack('>Q', int(timestamp) // 30))  # this will NOT stop working in 2038
+    hmac = hmac_sha1(
+        bytes(shared_secret), struct.pack('>Q', int(timestamp) // 30)
+    )  # this will NOT stop working in 2038
 
     start = ord(hmac[19:20]) & 0xF
-    codeint = struct.unpack('>I', hmac[start:start + 4])[0] & 0x7fffffff
+    codeint = struct.unpack('>I', hmac[start : start + 4])[0] & 0x7FFFFFFF
 
     charset = '23456789BCDFGHJKMNPQRTVWXY'
     code = ''
@@ -545,7 +608,9 @@ def generate_confirmation_key(identity_secret, tag, timestamp):
         * ``cancel`` to cancel a trade
 
     """
-    data = struct.pack('>Q', int(timestamp)) + tag.encode('ascii')  # this will NOT stop working in 2038
+    data = struct.pack('>Q', int(timestamp)) + tag.encode(
+        'ascii'
+    )  # this will NOT stop working in 2038
     return hmac_sha1(bytes(identity_secret), data)
 
 
@@ -556,7 +621,9 @@ def get_time_offset():
     :rtype: :class:`int`, :class:`None`
     """
     try:
-        resp = webapi.post('ITwoFactorService', 'QueryTime', 1, params={'http_timeout': 10})
+        resp = webapi.post(
+            'ITwoFactorService', 'QueryTime', 1, params={'http_timeout': 10}
+        )
     except:
         return None
 
@@ -573,7 +640,7 @@ def generate_device_id(steamid):
     :rtype: str
     """
     h = hexlify(sha1_hash(str(steamid).encode('ascii'))).decode('ascii')
-    return f"android:{h[:8]}-{h[8:12]}-{h[12:16]}-{h[16:20]}-{h[20:32]}"
+    return f'android:{h[:8]}-{h[8:12]}-{h[12:16]}-{h[16:20]}-{h[20:32]}'
 
 
 def extract_secrets_from_android_rooted(adb_path='adb'):
@@ -596,16 +663,21 @@ def extract_secrets_from_android_rooted(adb_path='adb'):
     :rtype: dict
     """
     data = subprocess.check_output([
-        adb_path, 'shell', 'su', '-c',
-        "'cat /data/data/com.valvesoftware.android.steam.community/files/Steamguard*'"
-        ])
+        adb_path,
+        'shell',
+        'su',
+        '-c',
+        "'cat /data/data/com.valvesoftware.android.steam.community/files/Steamguard*'",
+    ])
 
     # When adb daemon is not running, `adb` will print a couple of lines before our data.
     # The data doesn't have new lines and its always on the last line.
     data = data.decode('utf-8').split('\n')[-1]
 
-    if data[0] != "{":
-        raise RuntimeError("Got invalid data: %s" % repr(data))
+    if data[0] != '{':
+        raise RuntimeError('Got invalid data: %s' % repr(data))
 
-    return {int(x['steamid']): x
-            for x in map(json.loads, data.replace("}{", '}|||||{').split('|||||'))}
+    return {
+        int(x['steamid']): x
+        for x in map(json.loads, data.replace('}{', '}|||||{').split('|||||'))
+    }

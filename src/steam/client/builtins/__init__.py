@@ -1,6 +1,7 @@
 """
 All high level features of :class:`steam.client.SteamClient` are implemented here in separate submodules.
 """
+
 from steam.client.builtins.apps import Apps
 from steam.client.builtins.friends import Friends
 from steam.client.builtins.gameservers import GameServers
@@ -15,4 +16,5 @@ class BuiltinBase(GameServers, UnifiedMessages, User, Web, Leaderboards, Friends
     This object is used as base to implement all high level functionality.
     The features are separated into submodules.
     """
+
     pass

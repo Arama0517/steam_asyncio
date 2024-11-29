@@ -45,7 +45,7 @@ def proto_to_dict(message):
     :raises: :class:`.TypeError` if ``message`` is not a proto message
     """
     if not isinstance(message, _ProtoMessageType):
-        raise TypeError("Expected `message` to be a instance of protobuf message")
+        raise TypeError('Expected `message` to be a instance of protobuf message')
 
     data = {}
 
@@ -56,7 +56,9 @@ def proto_to_dict(message):
             else:
                 data[desc.name] = proto_to_dict(field)
         else:
-            data[desc.name] = list(field) if desc.label == desc.LABEL_REPEATED else field
+            data[desc.name] = (
+                list(field) if desc.label == desc.LABEL_REPEATED else field
+            )
 
     return data
 
@@ -73,11 +75,12 @@ def proto_fill_from_dict(message, data, clear=True):
     :raises: incorrect types or values will raise
     """
     if not isinstance(message, _ProtoMessageType):
-        raise TypeError("Expected `message` to be a instance of protobuf message")
+        raise TypeError('Expected `message` to be a instance of protobuf message')
     if not isinstance(data, dict):
-        raise TypeError("Expected `data` to be of type `dict`")
+        raise TypeError('Expected `data` to be of type `dict`')
 
-    if clear: message.Clear()
+    if clear:
+        message.Clear()
     field_descs = message.DESCRIPTOR.fields_by_name
 
     for key, val in data.items():
@@ -86,25 +89,31 @@ def proto_fill_from_dict(message, data, clear=True):
         if desc.type == desc.TYPE_MESSAGE:
             if desc.label == desc.LABEL_REPEATED:
                 if not isinstance(val, _list_types):
-                    raise TypeError(f"Expected {repr(key)} to be of type list, got {type(val)}")
+                    raise TypeError(
+                        f'Expected {repr(key)} to be of type list, got {type(val)}'
+                    )
 
                 list_ref = getattr(message, key)
 
                 # Takes care of overwriting list fields when merging partial data (clear=False)
-                if not clear: del list_ref[:]  # clears the list
+                if not clear:
+                    del list_ref[:]  # clears the list
 
                 for item in val:
                     item_message = getattr(message, key).add()
                     proto_fill_from_dict(item_message, item)
             else:
                 if not isinstance(val, dict):
-                    raise TypeError(f"Expected {repr(key)} to be of type dict, got {type(dict)}")
+                    raise TypeError(
+                        f'Expected {repr(key)} to be of type dict, got {type(dict)}'
+                    )
 
                 proto_fill_from_dict(getattr(message, key), val)
         else:
             if isinstance(val, _list_types):
                 list_ref = getattr(message, key)
-                if not clear: del list_ref[:]  # clears the list
+                if not clear:
+                    del list_ref[:]  # clears the list
                 list_ref.extend(val)
             else:
                 setattr(message, key, val)

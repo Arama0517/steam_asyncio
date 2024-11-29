@@ -1,5 +1,5 @@
-"""Utility package with various useful functions
-"""
+"""Utility package with various useful functions"""
+
 import socket
 import struct
 import sys
@@ -14,7 +14,7 @@ def ip4_from_int(ip):
     :return: IP in dot-decimal notation
     :rtype: str
     """
-    return socket.inet_ntoa(struct.pack(">L", ip))
+    return socket.inet_ntoa(struct.pack('>L', ip))
 
 
 def ip4_to_int(ip):
@@ -24,7 +24,7 @@ def ip4_to_int(ip):
     :type ip: str
     :rtype: int
     """
-    return struct.unpack(">L", socket.inet_aton(ip))[0]
+    return struct.unpack('>L', socket.inet_aton(ip))[0]
 
 
 ip_to_int = ip4_to_int
@@ -62,7 +62,7 @@ def chunks(arr, size):
     :rtype: :class:`generator`
     """
     for i in range(0, len(arr), size):
-        yield arr[i:i + size]
+        yield arr[i : i + size]
 
 
 class WeakRefKeyDict:
@@ -70,6 +70,7 @@ class WeakRefKeyDict:
     Use any object (even unhashable) as key and store a value.
     Once the object is garbage collected, the entry is destroyed automatically.
     """
+
     def __init__(self):
         self.refs = {}
 

@@ -9,13 +9,13 @@ from flask import Flask, jsonify, request
 from gevent.pywsgi import WSGIServer
 from steam_worker import SteamWorker
 
-logging.basicConfig(format="%(asctime)s | %(name)s | %(message)s", level=logging.INFO)
+logging.basicConfig(format='%(asctime)s | %(name)s | %(message)s', level=logging.INFO)
 LOG = logging.getLogger('SimpleWebAPI')
 
 app = Flask('SimpleWebAPI')
 
 
-@app.route("/ISteamApps/GetProductInfo/", methods=['GET'])
+@app.route('/ISteamApps/GetProductInfo/', methods=['GET'])
 def GetProductInfo():
     appids = request.args.get('appids', '')
     pkgids = request.args.get('packageids', '')
@@ -29,31 +29,31 @@ def GetProductInfo():
     return jsonify(worker.get_product_info(appids, pkgids) or {})
 
 
-@app.route("/ISteamApps/GetProductChanges/", methods=['GET'])
+@app.route('/ISteamApps/GetProductChanges/', methods=['GET'])
 def GetProductChanges():
     chgnum = int(request.args.get('since_changenumber', 0))
     return jsonify(worker.get_product_changes(chgnum))
 
 
-@app.route("/ISteamApps/GetPlayerCount/", methods=['GET'])
+@app.route('/ISteamApps/GetPlayerCount/', methods=['GET'])
 def GetPlayerCount():
     appid = int(request.args.get('appid', 0))
     return jsonify(worker.get_player_count(appid))
 
 
-if __name__ == "__main__":
-    LOG.info("Simple Web API recipe")
-    LOG.info("-" * 30)
-    LOG.info("Starting Steam worker...")
+if __name__ == '__main__':
+    LOG.info('Simple Web API recipe')
+    LOG.info('-' * 30)
+    LOG.info('Starting Steam worker...')
 
     worker = SteamWorker()
     worker.prompt_login()
 
-    LOG.info("Starting HTTP server...")
+    LOG.info('Starting HTTP server...')
     http_server = WSGIServer(('', 5000), app)
 
     try:
         http_server.serve_forever()
     except KeyboardInterrupt:
-        LOG.info("Exit requested")
+        LOG.info('Exit requested')
         worker.close()

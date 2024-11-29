@@ -1,6 +1,7 @@
 """
 Reading the leaderboards with :class:`SteamLeaderboard` is as easy as iterating over a list.
 """
+
 from steam.core.msg import MsgProto
 from steam.enums import (
     ELeaderboardDataRequest,
@@ -67,6 +68,7 @@ class SteamLeaderboard:
         for entry in lb[:100]:  # top 100
             print entry
     """
+
     ELeaderboardDataRequest = ELeaderboardDataRequest
     ELeaderboardSortMethod = ELeaderboardSortMethod
     ELeaderboardDisplayType = ELeaderboardDisplayType
@@ -75,9 +77,15 @@ class SteamLeaderboard:
     name = ''  #: leaderboard name
     id = 0  #: leaderboard id
     entry_count = 0
-    sort_method = ELeaderboardSortMethod.NONE      #: :class:`steam.enums.common.ELeaderboardSortMethod`
-    display_type = ELeaderboardDisplayType.NONE    #: :class:`steam.enums.common.ELeaderboardDisplayType`
-    data_request = ELeaderboardDataRequest.Global  #: :class:`steam.enums.common.ELeaderboardDataRequest`
+    sort_method = (
+        ELeaderboardSortMethod.NONE
+    )  #: :class:`steam.enums.common.ELeaderboardSortMethod`
+    display_type = (
+        ELeaderboardDisplayType.NONE
+    )  #: :class:`steam.enums.common.ELeaderboardDisplayType`
+    data_request = (
+        ELeaderboardDataRequest.Global
+    )  #: :class:`steam.enums.common.ELeaderboardDataRequest`
 
     def __init__(self, steam, app_id, name, data=None):
         self._steam = steam
@@ -86,20 +94,22 @@ class SteamLeaderboard:
         if data is not None:
             for field in data.DESCRIPTOR.fields:
                 if field.name.startswith('leaderboard_'):
-                    self.__dict__[field.name.replace('leaderboard_', '')] = getattr(data, field.name)
+                    self.__dict__[field.name.replace('leaderboard_', '')] = getattr(
+                        data, field.name
+                    )
 
         self.sort_method = ELeaderboardSortMethod(self.sort_method)
         self.display_type = ELeaderboardDisplayType(self.display_type)
 
     def __repr__(self):
-        return "<%s(%d, %s, %d, %s, %s)>" % (
+        return '<%s(%d, %s, %d, %s, %s)>' % (
             self.__class__.__name__,
             self.app_id,
             repr(self.name),
             len(self),
             self.sort_method,
             self.display_type,
-            )
+        )
 
     def __len__(self):
         return self.entry_count
@@ -124,7 +134,9 @@ class SteamLeaderboard:
         message.body.leaderboard_id = self.id
         message.body.range_start = start
         message.body.range_end = end
-        message.body.leaderboard_data_request = self.data_request if data_request is None else data_request
+        message.body.leaderboard_data_request = (
+            self.data_request if data_request is None else data_request
+        )
 
         if steam_ids:
             message.body.steamids.extend(steam_ids)
@@ -144,16 +156,30 @@ class SteamLeaderboard:
     def __getitem__(self, x):
         if isinstance(x, slice):
             stop_max = len(self)
-            start = 0 if x.start is None else x.start if x.start >= 0 else max(0, x.start + stop_max)
-            stop = stop_max if x.stop is None else x.stop if x.stop >= 0 else max(0, x.stop + stop_max)
+            start = (
+                0
+                if x.start is None
+                else x.start
+                if x.start >= 0
+                else max(0, x.start + stop_max)
+            )
+            stop = (
+                stop_max
+                if x.stop is None
+                else x.stop
+                if x.stop >= 0
+                else max(0, x.stop + stop_max)
+            )
             step = x.step or 1
             if step < 0:
                 start, stop = stop, start
             step = abs(step)
 
-            if start >= stop: return []
+            if start >= stop:
+                return []
         else:
-            if x < 0: x += self.entry_count
+            if x < 0:
+                x += self.entry_count
             start, stop, step = x, x + 1, 1
 
             if x < 0 or x >= self.entry_count:
@@ -180,6 +206,7 @@ class SteamLeaderboard:
         we are not sending messages too fast.
         For example, the ``__iter__`` method on this class uses ``get_iter(1, 1, 2000)``
         """
+
         def entry_generator():
             with ConstantRateLimit(times, seconds, sleep_func=self._steam.sleep) as r:
                 for entries in chunks(self, chunk_size):
@@ -187,6 +214,7 @@ class SteamLeaderboard:
                         return
                     yield from entries
                     r.wait()
+
         return entry_generator()
 
     def __iter__(self):

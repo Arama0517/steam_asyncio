@@ -19,7 +19,9 @@ Appache file parsing examples:
      'data_sha1': b'\\x87\\xfaCg\\x85\\x80\\r\\xb4\\x90Im\\xdc}\\xb4\\x81\\xeeQ\\x8b\\x825',
      'data': {'appinfo': {'appid': 5, 'public_only': 1}}}
 
-    >>> header, pkgs = parse_packageinfo(open('/d/Steam/appcache/packageinfo.vdf', 'rb'))
+    >>> header, pkgs = parse_packageinfo(
+    ...     open('/d/Steam/appcache/packageinfo.vdf', 'rb')
+    ... )
     >>> header
     {'magic': b"'UV\\x06", 'universe': 1}
 
@@ -56,30 +58,30 @@ def parse_appinfo(fp, mapper=None):
     :rtype: (:class:`Generator` returning :class:`dict` by default or mapper class if set)
     :return: (header, apps iterator)
     """
-# format:
-#   uint32   - MAGIC: "'DV\x07" or "(DV\x07" or b")DV\x07"
-#   uint32   - UNIVERSE: 1
-#   int64    - OFFSET TO KEY TABLE (added in ")DV\x07")
-#   ---- repeated app sections ----
-#   uint32   - AppID
-#   uint32   - size
-#   uint32   - infoState
-#   uint32   - lastUpdated
-#   uint64   - accessToken
-#   20bytes  - SHA1
-#   uint32   - changeNumber
-#   20bytes  - binary_vdf SHA1 (added in "(DV\x07")
-#   variable - binary_vdf
-#   ---- end of section ---------
-#   uint32   - EOF: 0
-#
-#   ---- key table ----
-#   uint32   - Count of keys
-#   char[]   - Null-terminated strings corresponding to field names
+    # format:
+    #   uint32   - MAGIC: "'DV\x07" or "(DV\x07" or b")DV\x07"
+    #   uint32   - UNIVERSE: 1
+    #   int64    - OFFSET TO KEY TABLE (added in ")DV\x07")
+    #   ---- repeated app sections ----
+    #   uint32   - AppID
+    #   uint32   - size
+    #   uint32   - infoState
+    #   uint32   - lastUpdated
+    #   uint64   - accessToken
+    #   20bytes  - SHA1
+    #   uint32   - changeNumber
+    #   20bytes  - binary_vdf SHA1 (added in "(DV\x07")
+    #   variable - binary_vdf
+    #   ---- end of section ---------
+    #   uint32   - EOF: 0
+    #
+    #   ---- key table ----
+    #   uint32   - Count of keys
+    #   char[]   - Null-terminated strings corresponding to field names
 
     magic = fp.read(4)
-    if magic not in (b"'DV\x07", b"(DV\x07", b")DV\x07"):
-        raise SyntaxError("Invalid magic, got %s" % repr(magic))
+    if magic not in (b"'DV\x07", b'(DV\x07', b')DV\x07'):
+        raise SyntaxError('Invalid magic, got %s' % repr(magic))
 
     universe = uint32.unpack(fp.read(4))[0]
 
@@ -105,7 +107,7 @@ def parse_appinfo(fp, mapper=None):
 
                 if field_name[-1] == 0:
                     field_name = field_name[0:-1]
-                    field_name = field_name.decode("utf-8", "replace")
+                    field_name = field_name.decode('utf-8', 'replace')
 
                     key_table.append(field_name)
                     break
@@ -140,12 +142,13 @@ def parse_appinfo(fp, mapper=None):
 
             yield app
 
-    return ({
-              'magic': magic,
-              'universe': universe,
-            },
-            apps_iter()
-            )
+    return (
+        {
+            'magic': magic,
+            'universe': universe,
+        },
+        apps_iter(),
+    )
 
 
 def parse_packageinfo(fp, mapper=None):
@@ -157,21 +160,21 @@ def parse_packageinfo(fp, mapper=None):
     :rtype: (:class:`Generator` returning :class:`dict` by default or mapper class if set)
     :return: (header, packages iterator)
     """
-# format:
-#   uint32   - MAGIC: b"'UV\x06" or b"(UV\x06"
-#   uint32   - UNIVERSE: 1
-#   ---- repeated package sections ----
-#   uint32   - PackageID
-#   20bytes  - SHA1
-#   uint32   - changeNumber
-#   uint64   - token           (only on b"(UV\x06")
-#   variable - binary_vdf
-#   ---- end of section ---------
-#   uint32   - EOF: 0xFFFFFFFF
+    # format:
+    #   uint32   - MAGIC: b"'UV\x06" or b"(UV\x06"
+    #   uint32   - UNIVERSE: 1
+    #   ---- repeated package sections ----
+    #   uint32   - PackageID
+    #   20bytes  - SHA1
+    #   uint32   - changeNumber
+    #   uint64   - token           (only on b"(UV\x06")
+    #   variable - binary_vdf
+    #   ---- end of section ---------
+    #   uint32   - EOF: 0xFFFFFFFF
 
     magic = fp.read(4)
-    if magic not in (b"'UV\x06", b"(UV\x06"):
-        raise SyntaxError("Invalid magic, got %s" % repr(magic))
+    if magic not in (b"'UV\x06", b'(UV\x06'):
+        raise SyntaxError('Invalid magic, got %s' % repr(magic))
 
     universe = uint32.unpack(fp.read(4))[0]
 
@@ -188,16 +191,17 @@ def parse_packageinfo(fp, mapper=None):
                 'change_number': uint32.unpack(fp.read(4))[0],
             }
 
-            if magic == b"(UV\x06":
+            if magic == b'(UV\x06':
                 pkg['token'] = uint64.unpack(fp.read(8))[0]
 
             pkg['data'] = binary_load(fp, mapper=mapper)
 
             yield pkg
 
-    return ({
-              'magic': magic,
-              'universe': universe,
-            },
-            pkgs_iter()
-            )
+    return (
+        {
+            'magic': magic,
+            'universe': universe,
+        },
+        pkgs_iter(),
+    )

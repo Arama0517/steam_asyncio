@@ -9,7 +9,7 @@ class StructReader:
         :type  data: :class:`bytes`
         """
         if not isinstance(data, bytes):
-            raise ValueError("Only works with bytes")
+            raise ValueError('Only works with bytes')
         self.data = data
         self.offset = 0
 
@@ -33,7 +33,7 @@ class StructReader:
         :rtype: :class:`bytes`
         """
         self.offset += n
-        return self.data[self.offset - n:self.offset]
+        return self.data[self.offset - n : self.offset]
 
     def read_cstring(self, terminator=b'\x00'):
         """Reads a single null termianted string
@@ -43,8 +43,8 @@ class StructReader:
         """
         null_index = self.data.find(terminator, self.offset)
         if null_index == -1:
-            raise RuntimeError("Reached end of buffer")
-        result = self.data[self.offset:null_index]  # bytes without the terminator
+            raise RuntimeError('Reached end of buffer')
+        result = self.data[self.offset : null_index]  # bytes without the terminator
         self.offset = null_index + len(terminator)  # advance offset past terminator
         return result
 

@@ -37,6 +37,7 @@ Example implementation of Dota 2 GC client with inheritance.
 The above code assumes that we have a ``myDotaModule`` that contains the appropriate
 protobufs needed to (de)serialize message for communication with GC.
 """
+
 import logging
 
 from eventemitter import EventEmitter
@@ -66,18 +67,18 @@ class GameCoordinator(EventEmitter):
 
     def __init__(self, steam_client, app_id):
         if not isinstance(steam_client, SteamClient):
-            raise ValueError("Expected an instance of SteamClient as first argument")
+            raise ValueError('Expected an instance of SteamClient as first argument')
 
         self.steam = steam_client
         self.app_id = app_id
-        self._LOG = logging.getLogger("GC(appid:%d)" % app_id)
+        self._LOG = logging.getLogger('GC(appid:%d)' % app_id)
 
         # listen for GC messages
         self.steam.on(EMsg.ClientFromGC, self._handle_from_gc)
 
     def emit(self, event, *args):
         if event is not None:
-            self._LOG.debug("Emit event: %s" % repr(event))
+            self._LOG.debug('Emit event: %s' % repr(event))
         EventEmitter.emit(self, event, *args)
 
     def send(self, header, body):
@@ -92,10 +93,7 @@ class GameCoordinator(EventEmitter):
         message = MsgProto(EMsg.ClientToGC)
         message.header.routing_appid = self.app_id
         message.body.appid = self.app_id
-        message.body.msgtype = (set_proto_bit(header.msg)
-                                if header.proto
-                                else header.msg
-                                )
+        message.body.msgtype = set_proto_bit(header.msg) if header.proto else header.msg
         message.body.payload = header.serialize() + body
         self.steam.send(message)
 

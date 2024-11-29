@@ -28,19 +28,21 @@ class DepotFile:
         if not isinstance(manifest, DepotManifest):
             raise TypeError("Expected 'manifest' to be of type DepotManifest")
         if not isinstance(file_mapping, ContentManifestPayload.FileMapping):
-            raise TypeError("Expected 'file_mapping' to be of type ContentManifestPayload.FileMapping")
+            raise TypeError(
+                "Expected 'file_mapping' to be of type ContentManifestPayload.FileMapping"
+            )
 
         self.manifest = manifest
         self.file_mapping = file_mapping
 
     def __repr__(self):
-        return "<{}({}, {}, {}, {})>".format(
+        return '<{}({}, {}, {}, {})>'.format(
             self.__class__.__name__,
             self.manifest.depot_id,
             self.manifest.gid,
             repr(self.filename),
             'is_directory=True' if self.is_directory else self.size,
-            )
+        )
 
     @property
     def filename_raw(self):
@@ -76,7 +78,7 @@ class DepotFile:
 
     @property
     def sha_content(self):
-        """File content SHA1 
+        """File content SHA1
 
         :type: bytes
         """
@@ -84,7 +86,7 @@ class DepotFile:
 
     @property
     def sha_filename(self):
-        """Filename SHA1 
+        """Filename SHA1
 
         :type: bytes
         """
@@ -157,20 +159,23 @@ class DepotManifest:
 
     def __repr__(self):
         params = ', '.join([
-                    "depot_id=" + str(self.depot_id),
-                    "gid=" + str(self.gid),
-                    "creation_time=" + repr(
-                        datetime.utcfromtimestamp(self.metadata.creation_time).isoformat().replace('T', ' ')
-                        ),
-                    ])
+            'depot_id=' + str(self.depot_id),
+            'gid=' + str(self.gid),
+            'creation_time='
+            + repr(
+                datetime.utcfromtimestamp(self.metadata.creation_time)
+                .isoformat()
+                .replace('T', ' ')
+            ),
+        ])
 
         if self.metadata.filenames_encrypted:
             params += ', filenames_encrypted=True'
 
-        return "<{}({})>".format(
+        return '<{}({})>'.format(
             self.__class__.__name__,
             params,
-            )
+        )
 
     @property
     def depot_id(self):
@@ -219,7 +224,7 @@ class DepotManifest:
                 if m.linktarget:
                     m.linktarget = symmetric_decrypt(b64decode(m.linktarget), depot_key)
         except Exception:
-            raise RuntimeError("Unable to decrypt filename for depot manifest")
+            raise RuntimeError('Unable to decrypt filename for depot manifest')
 
         self.metadata.filenames_encrypted = False
 
@@ -240,7 +245,7 @@ class DepotManifest:
         magic, length = data.unpack('<II')
 
         if magic != DepotManifest.PROTOBUF_PAYLOAD_MAGIC:
-            raise Exception("Expecting protobuf payload")
+            raise Exception('Expecting protobuf payload')
 
         self.payload = ContentManifestPayload()
         self.payload.ParseFromString(data.read(length))
@@ -248,7 +253,7 @@ class DepotManifest:
         magic, length = data.unpack('<II')
 
         if magic != DepotManifest.PROTOBUF_METADATA_MAGIC:
-            raise Exception("Expecting protobuf metadata")
+            raise Exception('Expecting protobuf metadata')
 
         self.metadata = ContentManifestMetadata()
         self.metadata.ParseFromString(data.read(length))
@@ -256,15 +261,15 @@ class DepotManifest:
         magic, length = data.unpack('<II')
 
         if magic != DepotManifest.PROTOBUF_SIGNATURE_MAGIC:
-            raise Exception("Expecting protobuf signature")
+            raise Exception('Expecting protobuf signature')
 
         self.signature = ContentManifestSignature()
         self.signature.ParseFromString(data.read(length))
 
-        magic, = data.unpack('<I')
+        (magic,) = data.unpack('<I')
 
         if magic != DepotManifest.PROTOBUF_ENDOFMANIFEST_MAGIC:
-            raise Exception("Expecting end of manifest")
+            raise Exception('Expecting end of manifest')
 
     def serialize(self, compress=True):
         """Serialize manifest
@@ -309,8 +314,9 @@ class DepotManifest:
         """
         if not self.filenames_encrypted:
             for mapping in self.payload.mappings:
-                if (pattern is not None
-                   and not fnmatch(mapping.filename.rstrip('\x00 \n\t'), pattern)):
+                if pattern is not None and not fnmatch(
+                    mapping.filename.rstrip('\x00 \n\t'), pattern
+                ):
                     continue
                 yield self.DepotFileClass(self, mapping)
 

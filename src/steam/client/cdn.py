@@ -119,7 +119,9 @@ from steam.enums import EResult, EType
 from steam.enums.emsg import EMsg
 from steam.exceptions import ManifestError, SteamError
 from steam.protobufs.content_manifest_pb2 import ContentManifestPayload
-from steam.protobufs.steammessages_publishedfile_pb2 import PublishedFileDetails
+from steam.protobufs.steammessages_publishedfile_pb2 import (
+    PublishedFileDetails,
+)
 from steam.utils.web import make_requests_session
 
 

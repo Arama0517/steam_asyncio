@@ -30,8 +30,8 @@ class ETypeChar(SteamIntEnum):
 
 ETypeChars = ''.join(ETypeChar.__members__.keys())
 
-_icode_hex = "0123456789abcdef"
-_icode_custom = "bcdfghjkmnpqrtvw"
+_icode_hex = '0123456789abcdef'
+_icode_custom = 'bcdfghjkmnpqrtvw'
 _icode_all_valid = _icode_hex + _icode_custom
 _icode_map = dict(zip(_icode_hex, _icode_custom))
 _icode_map_inv = dict(zip(_icode_custom, _icode_hex))
@@ -53,8 +53,9 @@ class SteamID(int):
         SteamID('STEAM_1:0:2')  # steam2
         SteamID('[g:1:4]')  # steam3
     """
-    EType = EType                  #: reference to EType
-    EUniverse = EUniverse          #: reference to EUniverse
+
+    EType = EType  #: reference to EType
+    EUniverse = EUniverse  #: reference to EUniverse
     EInstanceFlag = EInstanceFlag  #: reference to EInstanceFlag
 
     def __new__(cls, *args, **kwargs):
@@ -68,13 +69,13 @@ class SteamID(int):
         return str(int(self))
 
     def __repr__(self):
-        return "{}(id={}, type={}, universe={}, instance={})".format(
+        return '{}(id={}, type={}, universe={}, instance={})'.format(
             self.__class__.__name__,
             self.id,
             repr(self.type.name),
             repr(self.universe.name),
             self.instance,
-            )
+        )
 
     @property
     def id(self):
@@ -82,7 +83,7 @@ class SteamID(int):
         :return: account id
         :rtype: :class:`int`
         """
-        return int(self) & 0xFFffFFff
+        return int(self) & 0xFFFFFFFF
 
     @property
     def account_id(self):
@@ -90,14 +91,14 @@ class SteamID(int):
         :return: account id
         :rtype: :class:`int`
         """
-        return int(self) & 0xFFffFFff
+        return int(self) & 0xFFFFFFFF
 
     @property
     def instance(self):
         """
         :rtype: :class:`int`
         """
-        return (int(self) >> 32) & 0xFFffF
+        return (int(self) >> 32) & 0xFFFFF
 
     @property
     def type(self):
@@ -142,11 +143,11 @@ class SteamID(int):
 
 
         """
-        return "STEAM_%d:%d:%d" % (
+        return 'STEAM_%d:%d:%d' % (
             int(self.universe),
             self.id % 2,
             self.id >> 1,
-            )
+        )
 
     @property
     def as_steam2_zero(self):
@@ -157,7 +158,7 @@ class SteamID(int):
         :return: steam2 format (e.g ``STEAM_0:0:1234``)
         :rtype: :class:`str`
         """
-        return self.as_steam2.replace("_1", "_0")
+        return self.as_steam2.replace('_1', '_0')
 
     @property
     def as_steam3(self):
@@ -195,10 +196,11 @@ class SteamID(int):
         :rtype: :class:`str`
         """
         if self.type == EType.Individual and self.is_valid():
+
             def repl_mapper(x):
                 return _icode_map[x.group()]
 
-            invite_code = re.sub("[" + _icode_hex + "]", repl_mapper, "%x" % self.id)
+            invite_code = re.sub('[' + _icode_hex + ']', repl_mapper, '%x' % self.id)
             split_idx = len(invite_code) // 2
 
             if split_idx:
@@ -216,7 +218,7 @@ class SteamID(int):
             return
 
         h = b'CSGO' + struct.pack('>L', self.account_id)
-        h, = struct.unpack('<L', md5_hash(h[::-1])[:4])
+        (h,) = struct.unpack('<L', md5_hash(h[::-1])[:4])
         steamid = self.as_64
         result = 0
 
@@ -228,7 +230,7 @@ class SteamID(int):
             result = ((result >> 28) << 32) | a
             result = ((result >> 31) << 32) | ((a << 1) | hash_nib)
 
-        result, = struct.unpack('<Q', struct.pack('>Q', result))
+        (result,) = struct.unpack('<Q', struct.pack('>Q', result))
         code = ''
 
         for i in range(13):
@@ -248,7 +250,7 @@ class SteamID(int):
         """
         code = self.as_invite_code
         if code:
-            return "https://s.team/p/" + code
+            return 'https://s.team/p/' + code
 
     @property
     def community_url(self):
@@ -257,11 +259,11 @@ class SteamID(int):
         :rtype: :class:`str`
         """
         suffix = {
-            EType.Individual: "profiles/%s",
-            EType.Clan: "gid/%s",
+            EType.Individual: 'profiles/%s',
+            EType.Clan: 'gid/%s',
         }
         if self.type in suffix:
-            url = "https://steamcommunity.com/%s" % suffix[self.type]
+            url = 'https://steamcommunity.com/%s' % suffix[self.type]
             return url % self.as_64
 
         return None
@@ -345,44 +347,43 @@ def make_steam64(id=0, *args, **kwargs):
             result = steam2_to_tuple(value) or steam3_to_tuple(value)
 
             if result:
-                (accountid,
-                 etype,
-                 universe,
-                 instance,
-                 ) = result
+                (
+                    accountid,
+                    etype,
+                    universe,
+                    instance,
+                ) = result
             else:
                 accountid = 0
 
     elif len(args) > 0:
         length = len(args)
         if length == 1:
-            etype, = args
+            (etype,) = args
         elif length == 2:
             etype, universe = args
         elif length == 3:
             etype, universe, instance = args
         else:
-            raise TypeError("Takes at most 4 arguments (%d given)" % length)
+            raise TypeError('Takes at most 4 arguments (%d given)' % length)
 
     if len(kwargs) > 0:
         etype = kwargs.get('type', etype)
         universe = kwargs.get('universe', universe)
         instance = kwargs.get('instance', instance)
 
-    etype = (EType(etype)
-             if isinstance(etype, (int, EType))
-             else EType[etype]
-             )
+    etype = EType(etype) if isinstance(etype, (int, EType)) else EType[etype]
 
-    universe = (EUniverse(universe)
-                if isinstance(universe, (int, EUniverse))
-                else EUniverse[universe]
-                )
+    universe = (
+        EUniverse(universe)
+        if isinstance(universe, (int, EUniverse))
+        else EUniverse[universe]
+    )
 
     if instance is None:
         instance = 1 if etype in (EType.Individual, EType.GameServer) else 0
 
-    assert instance <= 0xffffF, "instance larger than 20bits"
+    assert instance <= 0xFFFFF, 'instance larger than 20bits'
 
     return (universe << 56) | (etype << 52) | (instance << 32) | accountid
 
@@ -397,10 +398,12 @@ def steam2_to_tuple(value):
     .. note::
         The universe will be always set to ``1``. See :attr:`SteamID.as_steam2`
     """
-    match = re.match(r"^STEAM_(?P<universe>\d+)"
-                     r":(?P<reminder>[0-1])"
-                     r":(?P<id>\d+)$", value
-                     )
+    match = re.match(
+        r'^STEAM_(?P<universe>\d+)'
+        r':(?P<reminder>[0-1])'
+        r':(?P<id>\d+)$',
+        value,
+    )
 
     if not match:
         return None
@@ -422,14 +425,15 @@ def steam3_to_tuple(value):
     :return: (accountid, type, universe, instance)
     :rtype: :class:`tuple` or :class:`None`
     """
-    match = re.match(r"^\["
-                     r"(?P<type>[i%s]):"        # type char
-                     r"(?P<universe>[0-4]):"     # universe
-                     r"(?P<id>\d{1,10})"            # accountid
-                     r"(:(?P<instance>\d+))?"  # instance
-                     r"\]$" % ETypeChars,
-                     value
-                     )
+    match = re.match(
+        r'^\['
+        r'(?P<type>[i%s]):'  # type char
+        r'(?P<universe>[0-4]):'  # universe
+        r'(?P<id>\d{1,10})'  # accountid
+        r'(:(?P<instance>\d+))?'  # instance
+        r'\]$' % ETypeChars,
+        value,
+    )
     if not match:
         return None
 
@@ -471,9 +475,11 @@ def from_invite_code(code, universe=EUniverse.Public):
     if not code:
         return None
 
-    m = re.match(r'(https?://s\.team/p/(?P<code1>[\-' + _icode_all_valid + ']+))'
-                 r'|(?P<code2>[\-' + _icode_all_valid + ']+$)'
-                 , code)
+    m = re.match(
+        r'(https?://s\.team/p/(?P<code1>[\-' + _icode_all_valid + ']+))'
+        r'|(?P<code2>[\-' + _icode_all_valid + ']+$)',
+        code,
+    )
     if not m:
         return None
 
@@ -482,7 +488,7 @@ def from_invite_code(code, universe=EUniverse.Public):
     def repl_mapper(x):
         return _icode_map_inv[x.group()]
 
-    accountid = int(re.sub("[" + _icode_custom + "]", repl_mapper, code), 16)
+    accountid = int(re.sub('[' + _icode_custom + ']', repl_mapper, code), 16)
 
     if 0 < accountid < 2**32:
         return SteamID(accountid, EType.Individual, EUniverse(universe), 1)
@@ -514,7 +520,7 @@ def from_csgo_friend_code(code, universe=EUniverse.Public):
             return None
         result = result | (index << 5 * i)
 
-    result, = struct.unpack('<Q', struct.pack('>Q', result))
+    (result,) = struct.unpack('<Q', struct.pack('>Q', result))
     accountid = 0
 
     for i in range(8):
@@ -558,8 +564,11 @@ def steam64_from_url(url, http_timeout=30):
         https://steamcommunity.com/app/570
     """
 
-    match = re.match(r'^(?P<clean_url>https?://steamcommunity.com/'
-                     r'(?P<type>profiles|id|gid|groups|user|app)/(?P<value>.*?))(?:/(?:.*)?)?$', url)
+    match = re.match(
+        r'^(?P<clean_url>https?://steamcommunity.com/'
+        r'(?P<type>profiles|id|gid|groups|user|app)/(?P<value>.*?))(?:/(?:.*)?)?$',
+        url,
+    )
 
     if not match:
         return None
@@ -570,7 +579,7 @@ def steam64_from_url(url, http_timeout=30):
         # user profiles
         if match.group('type') in ('id', 'profiles', 'user'):
             text = web.get(match.group('clean_url'), timeout=http_timeout).text
-            data_match = re.search("g_rgProfileData = (?P<json>{.*?});[ \t\r]*\n", text)
+            data_match = re.search('g_rgProfileData = (?P<json>{.*?});[ \t\r]*\n', text)
 
             if data_match:
                 data = json.loads(data_match.group('json'))

@@ -29,12 +29,14 @@ def response_scrubber(r):
     r['headers'].pop('date', None)
     r['headers'].pop('expires', None)
 
-    if 'set-cookie' in r['headers'] and 'steamLogin' in ''.join(r['headers']['set-cookie']):
+    if 'set-cookie' in r['headers'] and 'steamLogin' in ''.join(
+        r['headers']['set-cookie']
+    ):
         r['headers']['set-cookie'] = [
             'steamLogin=0%7C%7C{}; path=/; httponly'.format('A' * 16),
             'steamLoginSecure=0%7C%7C{}; path=/; httponly; secure'.format('B' * 16),
             'steamMachineAuth0={}; path=/; httponly'.format('C' * 16),
-            ]
+        ]
     else:
         r['headers'].pop('set-cookie', None)
 
@@ -55,7 +57,7 @@ def response_scrubber(r):
         r['body']['string'] = body
         r['headers']['content-length'] = [str(len(body))]
 
-        print("--- response ---------")
+        print('--- response ---------')
         print(r)
 
     return r
@@ -74,9 +76,9 @@ anon_vcr = vcr.VCR(
 
 
 def user_pass_only():
-    print("Please enter a user that can login with just password.")
-    u = input("Username: ")
-    p = getpass("Password (no echo): ")
+    print('Please enter a user that can login with just password.')
+    u = input('Username: ')
+    p = getpass('Password (no echo): ')
 
     user_pass_only_success(u, p)
     user_pass_only_fail(u, p + '123')

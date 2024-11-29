@@ -38,8 +38,8 @@ cmsg_lookup_predefined = {
     EMsg.ClientServiceMethodLegacyResponse: steammessages_clientserver_2_pb2.CMsgClientServiceMethodLegacyResponse,
     EMsg.ClientGetNumberOfCurrentPlayersDP: steammessages_clientserver_2_pb2.CMsgDPGetNumberOfCurrentPlayers,
     EMsg.ClientGetNumberOfCurrentPlayersDPResponse: steammessages_clientserver_2_pb2.CMsgDPGetNumberOfCurrentPlayersResponse,
-#   EMsg.ClientEmailChange4: steammessages_clientserver_2_pb2.CMsgClientEmailChange,
-#   EMsg.ClientEmailChangeResponse4: steammessages_clientserver_2_pb2.CMsgClientEmailChangeResponse,
+    #   EMsg.ClientEmailChange4: steammessages_clientserver_2_pb2.CMsgClientEmailChange,
+    #   EMsg.ClientEmailChangeResponse4: steammessages_clientserver_2_pb2.CMsgClientEmailChangeResponse,
     EMsg.ClientLogonGameServer: steammessages_clientserver_login_pb2.CMsgClientLogon,
     EMsg.ClientCurrentUIMode: steammessages_clientserver_2_pb2.CMsgClientUIMode,
     EMsg.ClientChatOfflineMessageNotification: steammessages_clientserver_2_pb2.CMsgClientOfflineMessageNotification,
@@ -48,24 +48,29 @@ cmsg_lookup_predefined = {
 cmsg_lookup = dict()
 
 for proto_module in [
-                    steammessages_clientserver_pb2,
-                    steammessages_clientserver_2_pb2,
-                    steammessages_clientserver_friends_pb2,
-                    steammessages_clientserver_login_pb2,
-                    steammessages_clientserver_appinfo_pb2,
-                    steammessages_clientserver_gameservers_pb2,
-                    steammessages_clientserver_lbs_pb2,
-                    steammessages_clientserver_mms_pb2,
-                    steammessages_clientserver_ucm_pb2,
-                    steammessages_clientserver_uds_pb2,
-                    steammessages_clientserver_ufs_pb2,
-                    steammessages_clientserver_userstats_pb2,
-                    ]:
+    steammessages_clientserver_pb2,
+    steammessages_clientserver_2_pb2,
+    steammessages_clientserver_friends_pb2,
+    steammessages_clientserver_login_pb2,
+    steammessages_clientserver_appinfo_pb2,
+    steammessages_clientserver_gameservers_pb2,
+    steammessages_clientserver_lbs_pb2,
+    steammessages_clientserver_mms_pb2,
+    steammessages_clientserver_ucm_pb2,
+    steammessages_clientserver_uds_pb2,
+    steammessages_clientserver_ufs_pb2,
+    steammessages_clientserver_userstats_pb2,
+]:
     cmsg_list = proto_module.__dict__
     cmsg_list = fnmatch.filter(cmsg_list, 'CMsg*')
-    cmsg_lookup.update(dict(zip(map(lambda cmsg_name: cmsg_name.lower(), cmsg_list),
-                                map(lambda cmsg_name: getattr(proto_module, cmsg_name), cmsg_list)
-                               )))
+    cmsg_lookup.update(
+        dict(
+            zip(
+                map(lambda cmsg_name: cmsg_name.lower(), cmsg_list),
+                map(lambda cmsg_name: getattr(proto_module, cmsg_name), cmsg_list),
+            )
+        )
+    )
 
 
 def get_cmsg(emsg):
@@ -82,17 +87,19 @@ def get_cmsg(emsg):
         return cmsg_lookup_predefined[emsg]
     else:
         enum_name = emsg.name.lower()
-        if enum_name.startswith("econ"):  # special case for 'EconTrading_'
+        if enum_name.startswith('econ'):  # special case for 'EconTrading_'
             enum_name = enum_name[4:]
-        cmsg_name = "cmsg" + enum_name
+        cmsg_name = 'cmsg' + enum_name
 
     return cmsg_lookup.get(cmsg_name, None)
 
 
 class Msg:
     proto = False
-    body = None     #: message instance
-    payload = None  #: Will contain body payload, if we fail to find correct message class
+    body = None  #: message instance
+    payload = (
+        None  #: Will contain body payload, if we fail to find correct message class
+    )
 
     def __init__(self, msg, data=None, extended=False, parse=True):
         self.extended = extended
@@ -100,7 +107,7 @@ class Msg:
         self.msg = msg
 
         if data:
-            self.payload = data[self.header._size:]
+            self.payload = data[self.header._size :]
 
         if parse:
             self.parse()
@@ -129,10 +136,7 @@ class Msg:
 
     @property
     def steamID(self):
-        return (self.header.steamID
-                if isinstance(self.header, ExtendedMsgHdr)
-                else None
-                )
+        return self.header.steamID if isinstance(self.header, ExtendedMsgHdr) else None
 
     @steamID.setter
     def steamID(self, value):
@@ -141,10 +145,9 @@ class Msg:
 
     @property
     def sessionID(self):
-        return (self.header.sessionID
-                if isinstance(self.header, ExtendedMsgHdr)
-                else None
-                )
+        return (
+            self.header.sessionID if isinstance(self.header, ExtendedMsgHdr) else None
+        )
 
     @sessionID.setter
     def sessionID(self, value):
@@ -159,21 +162,21 @@ class Msg:
         else:
             suffix = 'n/a'
 
-        return f"<Msg({self.msg!r} | {suffix})>"
+        return f'<Msg({self.msg!r} | {suffix})>'
 
     def __str__(self):
         rows = [repr(self)]
 
         header = str(self.header)
-        rows.append("-------------- header --")
-        rows.append(header if header else "(empty)")
+        rows.append('-------------- header --')
+        rows.append(header if header else '(empty)')
 
         body = str(self.body)
-        rows.append("---------------- body --")
-        rows.append(body if body else "(empty)")
+        rows.append('---------------- body --')
+        rows.append(body if body else '(empty)')
 
         if self.payload:
-            rows.append("------------- payload --")
+            rows.append('------------- payload --')
             rows.append(repr(self.payload))
 
         return '\n'.join(rows)
@@ -181,8 +184,10 @@ class Msg:
 
 class MsgProto:
     proto = True
-    body = None     #: protobuf message instance
-    payload = None  #: Will contain body payload, if we fail to find correct proto message
+    body = None  #: protobuf message instance
+    payload = (
+        None  #: Will contain body payload, if we fail to find correct proto message
+    )
 
     def __init__(self, msg, data=None, parse=True):
         self._header = MsgHdrProtoBuf(data)
@@ -190,7 +195,7 @@ class MsgProto:
         self.msg = msg
 
         if data:
-            self.payload = data[self._header._fullsize:]
+            self.payload = data[self._header._fullsize :]
 
         if parse:
             self.parse()
@@ -198,7 +203,11 @@ class MsgProto:
     def parse(self):
         """Parses :attr:`payload` into :attr:`body` instance"""
         if self.body is None:
-            if self.msg in (EMsg.ServiceMethod, EMsg.ServiceMethodResponse, EMsg.ServiceMethodSendToClient):
+            if self.msg in (
+                EMsg.ServiceMethod,
+                EMsg.ServiceMethodResponse,
+                EMsg.ServiceMethodSendToClient,
+            ):
                 is_resp = False if self.msg == EMsg.ServiceMethod else True
                 proto = get_um(self.header.target_job_name, response=is_resp)
             else:
@@ -247,21 +256,21 @@ class MsgProto:
         else:
             suffix = 'n/a'
 
-        return f"<MsgProto({self.msg!r} | {suffix})>"
+        return f'<MsgProto({self.msg!r} | {suffix})>'
 
     def __str__(self):
         rows = [repr(self)]
 
         header = str(self.header).rstrip()
-        rows.append("-------------- header --")
-        rows.append(header if header else "(empty)")
+        rows.append('-------------- header --')
+        rows.append(header if header else '(empty)')
 
         body = str(self.body).rstrip()
-        rows.append("---------------- body --")
-        rows.append(body if body else "(empty)")
+        rows.append('---------------- body --')
+        rows.append(body if body else '(empty)')
 
         if self.payload:
-            rows.append("------------- payload --")
+            rows.append('------------- payload --')
             rows.append(repr(self.payload))
 
         return '\n'.join(rows)

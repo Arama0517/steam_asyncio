@@ -29,7 +29,7 @@ class EMsg(SteamIntEnum):
     WebAPIJobResponse = 134
     ClientSessionStart = 135
     ClientSessionEnd = 136
-#   ClientSessionUpdateAuthTicket = 137 #: removed
+    #   ClientSessionUpdateAuthTicket = 137 #: removed
     ClientSessionUpdate = 137
     StatsDeprecated = 138
     Ping = 139
@@ -111,7 +111,7 @@ class EMsg(SteamIntEnum):
     AISRefreshContentDescription = 401  #: removed
     AISRequestContentDescription = 402
     AISUpdateAppInfo = 403
-#   AISUpdatePackageInfo = 404 #: removed
+    #   AISUpdatePackageInfo = 404 #: removed
     AISUpdatePackageCosts = 404  #: removed
     AISGetPackageChangeNumber = 405
     AISGetPackageChangeNumberResponse = 406
@@ -818,7 +818,7 @@ class EMsg(SteamIntEnum):
     AMSetProfileURL = 4005
     AMGetAccountEmailAddress = 4006
     AMGetAccountEmailAddressResponse = 4007
-#   AMRequestFriendData = 4008 #: removed
+    #   AMRequestFriendData = 4008 #: removed
     AMRequestClanData = 4008
     AMRouteToClients = 4009
     AMLeaveClan = 4010
@@ -1444,8 +1444,8 @@ class EMsg(SteamIntEnum):
     ClientPlayerNicknameList = 5587
     AMClientSetPlayerNickname = 5588
     AMClientSetPlayerNicknameResponse = 5589
-#     ClientRequestOAuthTokenForApp = 5590  #: removed
-#     ClientRequestOAuthTokenForAppResponse = 5591  #: removed
+    #     ClientRequestOAuthTokenForApp = 5590  #: removed
+    #     ClientRequestOAuthTokenForAppResponse = 5591  #: removed
     ClientCreateAccountProto = 5590
     ClientCreateAccountProtoResponse = 5591
     ClientGetNumberOfCurrentPlayersDP = 5592
@@ -1501,8 +1501,8 @@ class EMsg(SteamIntEnum):
     MDSToAMGetDepotDecryptionKeyResponse = 5813
     MDSGetVersionsForDepot = 5814  #: removed
     MDSGetVersionsForDepotResponse = 5815  #: removed
-#     MDSSetPublicVersionForDepot = 5816  #: removed
-#     MDSSetPublicVersionForDepotResponse = 5817  #: removed
+    #     MDSSetPublicVersionForDepot = 5816  #: removed
+    #     MDSSetPublicVersionForDepotResponse = 5817  #: removed
     ClientMDSInitWorkshopBuildRequest = 5816  #: removed
     ClientMDSInitWorkshopBuildResponse = 5817  #: removed
     ClientMDSGetDepotManifest = 5818  #: removed
@@ -1549,7 +1549,7 @@ class EMsg(SteamIntEnum):
 
     DeviceAuthorizationBase = 6500
     ClientAuthorizeLocalDeviceRequest = 6501
-#   ClientAuthorizeLocalDevice = 6502 #: removed
+    #   ClientAuthorizeLocalDevice = 6502 #: removed
     ClientAuthorizeLocalDeviceResponse = 6502
     ClientDeauthorizeDeviceRequest = 6503
     ClientDeauthorizeDevice = 6504
@@ -1612,9 +1612,9 @@ class EMsg(SteamIntEnum):
     UDSRenderUserAuth = 7003
     UDSRenderUserAuthResponse = 7004
     ClientInviteToGame = 7005
-#   UDSFindSession = 7006 #: removed
+    #   UDSFindSession = 7006 #: removed
     UDSHasSession = 7006
-#   UDSFindSessionResponse = 7007 #: removed
+    #   UDSFindSessionResponse = 7007 #: removed
     UDSHasSessionResponse = 7007
 
     MPASBase = 7100
@@ -1738,11 +1738,11 @@ class EMsg(SteamIntEnum):
     ClientFSEnumerateFollowingListResponse = 7520
     FSGetPendingNotificationCount = 7521
     FSGetPendingNotificationCountResponse = 7522
-#   ClientFSOfflineMessageNotification = 7523 #: renamed
-#   ClientFSRequestOfflineMessageCount = 7524 #: renamed
-#   ClientFSGetFriendMessageHistory = 7525 #: renamed
-#   ClientFSGetFriendMessageHistoryResponse = 7526 #: renamed
-#   ClientFSGetFriendMessageHistoryForOfflineMessages = 7527 #: renamed
+    #   ClientFSOfflineMessageNotification = 7523 #: renamed
+    #   ClientFSRequestOfflineMessageCount = 7524 #: renamed
+    #   ClientFSGetFriendMessageHistory = 7525 #: renamed
+    #   ClientFSGetFriendMessageHistoryResponse = 7526 #: renamed
+    #   ClientFSGetFriendMessageHistoryForOfflineMessages = 7527 #: renamed
     ClientChatOfflineMessageNotification = 7523
     ClientChatRequestOfflineMessageCount = 7524
     ClientChatGetFriendMessageHistory = 7525
@@ -1913,7 +1913,7 @@ class EMsg(SteamIntEnum):
     ClientGetEmoticonList = 9330
     ClientEmoticonList = 9331
 
-#   ClientSharedLibraryBase = 9400 #: removed
+    #   ClientSharedLibraryBase = 9400 #: removed
     SLCUserSessionStatus = 9400
     SLCBase = 9400
     SLCRequestUserSessionStatus = 9401
@@ -1966,7 +1966,7 @@ class EMsg(SteamIntEnum):
     ClientLANP2PRequestChunkResponse = 9901
     ClientLANP2PMax = 9999
 
-#   BaseWatchdogServer = 10000
+    #   BaseWatchdogServer = 10000
     NotifyWatchdog = 10000
 
     ClientSiteLicenseSiteInfoNotification = 10100

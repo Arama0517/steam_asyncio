@@ -1,4 +1,5 @@
 """Classes to (de)serialize various struct messages"""
+
 import struct
 
 import vdf
@@ -31,7 +32,8 @@ class StructMessageMeta(type):
 
 class StructMessage(metaclass=StructMessageMeta):
     def __init__(self, data=None):
-        if data: self.load(data)
+        if data:
+            self.load(data)
 
     def serialize(self):
         raise NotImplementedError
@@ -46,12 +48,13 @@ class ChannelEncryptRequest(StructMessage):
     challenge = b''
 
     def serialize(self):
-        return struct.pack("<II", self.protocolVersion, self.universe) + self.challenge
+        return struct.pack('<II', self.protocolVersion, self.universe) + self.challenge
 
     def load(self, data):
-        (self.protocolVersion,
-         universe,
-         ) = struct.unpack_from("<II", data)
+        (
+            self.protocolVersion,
+            universe,
+        ) = struct.unpack_from('<II', data)
 
         self.universe = EUniverse(universe)
 
@@ -59,10 +62,11 @@ class ChannelEncryptRequest(StructMessage):
             self.challenge = data[8:]
 
     def __str__(self):
-        return '\n'.join(["protocolVersion: %s" % self.protocolVersion,
-                          "universe: %s" % repr(self.universe),
-                          "challenge: %s" % repr(self.challenge),
-                          ])
+        return '\n'.join([
+            'protocolVersion: %s' % self.protocolVersion,
+            'universe: %s' % repr(self.universe),
+            'challenge: %s' % repr(self.challenge),
+        ])
 
 
 class ChannelEncryptResponse(StructMessage):
@@ -72,56 +76,54 @@ class ChannelEncryptResponse(StructMessage):
     crc = 0
 
     def serialize(self):
-        return struct.pack("<II128sII",
-                           self.protocolVersion,
-                           self.keySize,
-                           self.key,
-                           self.crc,
-                           0
-                           )
+        return struct.pack(
+            '<II128sII', self.protocolVersion, self.keySize, self.key, self.crc, 0
+        )
 
     def load(self, data):
-        (self.protocolVersion,
-         self.keySize,
-         self.key,
-         self.crc,
-         _,
-         ) = struct.unpack_from("<II128sII", data)
+        (
+            self.protocolVersion,
+            self.keySize,
+            self.key,
+            self.crc,
+            _,
+        ) = struct.unpack_from('<II128sII', data)
 
     def __str__(self):
-        return '\n'.join(["protocolVersion: %s" % self.protocolVersion,
-                          "keySize: %s" % self.keySize,
-                          "key: %s" % repr(self.key),
-                          "crc: %s" % self.crc,
-                          ])
+        return '\n'.join([
+            'protocolVersion: %s' % self.protocolVersion,
+            'keySize: %s' % self.keySize,
+            'key: %s' % repr(self.key),
+            'crc: %s' % self.crc,
+        ])
 
 
 class ChannelEncryptResult(StructMessage):
     eresult = EResult.Invalid
 
     def serialize(self):
-        return struct.pack("<I", self.eresult)
+        return struct.pack('<I', self.eresult)
 
     def load(self, data):
-        (result,) = struct.unpack_from("<I", data)
+        (result,) = struct.unpack_from('<I', data)
         self.eresult = EResult(result)
 
     def __str__(self):
-        return "eresult: %s" % repr(self.eresult)
+        return 'eresult: %s' % repr(self.eresult)
 
 
 class ClientLogOnResponse(StructMessage):
     eresult = EResult.Invalid
 
     def serialize(self):
-        return struct.pack("<I", self.eresult)
+        return struct.pack('<I', self.eresult)
 
     def load(self, data):
-        (result,) = struct.unpack_from("<I", data)
+        (result,) = struct.unpack_from('<I', data)
         self.eresult = EResult(result)
 
     def __str__(self):
-        return "eresult: %s" % repr(self.eresult)
+        return 'eresult: %s' % repr(self.eresult)
 
 
 class ClientVACBanStatus(StructMessage):
@@ -130,11 +132,12 @@ class ClientVACBanStatus(StructMessage):
         end = 0
 
         def __str__(self):
-            return '\n'.join(["{",
-                              "start: %s" % self.start,
-                              "end: %d" % self.end,
-                              "}",
-                              ])
+            return '\n'.join([
+                '{',
+                'start: %s' % self.start,
+                'end: %d' % self.end,
+                '}',
+            ])
 
     @property
     def numBans(self):
@@ -146,22 +149,22 @@ class ClientVACBanStatus(StructMessage):
 
     def load(self, data):
         buf = StructReader(data)
-        numBans, = buf.unpack("<I")
+        (numBans,) = buf.unpack('<I')
 
         for _ in range(numBans):
             m = self.VACBanRange()
             self.ranges.append(m)
 
-            m.start, m.end, _ = buf.unpack("<III")
+            m.start, m.end, _ = buf.unpack('<III')
 
             if m.start > m.end:
                 m.start, m.end = m.end, m.start
 
     def __str__(self):
-        text = ["numBans: %d" % self.numBans]
+        text = ['numBans: %d' % self.numBans]
 
         for m in self.ranges:  # emulate Protobuf text format
-            text.append("ranges " + str(m).replace("\n", "\n    ", 2))
+            text.append('ranges ' + str(m).replace('\n', '\n    ', 2))
 
         return '\n'.join(text)
 
@@ -170,34 +173,37 @@ class ClientChatMsg(StructMessage):
     steamIdChatter = 0
     steamIdChatRoom = 0
     ChatMsgType = 0
-    text = ""
+    text = ''
 
     def serialize(self):
-        rbytes = struct.pack("<QQI",
-                             self.steamIdChatter,
-                             self.steamIdChatRoom,
-                             self.ChatMsgType,
-                            )
+        rbytes = struct.pack(
+            '<QQI',
+            self.steamIdChatter,
+            self.steamIdChatRoom,
+            self.ChatMsgType,
+        )
         # utf-8 encode only when unicode in py2 and str in py3
-        rbytes += (self.text.encode('utf-8')
-                   if (not isinstance(self.text, str) and bytes is str)
-                      or isinstance(self.text, str)
-                   else self.text
-                  ) + b'\x00'
+        rbytes += (
+            self.text.encode('utf-8')
+            if (not isinstance(self.text, str) and bytes is str)
+            or isinstance(self.text, str)
+            else self.text
+        ) + b'\x00'
 
         return rbytes
 
     def load(self, data):
         buf = StructReader(data)
-        self.steamIdChatter, self.steamIdChatRoom, self.ChatMsgType = buf.unpack("<QQI")
+        self.steamIdChatter, self.steamIdChatRoom, self.ChatMsgType = buf.unpack('<QQI')
         self.text = buf.read_cstring().decode('utf-8')
 
     def __str__(self):
-        return '\n'.join(["steamIdChatter: %d" % self.steamIdChatter,
-                          "steamIdChatRoom: %d" % self.steamIdChatRoom,
-                          "ChatMsgType: %d" % self.ChatMsgType,
-                          "text: %s" % repr(self.text),
-                          ])
+        return '\n'.join([
+            'steamIdChatter: %d' % self.steamIdChatter,
+            'steamIdChatRoom: %d' % self.steamIdChatRoom,
+            'ChatMsgType: %d' % self.ChatMsgType,
+            'text: %s' % repr(self.text),
+        ])
 
 
 class ClientJoinChat(StructMessage):
@@ -205,20 +211,16 @@ class ClientJoinChat(StructMessage):
     isVoiceSpeaker = False
 
     def serialize(self):
-        return struct.pack("<Q?",
-                           self.steamIdChat,
-                           self.isVoiceSpeaker
-        )
+        return struct.pack('<Q?', self.steamIdChat, self.isVoiceSpeaker)
 
     def load(self, data):
-        (self.steamIdChat,
-         self.isVoiceSpeaker
-        ) = struct.unpack_from("<Q?", data)
+        (self.steamIdChat, self.isVoiceSpeaker) = struct.unpack_from('<Q?', data)
 
     def __str__(self):
-        return '\n'.join(["steamIdChat: %d" % self.steamIdChat,
-                          "isVoiceSpeaker: %r" % self.isVoiceSpeaker,
-                          ])
+        return '\n'.join([
+            'steamIdChat: %d' % self.steamIdChat,
+            'isVoiceSpeaker: %r' % self.isVoiceSpeaker,
+        ])
 
 
 class ClientChatMemberInfo(StructMessage):
@@ -229,29 +231,32 @@ class ClientChatMemberInfo(StructMessage):
     steamIdUserActedBy = 0
 
     def serialize(self):
-        return struct.pack("<QIQIQ",
-                           self.steamIdChat,
-                           self.type,
-                           self.steamIdUserActedOn,
-                           self.chatAction,
-                           self.steamIdUserActedBy
+        return struct.pack(
+            '<QIQIQ',
+            self.steamIdChat,
+            self.type,
+            self.steamIdUserActedOn,
+            self.chatAction,
+            self.steamIdUserActedBy,
         )
 
     def load(self, data):
-        (self.steamIdChat,
-         self.type,
-         self.steamIdUserActedOn,
-         self.chatAction,
-         self.steamIdUserActedBy
-        ) = struct.unpack_from("<QIQIQ", data)
+        (
+            self.steamIdChat,
+            self.type,
+            self.steamIdUserActedOn,
+            self.chatAction,
+            self.steamIdUserActedBy,
+        ) = struct.unpack_from('<QIQIQ', data)
 
     def __str__(self):
-        return '\n'.join(["steamIdChat: %d" % self.steamIdChat,
-                          "type: %r" % self.type,
-                          "steamIdUserActedOn: %d" % self.steamIdUserActedOn,
-                          "chatAction: %d" % self.chatAction,
-                          "steamIdUserActedBy: %d" % self.steamIdUserActedBy
-                          ])
+        return '\n'.join([
+            'steamIdChat: %d' % self.steamIdChat,
+            'type: %r' % self.type,
+            'steamIdUserActedOn: %d' % self.steamIdUserActedOn,
+            'chatAction: %d' % self.chatAction,
+            'steamIdUserActedBy: %d' % self.steamIdUserActedBy,
+        ])
 
 
 class ClientMarketingMessageUpdate2(StructMessage):
@@ -261,12 +266,13 @@ class ClientMarketingMessageUpdate2(StructMessage):
         flags = 0
 
         def __str__(self):
-            return '\n'.join(["{",
-                              "id: %s" % self.id,
-                              "url: %s" % repr(self.url),
-                              "flags: %d" % self.flags,
-                              "}",
-                              ])
+            return '\n'.join([
+                '{',
+                'id: %s' % self.id,
+                'url: %s' % repr(self.url),
+                'flags: %d' % self.flags,
+                '}',
+            ])
 
     time = 0
 
@@ -280,23 +286,24 @@ class ClientMarketingMessageUpdate2(StructMessage):
 
     def load(self, data):
         buf = StructReader(data)
-        self.time, count = buf.unpack("<II")
+        self.time, count = buf.unpack('<II')
 
         for _ in range(count):
             m = self.MarketingMessage()
             self.messages.append(m)
 
-            length, m.id = buf.unpack("<IQ")
+            length, m.id = buf.unpack('<IQ')
             m.url = buf.read_cstring().decode('utf-8')
-            m.flags = buf.unpack("<I")
+            m.flags = buf.unpack('<I')
 
     def __str__(self):
-        text = ["time: %s" % self.time,
-                "count: %d" % self.count,
-                ]
+        text = [
+            'time: %s' % self.time,
+            'count: %d' % self.count,
+        ]
 
         for m in self.messages:  # emulate Protobuf text format
-            text.append("messages " + str(m).replace("\n", "\n    ", 3))
+            text.append('messages ' + str(m).replace('\n', '\n    ', 3))
 
         return '\n'.join(text)
 
@@ -309,18 +316,20 @@ class ClientUpdateGuestPassesList(StructMessage):
     # fairly sure this is deprecated anyway since introduction of the invetory system
 
     def load(self, data):
-        (eresult,
-         self.countGuestPassesToGive,
-         self.countGuestPassesToRedeem,
-        ) = struct.unpack_from("<III", data)
+        (
+            eresult,
+            self.countGuestPassesToGive,
+            self.countGuestPassesToRedeem,
+        ) = struct.unpack_from('<III', data)
 
         self.eresult = EResult(eresult)
 
     def __str__(self):
-        return '\n'.join(["eresult: %s" % repr(self.eresult),
-                          "countGuestPassesToGive: %d" % self.countGuestPassesToGive,
-                          "countGuestPassesToRedeem: %d" % self.countGuestPassesToRedeem,
-                          ])
+        return '\n'.join([
+            'eresult: %s' % repr(self.eresult),
+            'countGuestPassesToGive: %d' % self.countGuestPassesToGive,
+            'countGuestPassesToRedeem: %d' % self.countGuestPassesToRedeem,
+        ])
 
 
 class ClientChatEnter(StructMessage):
@@ -332,36 +341,49 @@ class ClientChatEnter(StructMessage):
     chatFlags = 0
     enterResponse = 0
     numMembers = 0
-    chatRoomName = ""
+    chatRoomName = ''
     memberList = []
 
     def __init__(self, data=None):
-        if data: self.load(data)
+        if data:
+            self.load(data)
 
     def load(self, data):
         buf, self.memberList = StructReader(data), list()
 
-        (self.steamIdChat, self.steamIdFriend, self.chatRoomType, self.steamIdOwner,
-         self.steamIdClan, self.chatFlags, self.enterResponse, self.numMembers
-         ) = buf.unpack("<QQIQQ?II")
+        (
+            self.steamIdChat,
+            self.steamIdFriend,
+            self.chatRoomType,
+            self.steamIdOwner,
+            self.steamIdClan,
+            self.chatFlags,
+            self.enterResponse,
+            self.numMembers,
+        ) = buf.unpack('<QQIQQ?II')
         self.chatRoomName = buf.read_cstring().decode('utf-8')
 
         for _ in range(self.numMembers):
             self.memberList.append(vdf.binary_loads(buf.read(64))['MessageObject'])
 
-        self.UNKNOWN1, = buf.unpack("<I")
+        (self.UNKNOWN1,) = buf.unpack('<I')
 
     def __str__(self):
-        return '\n'.join(["steamIdChat: %d" % self.steamIdChat,
-                          "steamIdFriend: %d" % self.steamIdFriend,
-                          "chatRoomType: %r" % self.chatRoomType,
-                          "steamIdOwner: %d" % self.steamIdOwner,
-                          "steamIdClan: %d" % self.steamIdClan,
-                          "chatFlags: %r" % self.chatFlags,
-                          "enterResponse: %r" % self.enterResponse,
-                          "numMembers: %r" % self.numMembers,
-                          "chatRoomName: %s" % repr(self.chatRoomName),
-        ] + map(lambda x: "memberList: %s" % x, self.memberList))
+        return '\n'.join(
+            [
+                'steamIdChat: %d' % self.steamIdChat,
+                'steamIdFriend: %d' % self.steamIdFriend,
+                'chatRoomType: %r' % self.chatRoomType,
+                'steamIdOwner: %d' % self.steamIdOwner,
+                'steamIdClan: %d' % self.steamIdClan,
+                'chatFlags: %r' % self.chatFlags,
+                'enterResponse: %r' % self.enterResponse,
+                'numMembers: %r' % self.numMembers,
+                'chatRoomName: %s' % repr(self.chatRoomName),
+            ]
+            + map(lambda x: 'memberList: %s' % x, self.memberList)
+        )
+
 
 ##################################################################################################
 
@@ -370,14 +392,15 @@ class _ResultStruct(StructMessage):
     eresult = EResult.Invalid
 
     def serialize(self):
-        return struct.pack("<I", self.eresult)
+        return struct.pack('<I', self.eresult)
 
     def load(self, data):
-        eresult, = struct.unpack_from("<I", data)
+        (eresult,) = struct.unpack_from('<I', data)
         self.eresult = EResult(eresult)
 
     def __str__(self):
-        return "eresult: %s" % repr(self.eresult)
+        return 'eresult: %s' % repr(self.eresult)
+
 
 ##################################################################################################
 
@@ -392,11 +415,12 @@ class ClientRequestValidationMail(StructMessage):
         self.UNKNOWN1 = data
 
     def __str__(self):
-        return "UNKNOWN1: %s" % repr(self.UNKNOWN1)
+        return 'UNKNOWN1: %s' % repr(self.UNKNOWN1)
 
 
 class ClientRequestValidationMailResponse(_ResultStruct):
     pass
+
 
 ##################################################################################################
 
@@ -406,16 +430,18 @@ class ClientRequestChangeMail(StructMessage):
     UNKNOWN1 = 0
 
     def serialize(self):
-        return struct.pack("<81sI", self.password[:80].encode('ascii'), self.UNKNOWN1)
+        return struct.pack('<81sI', self.password[:80].encode('ascii'), self.UNKNOWN1)
 
     def __str__(self):
-        return '\n'.join(["password: %s" % repr(self.password),
-                          "UNKNOWN1: %d" % self.UNKNOWN1,
-                          ])
+        return '\n'.join([
+            'password: %s' % repr(self.password),
+            'UNKNOWN1: %d' % self.UNKNOWN1,
+        ])
 
 
 class ClientRequestChangeMailResponse(_ResultStruct):
     pass
+
 
 ##################################################################################################
 
@@ -426,17 +452,22 @@ class ClientPasswordChange3(StructMessage):
     code = ''
 
     def serialize(self):
-        return (b'\x00'
-                + self.password.encode('ascii') + b'\x00'
-                + self.new_password.encode('ascii') + b'\x00'
-                + self.code.encode('ascii') + b'\x00'
-                )
+        return (
+            b'\x00'
+            + self.password.encode('ascii')
+            + b'\x00'
+            + self.new_password.encode('ascii')
+            + b'\x00'
+            + self.code.encode('ascii')
+            + b'\x00'
+        )
 
     def __str__(self):
-        return '\n'.join(["password: %s" % repr(self.password),
-                          "new_password: %s" % repr(self.new_password),
-                          "code: %s" % repr(self.code),
-                          ])
+        return '\n'.join([
+            'password: %s' % repr(self.password),
+            'new_password: %s' % repr(self.new_password),
+            'code: %s' % repr(self.code),
+        ])
 
 
 class ClientPasswordChangeResponse(_ResultStruct):

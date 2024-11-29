@@ -2,14 +2,15 @@ from steam.enums import EResult
 
 
 class SteamError(Exception):
-    """ General error that also carries EResult code """
+    """General error that also carries EResult code"""
+
     def __init__(self, message, eresult=EResult.Fail):
         Exception.__init__(self, message, eresult)
         self.message = message
         self.eresult = EResult(eresult)  #: :class:`.EResult`
 
     def __str__(self):
-        return f"({self.eresult}) {self.message}"
+        return f'({self.eresult}) {self.message}'
 
 
 class ManifestError(SteamError):
@@ -17,6 +18,7 @@ class ManifestError(SteamError):
     Raised when there a problem getting a manifest by :class:`CDNClient`
     Encapsulates original exception in :attr:`.error` and includes manifest details
     """
+
     def __init__(self, message, app_id, depot_id, manifest_gid, error=None):
         self.message = message
         self.app_id = app_id
@@ -30,7 +32,7 @@ class ManifestError(SteamError):
             self.eresult = EResult.Fail
 
     def __repr__(self):
-        return "{}({}, app={}, depot={}, manifest={}, error={})".format(
+        return '{}({}, app={}, depot={}, manifest={}, error={})'.format(
             self.__class__.__name__,
             repr(self.message),
             self.app_id,
@@ -40,7 +42,7 @@ class ManifestError(SteamError):
         )
 
     def __str__(self):
-        return "({}) {} (app={} depot={} manifest={})".format(
+        return '({}) {} (app={} depot={} manifest={})'.format(
             self.eresult,
             self.message,
             self.app_id,

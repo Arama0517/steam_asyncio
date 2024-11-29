@@ -1,6 +1,7 @@
 """
 All function in this module take and return :class:`bytes`
 """
+
 from base64 import b64decode
 from os import urandom as random_bytes
 from struct import pack
@@ -16,17 +17,19 @@ from Cryptodome.PublicKey.RSA import (
 class UniverseKey:
     """Public keys for Universes"""
 
-    Public = rsa_import_key(b64decode("""
+    Public = rsa_import_key(
+        b64decode("""
 MIGdMA0GCSqGSIb3DQEBAQUAA4GLADCBhwKBgQDf7BrWLBBmLBc1OhSwfFkRf53T
 2Ct64+AVzRkeRuh7h3SiGEYxqQMUeYKO6UWiSRKpI2hzic9pobFhRr3Bvr/WARvY
 gdTckPv+T1JzZsuVcNfFjrocejN1oWI0Rrtgt4Bo+hOneoo3S57G9F1fOpn5nsQ6
 6WOiu4gZKODnFMBCiQIBEQ==
-"""))
+""")
+    )
 
 
 BS = 16
 pad = lambda s: s + (BS - len(s) % BS) * pack('B', BS - len(s) % BS)
-unpad = lambda s: s[0:-s[-1]]
+unpad = lambda s: s[0 : -s[-1]]
 
 
 def generate_session_key(hmac_secret=b''):
@@ -37,8 +40,9 @@ def generate_session_key(hmac_secret=b''):
     :rtype: :class:`tuple`
     """
     session_key = random_bytes(32)
-    encrypted_session_key = PKCS1_OAEP.new(UniverseKey.Public, SHA1)\
-                                      .encrypt(session_key + hmac_secret)
+    encrypted_session_key = PKCS1_OAEP.new(UniverseKey.Public, SHA1).encrypt(
+        session_key + hmac_secret
+    )
 
     return (session_key, encrypted_session_key)
 
@@ -86,7 +90,7 @@ def symmetric_decrypt_HMAC(cyphertext, key, hmac_secret):
     hmac = hmac_sha1(hmac_secret, iv[-3:] + message)
 
     if iv[:13] != hmac[:13]:
-        raise RuntimeError("Unable to decrypt message. HMAC does not match.")
+        raise RuntimeError('Unable to decrypt message. HMAC does not match.')
 
     return message
 

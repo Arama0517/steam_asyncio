@@ -56,29 +56,29 @@ class CMClient(EventEmitter):
     """All incoming messages are emitted with their :class:`.EMsg` number.
     """
 
-    PROTOCOL_TCP = 0                        #: TCP protocol enum
-    PROTOCOL_UDP = 1                        #: UDP protocol enum
-    PROTOCOL_WEBSOCKET = 2                  #: WEBSOCKET protocol enum
-    verbose_debug = False                   #: print message connects in debug
+    PROTOCOL_TCP = 0  #: TCP protocol enum
+    PROTOCOL_UDP = 1  #: UDP protocol enum
+    PROTOCOL_WEBSOCKET = 2  #: WEBSOCKET protocol enum
+    verbose_debug = False  #: print message connects in debug
 
-    auto_discovery = True                   #: enables automatic CM discovery
-    cm_servers = None                       #: a instance of :class:`.CMServerList`
-    current_server_addr = None              #: (ip, port) tuple
+    auto_discovery = True  #: enables automatic CM discovery
+    cm_servers = None  #: a instance of :class:`.CMServerList`
+    current_server_addr = None  #: (ip, port) tuple
     _seen_logon = False
     _connecting = False
-    connected = False                       #: :class:`True` if connected to CM
-    channel_secured = False                 #: :class:`True` once secure channel handshake is complete
+    connected = False  #: :class:`True` if connected to CM
+    channel_secured = False  #: :class:`True` once secure channel handshake is complete
 
-    channel_key = None                      #: channel encryption key
-    channel_hmac = None                     #: HMAC secret
+    channel_key = None  #: channel encryption key
+    channel_hmac = None  #: HMAC secret
 
-    steam_id = SteamID()                    #: :class:`.SteamID` of the current user
-    session_id = None                       #: session id when logged in
-    cell_id = 0                             #: cell id provided by CM
+    steam_id = SteamID()  #: :class:`.SteamID` of the current user
+    session_id = None  #: session id when logged in
+    cell_id = 0  #: cell id provided by CM
 
     _recv_loop = None
     # _heartbeat_loop = None
-    _LOG = logging.getLogger("CMClient")
+    _LOG = logging.getLogger('CMClient')
 
     def __init__(self, protocol=PROTOCOL_TCP):
         self.cm_servers = CMServerList()
@@ -88,16 +88,16 @@ class CMClient(EventEmitter):
         elif protocol == CMClient.PROTOCOL_TCP:
             self.connection = TCPConnection()
         else:
-            raise ValueError("Only Websocket and TCP are supported")
+            raise ValueError('Only Websocket and TCP are supported')
 
-        self.on(EMsg.ChannelEncryptRequest, self.__handle_encrypt_request),
-        self.on(EMsg.Multi, self.__handle_multi),
-        self.on(EMsg.ClientLogOnResponse, self._handle_logon),
-        self.on(EMsg.ClientCMList, self._handle_cm_list),
+        (self.on(EMsg.ChannelEncryptRequest, self.__handle_encrypt_request),)
+        (self.on(EMsg.Multi, self.__handle_multi),)
+        (self.on(EMsg.ClientLogOnResponse, self._handle_logon),)
+        (self.on(EMsg.ClientCMList, self._handle_cm_list),)
 
     def emit(self, event, *args):
         if event is not None:
-            self._LOG.debug("Emit event: %s" % repr(event))
+            self._LOG.debug('Emit event: %s' % repr(event))
         super().emit(event, *args)
 
     def connect(self, retry=0, delay=0):
@@ -111,26 +111,26 @@ class CMClient(EventEmitter):
         :rtype: :class:`bool`
         """
         if self.connected:
-            self._LOG.debug("Connect called, but we are connected?")
+            self._LOG.debug('Connect called, but we are connected?')
             return
         if self._connecting:
-            self._LOG.debug("Connect called, but we are already connecting.")
+            self._LOG.debug('Connect called, but we are already connecting.')
             return
         self._connecting = True
 
         if delay:
-            self._LOG.debug("Delayed connect: %d seconds" % delay)
+            self._LOG.debug('Delayed connect: %d seconds' % delay)
             self.emit(self.EVENT_RECONNECT, delay)
             self.sleep(delay)
 
-        self._LOG.debug("Connect initiated.")
+        self._LOG.debug('Connect initiated.')
 
         i = count(0)
 
         while len(self.cm_servers) == 0:
             if not self.auto_discovery or (retry and next(i) >= retry):
                 if not self.auto_discovery:
-                    self._LOG.error("CM server list is empty. Auto discovery is off.")
+                    self._LOG.error('CM server list is empty. Auto discovery is off.')
                 self._connecting = False
                 return False
 
@@ -149,7 +149,7 @@ class CMClient(EventEmitter):
 
             if self.connection.connect(server_addr):
                 break
-            self._LOG.debug("Failed to connect. Retrying...")
+            self._LOG.debug('Failed to connect. Retrying...')
 
             diff = time() - start
 
@@ -185,16 +185,17 @@ class CMClient(EventEmitter):
         self.emit(self.EVENT_DISCONNECTED)
 
     def _reset_attributes(self):
-        for name in ['connected',
-                     'channel_secured',
-                     'channel_key',
-                     'channel_hmac',
-                     'steam_id',
-                     'session_id',
-                     '_seen_logon',
-                     '_recv_loop',
-                     # '_heartbeat_loop',
-                     ]:
+        for name in [
+            'connected',
+            'channel_secured',
+            'channel_key',
+            'channel_hmac',
+            'steam_id',
+            'session_id',
+            '_seen_logon',
+            '_recv_loop',
+            # '_heartbeat_loop',
+        ]:
             self.__dict__.pop(name, None)
 
     def send(self, message):
@@ -205,7 +206,7 @@ class CMClient(EventEmitter):
         :type message: :class:`steam.core.msg.Msg`, :class:`steam.core.msg.MsgProto`
         """
         if not isinstance(message, (Msg, MsgProto)):
-            raise ValueError("Expected Msg or MsgProto, got %s" % message)
+            raise ValueError('Expected Msg or MsgProto, got %s' % message)
 
         if self.steam_id:
             message.steamID = self.steam_id
@@ -213,15 +214,17 @@ class CMClient(EventEmitter):
             message.sessionID = self.session_id
 
         if self.verbose_debug:
-            self._LOG.debug(f"Outgoing: {repr(message)}\n{str(message)}")
+            self._LOG.debug(f'Outgoing: {repr(message)}\n{str(message)}')
         else:
-            self._LOG.debug("Outgoing: %s", repr(message))
+            self._LOG.debug('Outgoing: %s', repr(message))
 
         data = message.serialize()
 
         if self.channel_key:
             if self.channel_hmac:
-                data = crypto.symmetric_encrypt_HMAC(data, self.channel_key, self.channel_hmac)
+                data = crypto.symmetric_encrypt_HMAC(
+                    data, self.channel_key, self.channel_hmac
+                )
             else:
                 data = crypto.symmetric_encrypt(data, self.channel_key)
 
@@ -235,7 +238,9 @@ class CMClient(EventEmitter):
             if self.channel_key:
                 if self.channel_hmac:
                     try:
-                        message = crypto.symmetric_decrypt_HMAC(message, self.channel_key, self.channel_hmac)
+                        message = crypto.symmetric_decrypt_HMAC(
+                            message, self.channel_key, self.channel_hmac
+                        )
                     except RuntimeError as e:
                         self._LOG.exception(e)
                         break
@@ -252,21 +257,22 @@ class CMClient(EventEmitter):
         gevent.spawn(self.disconnect)
 
     def _parse_message(self, message):
-        emsg_id, = struct.unpack_from("<I", message)
+        (emsg_id,) = struct.unpack_from('<I', message)
         emsg = EMsg(clear_proto_bit(emsg_id))
 
         if not self.connected and emsg != EMsg.ClientLogOnResponse:
-            self._LOG.debug("Dropped unexpected message: %s (is_proto: %s)",
-                            repr(emsg),
-                            is_proto(emsg_id),
-                            )
+            self._LOG.debug(
+                'Dropped unexpected message: %s (is_proto: %s)',
+                repr(emsg),
+                is_proto(emsg_id),
+            )
             return
 
-        if emsg in (EMsg.ChannelEncryptRequest,
-                    EMsg.ChannelEncryptResponse,
-                    EMsg.ChannelEncryptResult,
-                    ):
-
+        if emsg in (
+            EMsg.ChannelEncryptRequest,
+            EMsg.ChannelEncryptResponse,
+            EMsg.ChannelEncryptResult,
+        ):
             msg = Msg(emsg, message, parse=False)
         else:
             try:
@@ -275,10 +281,11 @@ class CMClient(EventEmitter):
                 else:
                     msg = Msg(emsg, message, extended=True, parse=False)
             except Exception as e:
-                self._LOG.fatal("Failed to deserialize message: %s (is_proto: %s)",
-                                repr(emsg),
-                                is_proto(emsg_id)
-                                )
+                self._LOG.fatal(
+                    'Failed to deserialize message: %s (is_proto: %s)',
+                    repr(emsg),
+                    is_proto(emsg_id),
+                )
                 self._LOG.exception(e)
                 return
 
@@ -286,21 +293,21 @@ class CMClient(EventEmitter):
             msg.parse()
 
         if self.verbose_debug:
-            self._LOG.debug(f"Incoming: {repr(msg)}\n{str(msg)}")
+            self._LOG.debug(f'Incoming: {repr(msg)}\n{str(msg)}')
         else:
-            self._LOG.debug("Incoming: %s", repr(msg))
+            self._LOG.debug('Incoming: %s', repr(msg))
 
         self.emit(emsg, msg)
         return emsg, msg
 
     def __handle_encrypt_request(self, req):
-        self._LOG.debug("Securing channel")
+        self._LOG.debug('Securing channel')
 
         try:
             if req.body.protocolVersion != 1:
-                raise RuntimeError("Unsupported protocol version")
+                raise RuntimeError('Unsupported protocol version')
             if req.body.universe != EUniverse.Public:
-                raise RuntimeError("Unsupported universe")
+                raise RuntimeError('Unsupported universe')
         except RuntimeError as e:
             self._LOG.exception(e)
             gevent.spawn(self.disconnect)
@@ -310,7 +317,7 @@ class CMClient(EventEmitter):
 
         challenge = req.body.challenge
         key, resp.body.key = crypto.generate_session_key(challenge)
-        resp.body.crc = binascii.crc32(resp.body.key) & 0xffffffff
+        resp.body.crc = binascii.crc32(resp.body.key) & 0xFFFFFFFF
 
         self.send(resp)
 
@@ -324,44 +331,47 @@ class CMClient(EventEmitter):
         eresult = result[0].body.eresult
 
         if eresult != EResult.OK:
-            self._LOG.error("Failed to secure channel: %s" % eresult)
+            self._LOG.error('Failed to secure channel: %s' % eresult)
             gevent.spawn(self.disconnect)
             return
 
         self.channel_key = key
 
         if challenge:
-            self._LOG.debug("Channel secured")
+            self._LOG.debug('Channel secured')
             self.channel_hmac = key[:16]
         else:
-            self._LOG.debug("Channel secured (legacy mode)")
+            self._LOG.debug('Channel secured (legacy mode)')
 
         self.channel_secured = True
         self.emit(self.EVENT_CHANNEL_SECURED)
 
     def __handle_multi(self, msg):
-        self._LOG.debug("Multi: Unpacking")
+        self._LOG.debug('Multi: Unpacking')
 
         if msg.body.size_unzipped:
-            self._LOG.debug("Multi: Decompressing payload (%d -> %s)" % (
-                len(msg.body.message_body),
-                msg.body.size_unzipped,
-                ))
+            self._LOG.debug(
+                'Multi: Decompressing payload (%d -> %s)'
+                % (
+                    len(msg.body.message_body),
+                    msg.body.size_unzipped,
+                )
+            )
 
             with GzipFile(fileobj=BytesIO(msg.body.message_body)) as f:
                 data = f.read()
 
             if len(data) != msg.body.size_unzipped:
-                self._LOG.fatal("Unzipped size mismatch")
+                self._LOG.fatal('Unzipped size mismatch')
                 gevent.spawn(self.disconnect)
                 return
         else:
             data = msg.body.message_body
 
         while len(data) > 0:
-            size, = struct.unpack_from("<I", data)
-            self._parse_message(data[4:4 + size])
-            data = data[4 + size:]
+            (size,) = struct.unpack_from('<I', data)
+            self._parse_message(data[4 : 4 + size])
+            data = data[4 + size :]
 
     # def __heartbeat(self, interval):
     #     message = MsgProto(EMsg.ClientHeartBeat)
@@ -375,15 +385,13 @@ class CMClient(EventEmitter):
     def _handle_logon(self, msg):
         result = msg.body.eresult
 
-        if result in (EResult.TryAnotherCM,
-                      EResult.ServiceUnavailable
-                      ):
+        if result in (EResult.TryAnotherCM, EResult.ServiceUnavailable):
             self.cm_servers.mark_bad(self.current_server_addr)
             self.disconnect()
         elif result == EResult.OK:
             self._seen_logon = True
 
-            self._LOG.debug("Logon completed")
+            self._LOG.debug('Logon completed')
 
             self.steam_id = SteamID(msg.header.steamid)
             self.session_id = msg.header.client_sessionid
@@ -398,7 +406,7 @@ class CMClient(EventEmitter):
             self.disconnect()
 
     def _handle_cm_list(self, msg):
-        self._LOG.debug("Updating CM list")
+        self._LOG.debug('Updating CM list')
 
         new_servers = zip(map(ip4_from_int, msg.body.cm_addresses), msg.body.cm_ports)
         self.cm_servers.clear()
@@ -435,39 +443,38 @@ class CMServerList:
 
     Good = 1
     Bad = 2
-    last_updated = 0       #: timestamp of when the list was last updated
-    cell_id = 0            #: cell id of the server list
-    bad_timestamp = 300    #: how long bad mark lasts in seconds
+    last_updated = 0  #: timestamp of when the list was last updated
+    cell_id = 0  #: cell id of the server list
+    bad_timestamp = 300  #: how long bad mark lasts in seconds
 
     def __init__(self):
-        self._LOG = logging.getLogger("CMServerList")
+        self._LOG = logging.getLogger('CMServerList')
         self.list = defaultdict(dict)
 
     def __len__(self):
         return len(self.list)
 
     def __repr__(self):
-        return "<%s: %d servers>" % (self.__class__.__name__, len(self))
+        return '<%s: %d servers>' % (self.__class__.__name__, len(self))
 
     def clear(self):
         """Clears the server list"""
         if len(self.list):
-            self._LOG.debug("List cleared.")
+            self._LOG.debug('List cleared.')
         self.list.clear()
 
     def bootstrap_from_dns(self):
         """
         Fetches CM server list from WebAPI and replaces the current one
         """
-        self._LOG.debug("Attempting bootstrap via DNS")
+        self._LOG.debug('Attempting bootstrap via DNS')
 
         try:
-            answer = socket.getaddrinfo("cm0.steampowered.com",
-                                        27017,
-                                        socket.AF_INET,
-                                        proto=socket.IPPROTO_TCP)
+            answer = socket.getaddrinfo(
+                'cm0.steampowered.com', 27017, socket.AF_INET, proto=socket.IPPROTO_TCP
+            )
         except Exception as exp:
-            self._LOG.error("DNS boostrap failed: %s" % str(exp))
+            self._LOG.error('DNS boostrap failed: %s' % str(exp))
             return False
 
         servers = list(map(lambda addr: addr[4], answer))
@@ -477,7 +484,7 @@ class CMServerList:
             self.merge_list(servers)
             return True
         else:
-            self._LOG.error("DNS boostrap: cm0.steampowered.com resolved no A records")
+            self._LOG.error('DNS boostrap: cm0.steampowered.com resolved no A records')
             return False
 
     def bootstrap_from_webapi(self, cell_id=0, cmtype='netfilter'):
@@ -491,28 +498,32 @@ class CMServerList:
         :return: booststrap success
         :rtype: :class:`bool`
         """
-        self._LOG.debug("Attempting bootstrap via WebAPI for %s" % cmtype)
+        self._LOG.debug('Attempting bootstrap via WebAPI for %s' % cmtype)
 
         from steam import webapi
+
         try:
-            resp = webapi.get('ISteamDirectory', 'GetCMListForConnect', 1,
+            resp = webapi.get(
+                'ISteamDirectory',
+                'GetCMListForConnect',
+                1,
                 params={
                     'cellid': cell_id,
                     'cmtype': cmtype,
-                }
+                },
             )
         except Exception as exp:
-            self._LOG.error("WebAPI boostrap failed: %s" % str(exp))
+            self._LOG.error('WebAPI boostrap failed: %s' % str(exp))
             return False
 
         result = EResult(resp['response']['success'])
 
         if result != EResult.OK:
-            self._LOG.error("GetCMList failed with %s" % repr(result))
+            self._LOG.error('GetCMList failed with %s' % repr(result))
             return False
 
         serverlist = resp['response']['serverlist']
-        self._LOG.debug("Received %d servers from WebAPI" % len(serverlist))
+        self._LOG.debug('Received %d servers from WebAPI' % len(serverlist))
 
         def str_to_tuple(serverinfo):
             ip, port = serverinfo['endpoint'].split(':')
@@ -527,15 +538,17 @@ class CMServerList:
     def __iter__(self):
         def cm_server_iter():
             if not self.list:
-                self._LOG.error("Server list is empty.")
+                self._LOG.error('Server list is empty.')
                 return
 
-            good_servers = list(filter(lambda x: x[1]['quality'] == CMServerList.Good,
-                                       self.list.items()
-                                       ))
+            good_servers = list(
+                filter(
+                    lambda x: x[1]['quality'] == CMServerList.Good, self.list.items()
+                )
+            )
 
             if len(good_servers) == 0:
-                self._LOG.debug("No good servers left. Reseting...")
+                self._LOG.debug('No good servers left. Reseting...')
                 self.reset_all()
                 return
 
@@ -549,7 +562,7 @@ class CMServerList:
     def reset_all(self):
         """Reset status for all servers in the list"""
 
-        self._LOG.debug("Marking all CMs as Good.")
+        self._LOG.debug('Marking all CMs as Good.')
 
         for key in self.list:
             self.mark_good(key)
@@ -560,7 +573,10 @@ class CMServerList:
         :param server_addr: (ip, port) tuple
         :type server_addr: :class:`tuple`
         """
-        self.list[server_addr].update({'quality': CMServerList.Good, 'timestamp': time()})
+        self.list[server_addr].update({
+            'quality': CMServerList.Good,
+            'timestamp': time(),
+        })
 
     def mark_bad(self, server_addr):
         """Mark server address as bad, when unable to connect for example
@@ -568,8 +584,11 @@ class CMServerList:
         :param server_addr: (ip, port) tuple
         :type server_addr: :class:`tuple`
         """
-        self._LOG.debug("Marking %s as Bad." % repr(server_addr))
-        self.list[server_addr].update({'quality': CMServerList.Bad, 'timestamp': time()})
+        self._LOG.debug('Marking %s as Bad.' % repr(server_addr))
+        self.list[server_addr].update({
+            'quality': CMServerList.Bad,
+            'timestamp': time(),
+        })
 
     def merge_list(self, new_list):
         """Add new CM servers to the list
@@ -584,6 +603,6 @@ class CMServerList:
                 self.mark_good((ip, port))
 
         if len(self.list) > total:
-            self._LOG.debug("Added %d new CM addresses." % (len(self.list) - total))
+            self._LOG.debug('Added %d new CM addresses.' % (len(self.list) - total))
 
         self.last_updated = int(time())

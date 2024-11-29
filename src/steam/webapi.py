@@ -14,9 +14,9 @@ Example code:
 .. code:: python
 
     >>> api = WebAPI(key)
-    >>> api.call('ISteamUser.ResolveVanityURL', vanityurl="valve", url_type=2)
-    >>> api.ISteamUser.ResolveVanityURL(vanityurl="valve", url_type=2)
-    >>> api.ISteamUser.ResolveVanityURL_v1(vanityurl="valve", url_type=2)
+    >>> api.call('ISteamUser.ResolveVanityURL', vanityurl='valve', url_type=2)
+    >>> api.ISteamUser.ResolveVanityURL(vanityurl='valve', url_type=2)
+    >>> api.ISteamUser.ResolveVanityURL_v1(vanityurl='valve', url_type=2)
     {'response': {'steamid': '103582791429521412', 'success': 1}}
 
 All globals params (``key``, ``https``, ``format``, ``raw``) can be specified on per call basis.
@@ -30,6 +30,7 @@ All globals params (``key``, ``https``, ``format``, ``raw``) can be specified on
             "success"       "1"
     }
 """
+
 import json as _json
 
 from steam.utils.web import make_requests_session as _make_session
@@ -37,6 +38,7 @@ from steam.utils.web import make_requests_session as _make_session
 
 class APIHost:
     """Enum of currently available API hosts."""
+
     Public = 'api.steampowered.com'
     """ available over HTTP (port 80) and HTTPS (port 443)"""
     Partner = 'partner.steam-api.com'
@@ -82,6 +84,7 @@ class WebAPI:
 
     These can be specified per method call for one off calls
     """
+
     key = DEFAULT_PARAMS['key']
     format = DEFAULT_PARAMS['format']
     raw = DEFAULT_PARAMS['raw']
@@ -90,30 +93,36 @@ class WebAPI:
     apihost = DEFAULT_PARAMS['apihost']
     interfaces = []
 
-    def __init__(self, key, format=DEFAULT_PARAMS['format'],
-                            raw=DEFAULT_PARAMS['raw'],
-                            https=DEFAULT_PARAMS['https'],
-                            http_timeout=DEFAULT_PARAMS['http_timeout'],
-                            apihost=DEFAULT_PARAMS['apihost'],
-                            auto_load_interfaces=True):
-        self.key = key                              #: api key
-        self.format = format                        #: format (``json``, ``vdf``, or ``xml``)
-        self.raw = raw                              #: return raw reponse or parse
-        self.https = https                          #: use https or not
-        self.http_timeout = http_timeout            #: HTTP timeout in seconds
-        self.apihost = apihost                      #: ..versionadded:: 0.8.3 apihost hostname
-        self.interfaces = []                        #: list of all interfaces
-        self.session = _make_session()              #: :class:`requests.Session` from :func:`.make_requests_session`
+    def __init__(
+        self,
+        key,
+        format=DEFAULT_PARAMS['format'],
+        raw=DEFAULT_PARAMS['raw'],
+        https=DEFAULT_PARAMS['https'],
+        http_timeout=DEFAULT_PARAMS['http_timeout'],
+        apihost=DEFAULT_PARAMS['apihost'],
+        auto_load_interfaces=True,
+    ):
+        self.key = key  #: api key
+        self.format = format  #: format (``json``, ``vdf``, or ``xml``)
+        self.raw = raw  #: return raw reponse or parse
+        self.https = https  #: use https or not
+        self.http_timeout = http_timeout  #: HTTP timeout in seconds
+        self.apihost = apihost  #: ..versionadded:: 0.8.3 apihost hostname
+        self.interfaces = []  #: list of all interfaces
+        self.session = (
+            _make_session()
+        )  #: :class:`requests.Session` from :func:`.make_requests_session`
 
         if auto_load_interfaces:
             self.load_interfaces(self.fetch_interfaces())
 
     def __repr__(self):
-        return "{}(key={}, https={})".format(
+        return '{}(key={}, https={})'.format(
             self.__class__.__name__,
             repr(self.key),
             repr(self.https),
-            )
+        )
 
     def fetch_interfaces(self):
         """
@@ -123,26 +132,30 @@ class WebAPI:
 
         The returned value can passed to :meth:`load_interfaces`
         """
-        return get('ISteamWebAPIUtil', 'GetSupportedAPIList', 1,
+        return get(
+            'ISteamWebAPIUtil',
+            'GetSupportedAPIList',
+            1,
             https=self.https,
             apihost=self.apihost,
             caller=None,
             session=self.session,
-            params={'format': 'json',
-                    'key': self.key,
-                    },
-            )
+            params={
+                'format': 'json',
+                'key': self.key,
+            },
+        )
 
     def load_interfaces(self, interfaces_dict):
         """
         Populates the namespace under the instance
         """
         if interfaces_dict.get('apilist', {}).get('interfaces', None) is None:
-            raise ValueError("Invalid response for GetSupportedAPIList")
+            raise ValueError('Invalid response for GetSupportedAPIList')
 
         interfaces = interfaces_dict['apilist']['interfaces']
         if len(interfaces) == 0:
-            raise ValueError("API returned not interfaces; probably using invalid key")
+            raise ValueError('API returned not interfaces; probably using invalid key')
 
         # clear existing interface instances
         for interface in self.interfaces:
@@ -174,7 +187,7 @@ class WebAPI:
         :return: Documentation for all interfaces and their methods
         :rtype: str
         """
-        doc = "Steam Web API - List of all interfaces\n\n"
+        doc = 'Steam Web API - List of all interfaces\n\n'
         for interface in self.interfaces:
             doc += interface.__doc__
         return doc
@@ -195,7 +208,7 @@ class WebAPIInterface:
             self.methods.append(obj)
 
             # map the method name as attribute including version
-            setattr(self, "%s_v%d" % (obj.name, obj.version), obj)
+            setattr(self, '%s_v%d' % (obj.name, obj.version), obj)
 
             # without version, but th refernce of latest version
             current_obj = getattr(self, obj.name, None)
@@ -203,11 +216,11 @@ class WebAPIInterface:
                 setattr(self, obj.name, obj)
 
     def __repr__(self):
-        return "<{} {} with {} methods>".format(
+        return '<{} {} with {} methods>'.format(
             self.__class__.__name__,
             repr(self.name),
             repr(len(list(self))),
-            )
+        )
 
     def __iter__(self):
         return iter(self.methods)
@@ -249,9 +262,9 @@ class WebAPIInterface:
 
     @property
     def __doc__(self):
-        doc = "{}\n{}\n".format(self.name, '-' * len(self.name))
+        doc = '{}\n{}\n'.format(self.name, '-' * len(self.name))
         for method in self.methods:
-            doc += "  %s\n" % method.__doc__.replace("\n", "\n  ")
+            doc += '  %s\n' % method.__doc__.replace('\n', '\n  ')
         return doc
 
 
@@ -277,20 +290,25 @@ class WebAPIMethod:
             self._dict['parameters'][param['name']] = param
 
     def __repr__(self):
-        return "<{} {}>".format(
+        return '<{} {}>'.format(
             self.__class__.__name__,
-            repr("%s.%s_v%d" % (
-                self._parent.name,
-                self.name,
-                self.version,
-                )),
-            )
+            repr(
+                '%s.%s_v%d'
+                % (
+                    self._parent.name,
+                    self.name,
+                    self.version,
+                )
+            ),
+        )
 
     def __call__(self, **kwargs):
-        possible_kwargs = set(self._dict['parameters'].keys()) | set(DEFAULT_PARAMS.keys())
+        possible_kwargs = set(self._dict['parameters'].keys()) | set(
+            DEFAULT_PARAMS.keys()
+        )
         unrecognized = set(kwargs.keys()).difference(possible_kwargs)
         if unrecognized:
-            raise ValueError("Unrecognized parameter %s" % repr(unrecognized.pop()))
+            raise ValueError('Unrecognized parameter %s' % repr(unrecognized.pop()))
 
         params = {}
         # process special case kwargs
@@ -308,23 +326,24 @@ class WebAPIMethod:
             optional = param['optional']
 
             if not optional and name not in kwargs and name != 'key':
-                raise ValueError("Method requires %s to be set" % repr(name))
+                raise ValueError('Method requires %s to be set' % repr(name))
 
             if name in kwargs:
                 if islist and not isinstance(kwargs[name], list):
-                    raise ValueError("Expected {} to be a list, got {}".format(
-                        repr(name),
-                        repr(type(kwargs[name])))
+                    raise ValueError(
+                        'Expected {} to be a list, got {}'.format(
+                            repr(name), repr(type(kwargs[name]))
                         )
+                    )
                 params[name] = kwargs[name]
 
-        url = "{}://{}/{}/{}/v{}/".format(
+        url = '{}://{}/{}/{}/v{}/'.format(
             'https' if self._parent.https else 'http',
             self._parent.apihost,
             self._parent.name,
             self.name,
             self.version,
-            )
+        )
 
         return webapi_request(
             url=url,
@@ -332,7 +351,7 @@ class WebAPIMethod:
             caller=self,
             session=self._parent.session,
             params=params,
-            )
+        )
 
     @property
     def version(self):
@@ -359,25 +378,27 @@ class WebAPIMethod:
 
     @property
     def __doc__(self):
-        doc = "%(httpmethod)s %(name)s (v%(version)04d)\n" % self._dict
+        doc = '%(httpmethod)s %(name)s (v%(version)04d)\n' % self._dict
 
         if 'description' in self._dict:
-            doc += "\n  %(description)s\n" % self._dict
+            doc += '\n  %(description)s\n' % self._dict
 
         if len(self.parameters):
-            doc += "  \n  Parameters:\n"
+            doc += '  \n  Parameters:\n'
 
             for param in sorted(self.parameters.values(), key=lambda x: x['name']):
-                doc += "    {} {} {}{}\n".format(
+                doc += '    {} {} {}{}\n'.format(
                     param['name'].ljust(25),
-                    ((param['type'] + "[]") if param['_array'] else
-                     param['type']
-                     ).ljust(8),
+                    (
+                        (param['type'] + '[]') if param['_array'] else param['type']
+                    ).ljust(8),
                     'optional' if param['optional'] else 'required',
-                    (("\n      - " + param['description'])
-                     if 'description' in param and param['description'] else ''
-                     ),
-                    )
+                    (
+                        ('\n      - ' + param['description'])
+                        if 'description' in param and param['description']
+                        else ''
+                    ),
+                )
 
         return doc
 
@@ -400,7 +421,9 @@ def webapi_request(url, method='GET', caller=None, session=None, params=None):
     :rtype: :class:`dict`, :class:`lxml.etree.Element`, :class:`str`
     """
     if method not in ('GET', 'POST'):
-        raise ValueError("Only GET and POST methods are supported, got: %s" % repr(method))
+        raise ValueError(
+            'Only GET and POST methods are supported, got: %s' % repr(method)
+        )
     if params is None:
         params = {}
 
@@ -411,25 +434,33 @@ def webapi_request(url, method='GET', caller=None, session=None, params=None):
         del params[param]
 
     if onetime['format'] not in ('json', 'vdf', 'xml'):
-        raise ValueError("Expected format to be json,vdf or xml; got %s" % onetime['format'])
+        raise ValueError(
+            'Expected format to be json,vdf or xml; got %s' % onetime['format']
+        )
 
     for k, v in list(params.items()):  # serialize some types
-        if isinstance(v, bool): params[k] = 1 if v else 0
-        elif isinstance(v, dict): params[k] = _json.dumps(v)
+        if isinstance(v, bool):
+            params[k] = 1 if v else 0
+        elif isinstance(v, dict):
+            params[k] = _json.dumps(v)
         elif isinstance(v, list):
             del params[k]
             for i, lvalue in enumerate(v):
-                params["%s[%d]" % (k, i)] = lvalue
+                params['%s[%d]' % (k, i)] = lvalue
 
-    kwargs = {'params': params} if method == "GET" else {'data': params}  # params to data for POST
+    kwargs = (
+        {'params': params} if method == 'GET' else {'data': params}
+    )  # params to data for POST
 
-    if session is None: session = _make_session()
+    if session is None:
+        session = _make_session()
 
     f = getattr(session, method.lower())
     resp = f(url, stream=False, timeout=onetime['http_timeout'], **kwargs)
 
     # we keep a reference of the last response instance on the caller
-    if caller is not None: caller.last_response = resp
+    if caller is not None:
+        caller.last_response = resp
     # 4XX and 5XX will cause this to raise
     resp.raise_for_status()
 
@@ -439,15 +470,24 @@ def webapi_request(url, method='GET', caller=None, session=None, params=None):
         return resp.json()
     elif onetime['format'] == 'xml':
         from lxml import etree as _etree
+
         return _etree.fromstring(resp.content)
     elif onetime['format'] == 'vdf':
         import vdf as _vdf
+
         return _vdf.loads(resp.text)
 
 
-def get(interface, method, version=1,
-        apihost=DEFAULT_PARAMS['apihost'], https=DEFAULT_PARAMS['https'],
-        caller=None, session=None, params=None):
+def get(
+    interface,
+    method,
+    version=1,
+    apihost=DEFAULT_PARAMS['apihost'],
+    https=DEFAULT_PARAMS['https'],
+    caller=None,
+    session=None,
+    params=None,
+):
     """Send GET request to an API endpoint
 
     .. versionadded:: 0.8.3
@@ -467,14 +507,22 @@ def get(interface, method, version=1,
     :return: endpoint response
     :rtype: :class:`dict`, :class:`lxml.etree.Element`, :class:`str`
     """
-    url = "{}://{}/{}/{}/v{}/".format(
-        'https' if https else 'http', apihost, interface, method, version)
+    url = '{}://{}/{}/{}/v{}/'.format(
+        'https' if https else 'http', apihost, interface, method, version
+    )
     return webapi_request(url, 'GET', caller=caller, session=session, params=params)
 
 
-def post(interface, method, version=1,
-         apihost=DEFAULT_PARAMS['apihost'], https=DEFAULT_PARAMS['https'],
-         caller=None, session=None, params=None):
+def post(
+    interface,
+    method,
+    version=1,
+    apihost=DEFAULT_PARAMS['apihost'],
+    https=DEFAULT_PARAMS['https'],
+    caller=None,
+    session=None,
+    params=None,
+):
     """Send POST request to an API endpoint
 
     .. versionadded:: 0.8.3
@@ -494,6 +542,7 @@ def post(interface, method, version=1,
     :return: endpoint response
     :rtype: :class:`dict`, :class:`lxml.etree.Element`, :class:`str`
     """
-    url = "{}://{}/{}/{}/v{}/".format(
-        'https' if https else 'http', apihost, interface, method, version)
+    url = '{}://{}/{}/{}/v{}/'.format(
+        'https' if https else 'http', apihost, interface, method, version
+    )
     return webapi_request(url, 'POST', caller=caller, session=session, params=params)
