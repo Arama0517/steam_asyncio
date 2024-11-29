@@ -1,0 +1,492 @@
+from google.protobuf import descriptor_pb2 as _descriptor_pb2
+import enums_pb2 as _enums_pb2
+from google.protobuf.internal import enum_type_wrapper as _enum_type_wrapper
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from typing import ClassVar as _ClassVar, Mapping as _Mapping, Optional as _Optional, Union as _Union
+
+DESCRIPTOR: _descriptor.FileDescriptor
+
+class EClientSettingStore(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+    __slots__ = ()
+    k_EClientSettingStore_Invalid: _ClassVar[EClientSettingStore]
+    k_EClientSettingStore_ConfigStore_Install: _ClassVar[EClientSettingStore]
+    k_EClientSettingStore_ConfigStore_UserRoaming: _ClassVar[EClientSettingStore]
+    k_EClientSettingStore_ConfigStore_UserLocal: _ClassVar[EClientSettingStore]
+    k_EClientSettingStore_Registry: _ClassVar[EClientSettingStore]
+    k_EClientSettingStore_CustomFunc: _ClassVar[EClientSettingStore]
+
+class EOverlayToggleBarLocation(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+    __slots__ = ()
+    k_EOverlayToggleBarLocation_Bottom: _ClassVar[EOverlayToggleBarLocation]
+    k_EOverlayToggleBarLocation_Left: _ClassVar[EOverlayToggleBarLocation]
+    k_EOverlayToggleBarLocation_Right: _ClassVar[EOverlayToggleBarLocation]
+    k_EOverlayToggleBarLocation_Top: _ClassVar[EOverlayToggleBarLocation]
+
+class ESettingProfileMode(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+    __slots__ = ()
+    k_ESettingProfileMode_None: _ClassVar[ESettingProfileMode]
+    k_ESettingProfileMode_PerGame: _ClassVar[ESettingProfileMode]
+    k_ESettingProfileMode_PerGamePerDisplay: _ClassVar[ESettingProfileMode]
+    k_ESettingProfileMode_PerDisplay: _ClassVar[ESettingProfileMode]
+
+class EGRMode(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+    __slots__ = ()
+    k_EGRMode_Never: _ClassVar[EGRMode]
+    k_EGRMode_Always: _ClassVar[EGRMode]
+    k_EGRMode_Manual: _ClassVar[EGRMode]
+
+class EGRAudio(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+    __slots__ = ()
+    k_EGRAudio_Game: _ClassVar[EGRAudio]
+    k_EGRAudio_System: _ClassVar[EGRAudio]
+    k_EGRAudio_Select: _ClassVar[EGRAudio]
+
+class EGRExportLimitType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+    __slots__ = ()
+    k_EGRExportLimitType_Native: _ClassVar[EGRExportLimitType]
+    k_EGRExportLimitType_FileSize: _ClassVar[EGRExportLimitType]
+    k_EGRExportLimitType_Advanced: _ClassVar[EGRExportLimitType]
+k_EClientSettingStore_Invalid: EClientSettingStore
+k_EClientSettingStore_ConfigStore_Install: EClientSettingStore
+k_EClientSettingStore_ConfigStore_UserRoaming: EClientSettingStore
+k_EClientSettingStore_ConfigStore_UserLocal: EClientSettingStore
+k_EClientSettingStore_Registry: EClientSettingStore
+k_EClientSettingStore_CustomFunc: EClientSettingStore
+k_EOverlayToggleBarLocation_Bottom: EOverlayToggleBarLocation
+k_EOverlayToggleBarLocation_Left: EOverlayToggleBarLocation
+k_EOverlayToggleBarLocation_Right: EOverlayToggleBarLocation
+k_EOverlayToggleBarLocation_Top: EOverlayToggleBarLocation
+k_ESettingProfileMode_None: ESettingProfileMode
+k_ESettingProfileMode_PerGame: ESettingProfileMode
+k_ESettingProfileMode_PerGamePerDisplay: ESettingProfileMode
+k_ESettingProfileMode_PerDisplay: ESettingProfileMode
+k_EGRMode_Never: EGRMode
+k_EGRMode_Always: EGRMode
+k_EGRMode_Manual: EGRMode
+k_EGRAudio_Game: EGRAudio
+k_EGRAudio_System: EGRAudio
+k_EGRAudio_Select: EGRAudio
+k_EGRExportLimitType_Native: EGRExportLimitType
+k_EGRExportLimitType_FileSize: EGRExportLimitType
+k_EGRExportLimitType_Advanced: EGRExportLimitType
+SETTING_STORE_FIELD_NUMBER: _ClassVar[int]
+setting_store: _descriptor.FieldDescriptor
+SETTING_NAME_FIELD_NUMBER: _ClassVar[int]
+setting_name: _descriptor.FieldDescriptor
+SETTING_PRE_LOGIN_FIELD_NUMBER: _ClassVar[int]
+setting_pre_login: _descriptor.FieldDescriptor
+SETTING_DEFAULT_BOOL_FIELD_NUMBER: _ClassVar[int]
+setting_default_bool: _descriptor.FieldDescriptor
+SETTING_DEFAULT_INT_FIELD_NUMBER: _ClassVar[int]
+setting_default_int: _descriptor.FieldDescriptor
+SETTING_DEFAULT_UINT_FIELD_NUMBER: _ClassVar[int]
+setting_default_uint: _descriptor.FieldDescriptor
+SETTING_DEFAULT_FLOAT_FIELD_NUMBER: _ClassVar[int]
+setting_default_float: _descriptor.FieldDescriptor
+SETTING_DEFAULT_STRING_FIELD_NUMBER: _ClassVar[int]
+setting_default_string: _descriptor.FieldDescriptor
+SETTING_READONLY_FIELD_NUMBER: _ClassVar[int]
+setting_readonly: _descriptor.FieldDescriptor
+SETTING_DESCRIPTION_FIELD_NUMBER: _ClassVar[int]
+setting_description: _descriptor.FieldDescriptor
+SETTING_PROFILE_MODE_FIELD_NUMBER: _ClassVar[int]
+setting_profile_mode: _descriptor.FieldDescriptor
+SETTING_CLAMP_MIN_FIELD_NUMBER: _ClassVar[int]
+setting_clamp_min: _descriptor.FieldDescriptor
+SETTING_CLAMP_MAX_FIELD_NUMBER: _ClassVar[int]
+setting_clamp_max: _descriptor.FieldDescriptor
+
+class CMsgHotkey(_message.Message):
+    __slots__ = ("key_code", "alt_key", "shift_key", "ctrl_key", "meta_key", "display_name")
+    KEY_CODE_FIELD_NUMBER: _ClassVar[int]
+    ALT_KEY_FIELD_NUMBER: _ClassVar[int]
+    SHIFT_KEY_FIELD_NUMBER: _ClassVar[int]
+    CTRL_KEY_FIELD_NUMBER: _ClassVar[int]
+    META_KEY_FIELD_NUMBER: _ClassVar[int]
+    DISPLAY_NAME_FIELD_NUMBER: _ClassVar[int]
+    key_code: int
+    alt_key: bool
+    shift_key: bool
+    ctrl_key: bool
+    meta_key: bool
+    display_name: str
+    def __init__(self, key_code: _Optional[int] = ..., alt_key: bool = ..., shift_key: bool = ..., ctrl_key: bool = ..., meta_key: bool = ..., display_name: _Optional[str] = ...) -> None: ...
+
+class CMsgSettingVariant(_message.Message):
+    __slots__ = ("value_bool", "value_int32", "value_uint32", "value_uint64", "value_float", "value_string", "value_hotkey")
+    VALUE_BOOL_FIELD_NUMBER: _ClassVar[int]
+    VALUE_INT32_FIELD_NUMBER: _ClassVar[int]
+    VALUE_UINT32_FIELD_NUMBER: _ClassVar[int]
+    VALUE_UINT64_FIELD_NUMBER: _ClassVar[int]
+    VALUE_FLOAT_FIELD_NUMBER: _ClassVar[int]
+    VALUE_STRING_FIELD_NUMBER: _ClassVar[int]
+    VALUE_HOTKEY_FIELD_NUMBER: _ClassVar[int]
+    value_bool: bool
+    value_int32: int
+    value_uint32: int
+    value_uint64: int
+    value_float: float
+    value_string: str
+    value_hotkey: CMsgHotkey
+    def __init__(self, value_bool: bool = ..., value_int32: _Optional[int] = ..., value_uint32: _Optional[int] = ..., value_uint64: _Optional[int] = ..., value_float: _Optional[float] = ..., value_string: _Optional[str] = ..., value_hotkey: _Optional[_Union[CMsgHotkey, _Mapping]] = ...) -> None: ...
+
+class CMsgClientSettings(_message.Message):
+    __slots__ = ("no_save_personal_info", "oobe_test_mode_enabled", "in_client_beta", "is_steam_sideloaded", "preferred_monitor", "steam_cef_gpu_blocklist_disabled", "bigpicture_windowed", "display_name", "is_external_display", "steam_os_underscan_level", "steam_os_underscan_enabled", "min_scale_factor", "max_scale_factor", "auto_scale_factor", "small_mode", "skip_steamvr_install_dialog", "always_show_user_chooser", "os_version_unsupported", "show_family_sharing_notifications", "show_copy_count_in_library", "overlay_fps_counter_corner", "overlay_fps_counter_high_contrast", "overlay_key", "screenshot_key", "enable_overlay", "enable_screenshot_notification", "enable_screenshot_sound", "save_uncompressed_screenshots", "screenshots_path", "default_ping_rate", "server_ping_rate", "steam_networking_share_ip", "web_browser_home", "voice_mic_device_name", "voice_mic_input_gain", "voice_speaker_output_gain", "voice_push_to_talk_setting", "voice_push_to_talk_key", "overlay_toolbar_list_view", "always_use_gamepadui_overlay", "overlay_tabs", "overlay_scale_interface", "overlay_restore_browser_tabs", "enable_avif_screenshots", "smooth_scroll_webviews", "enable_gpu_accelerated_webviews", "enable_hardware_video_decoding", "run_at_startup", "enable_dpi_scaling", "enable_marketing_messages", "start_in_big_picture_mode", "jumplist_flags", "enable_ui_sounds", "disable_all_toasts", "disable_toasts_in_game", "play_sound_on_toast", "library_display_size", "library_whats_new_show_only_product_updates", "show_store_content_on_home", "start_page", "library_low_bandwidth_mode", "library_low_perf_mode", "library_disable_community_content", "library_display_icon_in_game_list", "ready_to_play_includes_streaming", "show_steam_deck_info", "enable_shader_precache", "enable_shader_background_processing", "shader_precached_size", "needs_steam_service_repair", "download_peer_content", "download_rate_bits_per_s", "restrict_auto_updates", "restrict_auto_updates_start", "restrict_auto_updates_end", "download_region", "download_while_app_running", "download_throttle_while_streaming", "download_throttle_rate", "cloud_enabled", "show_screenshot_manager", "music_volume", "music_pause_on_app_start", "music_pause_on_voice_chat", "music_download_high_quality", "music_playlist_notification", "broadcast_permissions", "broadcast_output_width", "broadcast_output_height", "broadcast_bitrate", "broadcast_encoding_option", "broadcast_record_all_video", "broadcast_record_all_audio", "broadcast_record_microphone", "broadcast_show_upload_stats", "broadcast_show_live_reminder", "broadcast_chat_corner", "gamestream_hardware_video_encode", "gamestream_enable_video_h265", "steam_input_configurator_error_msg_enable", "controller_guide_button_focus_steam", "controller_ps_support", "controller_xbox_support", "controller_xbox_driver", "controller_switch_support", "controller_generic_support", "controller_power_off_timeout", "turn_off_controller_on_exit", "controller_combine_nintendo_joycons", "controller_enable_chord", "controller_poll_rate", "startup_movie_id", "startup_movie_local_path", "startup_movie_shuffle", "startup_movie_used_for_resume", "game_notes_enable_spellcheck", "screenshot_items_per_row", "g_background_path", "g_background_max_keep", "g_background_time_resolution", "g_background_mk", "g_background_tg", "g_background_a_m", "gamerecording_video_bitrate", "g_background_a_s", "g_background_mode", "g_background_audio", "g_max_fps", "gamerecording_hotkey_ic", "gamerecording_ic_seconds", "gamerecording_export_limit_type", "gamerecording_export_limit_size_mb", "gamerecording_export_limit_bitrate", "gamerecording_export_limit_width", "gamerecording_export_limit_height", "gamerecording_export_limit_frame_rate", "gamerecording_export_directory", "gamerecording_export_codec", "gamerecording_video_maxheight", "gamerecording_force_mic_mono", "gamerecording_automatic_gain_control", "show_timestamps_in_console", "force_oobe", "override_browser_composer_mode", "cef_remote_debugging_enabled", "force_deck_perf_tab", "force_fake_mandatory_update", "hdr_compat_testing", "developer_mode_enabled", "show_advanced_update_channels", "gamescope_hdr_visualization", "gamescope_app_target_framerate", "gamescope_enable_app_target_framerate", "gamescope_disable_framelimit", "gamescope_display_refresh_rate", "gamescope_use_game_refresh_rate_in_steam", "gamescope_disable_mura_correction", "gamescope_include_steamui_in_screenshots", "gamescope_allow_tearing", "gamescope_composite_debug", "gamescope_force_composite", "gamescope_game_resolution_global", "steamos_status_led_brightness", "steamos_tdp_limit_enabled", "steamos_tdp_limit", "steamos_cec_enabled", "steamos_cec_wake_on_resume", "steamos_wifi_debug", "steamos_wifi_force_wpa_supplicant", "steamos_magnifier_scale", "setting_validation_bool", "setting_validation_enum", "setting_validation_int32", "setting_validation_uint32", "setting_validation_uint64", "setting_validation_float", "setting_validation_string", "system_bluetooth_enabled")
+    NO_SAVE_PERSONAL_INFO_FIELD_NUMBER: _ClassVar[int]
+    OOBE_TEST_MODE_ENABLED_FIELD_NUMBER: _ClassVar[int]
+    IN_CLIENT_BETA_FIELD_NUMBER: _ClassVar[int]
+    IS_STEAM_SIDELOADED_FIELD_NUMBER: _ClassVar[int]
+    PREFERRED_MONITOR_FIELD_NUMBER: _ClassVar[int]
+    STEAM_CEF_GPU_BLOCKLIST_DISABLED_FIELD_NUMBER: _ClassVar[int]
+    BIGPICTURE_WINDOWED_FIELD_NUMBER: _ClassVar[int]
+    DISPLAY_NAME_FIELD_NUMBER: _ClassVar[int]
+    IS_EXTERNAL_DISPLAY_FIELD_NUMBER: _ClassVar[int]
+    STEAM_OS_UNDERSCAN_LEVEL_FIELD_NUMBER: _ClassVar[int]
+    STEAM_OS_UNDERSCAN_ENABLED_FIELD_NUMBER: _ClassVar[int]
+    MIN_SCALE_FACTOR_FIELD_NUMBER: _ClassVar[int]
+    MAX_SCALE_FACTOR_FIELD_NUMBER: _ClassVar[int]
+    AUTO_SCALE_FACTOR_FIELD_NUMBER: _ClassVar[int]
+    SMALL_MODE_FIELD_NUMBER: _ClassVar[int]
+    SKIP_STEAMVR_INSTALL_DIALOG_FIELD_NUMBER: _ClassVar[int]
+    ALWAYS_SHOW_USER_CHOOSER_FIELD_NUMBER: _ClassVar[int]
+    OS_VERSION_UNSUPPORTED_FIELD_NUMBER: _ClassVar[int]
+    SHOW_FAMILY_SHARING_NOTIFICATIONS_FIELD_NUMBER: _ClassVar[int]
+    SHOW_COPY_COUNT_IN_LIBRARY_FIELD_NUMBER: _ClassVar[int]
+    OVERLAY_FPS_COUNTER_CORNER_FIELD_NUMBER: _ClassVar[int]
+    OVERLAY_FPS_COUNTER_HIGH_CONTRAST_FIELD_NUMBER: _ClassVar[int]
+    OVERLAY_KEY_FIELD_NUMBER: _ClassVar[int]
+    SCREENSHOT_KEY_FIELD_NUMBER: _ClassVar[int]
+    ENABLE_OVERLAY_FIELD_NUMBER: _ClassVar[int]
+    ENABLE_SCREENSHOT_NOTIFICATION_FIELD_NUMBER: _ClassVar[int]
+    ENABLE_SCREENSHOT_SOUND_FIELD_NUMBER: _ClassVar[int]
+    SAVE_UNCOMPRESSED_SCREENSHOTS_FIELD_NUMBER: _ClassVar[int]
+    SCREENSHOTS_PATH_FIELD_NUMBER: _ClassVar[int]
+    DEFAULT_PING_RATE_FIELD_NUMBER: _ClassVar[int]
+    SERVER_PING_RATE_FIELD_NUMBER: _ClassVar[int]
+    STEAM_NETWORKING_SHARE_IP_FIELD_NUMBER: _ClassVar[int]
+    WEB_BROWSER_HOME_FIELD_NUMBER: _ClassVar[int]
+    VOICE_MIC_DEVICE_NAME_FIELD_NUMBER: _ClassVar[int]
+    VOICE_MIC_INPUT_GAIN_FIELD_NUMBER: _ClassVar[int]
+    VOICE_SPEAKER_OUTPUT_GAIN_FIELD_NUMBER: _ClassVar[int]
+    VOICE_PUSH_TO_TALK_SETTING_FIELD_NUMBER: _ClassVar[int]
+    VOICE_PUSH_TO_TALK_KEY_FIELD_NUMBER: _ClassVar[int]
+    OVERLAY_TOOLBAR_LIST_VIEW_FIELD_NUMBER: _ClassVar[int]
+    ALWAYS_USE_GAMEPADUI_OVERLAY_FIELD_NUMBER: _ClassVar[int]
+    OVERLAY_TABS_FIELD_NUMBER: _ClassVar[int]
+    OVERLAY_SCALE_INTERFACE_FIELD_NUMBER: _ClassVar[int]
+    OVERLAY_RESTORE_BROWSER_TABS_FIELD_NUMBER: _ClassVar[int]
+    ENABLE_AVIF_SCREENSHOTS_FIELD_NUMBER: _ClassVar[int]
+    SMOOTH_SCROLL_WEBVIEWS_FIELD_NUMBER: _ClassVar[int]
+    ENABLE_GPU_ACCELERATED_WEBVIEWS_FIELD_NUMBER: _ClassVar[int]
+    ENABLE_HARDWARE_VIDEO_DECODING_FIELD_NUMBER: _ClassVar[int]
+    RUN_AT_STARTUP_FIELD_NUMBER: _ClassVar[int]
+    ENABLE_DPI_SCALING_FIELD_NUMBER: _ClassVar[int]
+    ENABLE_MARKETING_MESSAGES_FIELD_NUMBER: _ClassVar[int]
+    START_IN_BIG_PICTURE_MODE_FIELD_NUMBER: _ClassVar[int]
+    JUMPLIST_FLAGS_FIELD_NUMBER: _ClassVar[int]
+    ENABLE_UI_SOUNDS_FIELD_NUMBER: _ClassVar[int]
+    DISABLE_ALL_TOASTS_FIELD_NUMBER: _ClassVar[int]
+    DISABLE_TOASTS_IN_GAME_FIELD_NUMBER: _ClassVar[int]
+    PLAY_SOUND_ON_TOAST_FIELD_NUMBER: _ClassVar[int]
+    LIBRARY_DISPLAY_SIZE_FIELD_NUMBER: _ClassVar[int]
+    LIBRARY_WHATS_NEW_SHOW_ONLY_PRODUCT_UPDATES_FIELD_NUMBER: _ClassVar[int]
+    SHOW_STORE_CONTENT_ON_HOME_FIELD_NUMBER: _ClassVar[int]
+    START_PAGE_FIELD_NUMBER: _ClassVar[int]
+    LIBRARY_LOW_BANDWIDTH_MODE_FIELD_NUMBER: _ClassVar[int]
+    LIBRARY_LOW_PERF_MODE_FIELD_NUMBER: _ClassVar[int]
+    LIBRARY_DISABLE_COMMUNITY_CONTENT_FIELD_NUMBER: _ClassVar[int]
+    LIBRARY_DISPLAY_ICON_IN_GAME_LIST_FIELD_NUMBER: _ClassVar[int]
+    READY_TO_PLAY_INCLUDES_STREAMING_FIELD_NUMBER: _ClassVar[int]
+    SHOW_STEAM_DECK_INFO_FIELD_NUMBER: _ClassVar[int]
+    ENABLE_SHADER_PRECACHE_FIELD_NUMBER: _ClassVar[int]
+    ENABLE_SHADER_BACKGROUND_PROCESSING_FIELD_NUMBER: _ClassVar[int]
+    SHADER_PRECACHED_SIZE_FIELD_NUMBER: _ClassVar[int]
+    NEEDS_STEAM_SERVICE_REPAIR_FIELD_NUMBER: _ClassVar[int]
+    DOWNLOAD_PEER_CONTENT_FIELD_NUMBER: _ClassVar[int]
+    DOWNLOAD_RATE_BITS_PER_S_FIELD_NUMBER: _ClassVar[int]
+    RESTRICT_AUTO_UPDATES_FIELD_NUMBER: _ClassVar[int]
+    RESTRICT_AUTO_UPDATES_START_FIELD_NUMBER: _ClassVar[int]
+    RESTRICT_AUTO_UPDATES_END_FIELD_NUMBER: _ClassVar[int]
+    DOWNLOAD_REGION_FIELD_NUMBER: _ClassVar[int]
+    DOWNLOAD_WHILE_APP_RUNNING_FIELD_NUMBER: _ClassVar[int]
+    DOWNLOAD_THROTTLE_WHILE_STREAMING_FIELD_NUMBER: _ClassVar[int]
+    DOWNLOAD_THROTTLE_RATE_FIELD_NUMBER: _ClassVar[int]
+    CLOUD_ENABLED_FIELD_NUMBER: _ClassVar[int]
+    SHOW_SCREENSHOT_MANAGER_FIELD_NUMBER: _ClassVar[int]
+    MUSIC_VOLUME_FIELD_NUMBER: _ClassVar[int]
+    MUSIC_PAUSE_ON_APP_START_FIELD_NUMBER: _ClassVar[int]
+    MUSIC_PAUSE_ON_VOICE_CHAT_FIELD_NUMBER: _ClassVar[int]
+    MUSIC_DOWNLOAD_HIGH_QUALITY_FIELD_NUMBER: _ClassVar[int]
+    MUSIC_PLAYLIST_NOTIFICATION_FIELD_NUMBER: _ClassVar[int]
+    BROADCAST_PERMISSIONS_FIELD_NUMBER: _ClassVar[int]
+    BROADCAST_OUTPUT_WIDTH_FIELD_NUMBER: _ClassVar[int]
+    BROADCAST_OUTPUT_HEIGHT_FIELD_NUMBER: _ClassVar[int]
+    BROADCAST_BITRATE_FIELD_NUMBER: _ClassVar[int]
+    BROADCAST_ENCODING_OPTION_FIELD_NUMBER: _ClassVar[int]
+    BROADCAST_RECORD_ALL_VIDEO_FIELD_NUMBER: _ClassVar[int]
+    BROADCAST_RECORD_ALL_AUDIO_FIELD_NUMBER: _ClassVar[int]
+    BROADCAST_RECORD_MICROPHONE_FIELD_NUMBER: _ClassVar[int]
+    BROADCAST_SHOW_UPLOAD_STATS_FIELD_NUMBER: _ClassVar[int]
+    BROADCAST_SHOW_LIVE_REMINDER_FIELD_NUMBER: _ClassVar[int]
+    BROADCAST_CHAT_CORNER_FIELD_NUMBER: _ClassVar[int]
+    GAMESTREAM_HARDWARE_VIDEO_ENCODE_FIELD_NUMBER: _ClassVar[int]
+    GAMESTREAM_ENABLE_VIDEO_H265_FIELD_NUMBER: _ClassVar[int]
+    STEAM_INPUT_CONFIGURATOR_ERROR_MSG_ENABLE_FIELD_NUMBER: _ClassVar[int]
+    CONTROLLER_GUIDE_BUTTON_FOCUS_STEAM_FIELD_NUMBER: _ClassVar[int]
+    CONTROLLER_PS_SUPPORT_FIELD_NUMBER: _ClassVar[int]
+    CONTROLLER_XBOX_SUPPORT_FIELD_NUMBER: _ClassVar[int]
+    CONTROLLER_XBOX_DRIVER_FIELD_NUMBER: _ClassVar[int]
+    CONTROLLER_SWITCH_SUPPORT_FIELD_NUMBER: _ClassVar[int]
+    CONTROLLER_GENERIC_SUPPORT_FIELD_NUMBER: _ClassVar[int]
+    CONTROLLER_POWER_OFF_TIMEOUT_FIELD_NUMBER: _ClassVar[int]
+    TURN_OFF_CONTROLLER_ON_EXIT_FIELD_NUMBER: _ClassVar[int]
+    CONTROLLER_COMBINE_NINTENDO_JOYCONS_FIELD_NUMBER: _ClassVar[int]
+    CONTROLLER_ENABLE_CHORD_FIELD_NUMBER: _ClassVar[int]
+    CONTROLLER_POLL_RATE_FIELD_NUMBER: _ClassVar[int]
+    STARTUP_MOVIE_ID_FIELD_NUMBER: _ClassVar[int]
+    STARTUP_MOVIE_LOCAL_PATH_FIELD_NUMBER: _ClassVar[int]
+    STARTUP_MOVIE_SHUFFLE_FIELD_NUMBER: _ClassVar[int]
+    STARTUP_MOVIE_USED_FOR_RESUME_FIELD_NUMBER: _ClassVar[int]
+    GAME_NOTES_ENABLE_SPELLCHECK_FIELD_NUMBER: _ClassVar[int]
+    SCREENSHOT_ITEMS_PER_ROW_FIELD_NUMBER: _ClassVar[int]
+    G_BACKGROUND_PATH_FIELD_NUMBER: _ClassVar[int]
+    G_BACKGROUND_MAX_KEEP_FIELD_NUMBER: _ClassVar[int]
+    G_BACKGROUND_TIME_RESOLUTION_FIELD_NUMBER: _ClassVar[int]
+    G_BACKGROUND_MK_FIELD_NUMBER: _ClassVar[int]
+    G_BACKGROUND_TG_FIELD_NUMBER: _ClassVar[int]
+    G_BACKGROUND_A_M_FIELD_NUMBER: _ClassVar[int]
+    GAMERECORDING_VIDEO_BITRATE_FIELD_NUMBER: _ClassVar[int]
+    G_BACKGROUND_A_S_FIELD_NUMBER: _ClassVar[int]
+    G_BACKGROUND_MODE_FIELD_NUMBER: _ClassVar[int]
+    G_BACKGROUND_AUDIO_FIELD_NUMBER: _ClassVar[int]
+    G_MAX_FPS_FIELD_NUMBER: _ClassVar[int]
+    GAMERECORDING_HOTKEY_IC_FIELD_NUMBER: _ClassVar[int]
+    GAMERECORDING_IC_SECONDS_FIELD_NUMBER: _ClassVar[int]
+    GAMERECORDING_EXPORT_LIMIT_TYPE_FIELD_NUMBER: _ClassVar[int]
+    GAMERECORDING_EXPORT_LIMIT_SIZE_MB_FIELD_NUMBER: _ClassVar[int]
+    GAMERECORDING_EXPORT_LIMIT_BITRATE_FIELD_NUMBER: _ClassVar[int]
+    GAMERECORDING_EXPORT_LIMIT_WIDTH_FIELD_NUMBER: _ClassVar[int]
+    GAMERECORDING_EXPORT_LIMIT_HEIGHT_FIELD_NUMBER: _ClassVar[int]
+    GAMERECORDING_EXPORT_LIMIT_FRAME_RATE_FIELD_NUMBER: _ClassVar[int]
+    GAMERECORDING_EXPORT_DIRECTORY_FIELD_NUMBER: _ClassVar[int]
+    GAMERECORDING_EXPORT_CODEC_FIELD_NUMBER: _ClassVar[int]
+    GAMERECORDING_VIDEO_MAXHEIGHT_FIELD_NUMBER: _ClassVar[int]
+    GAMERECORDING_FORCE_MIC_MONO_FIELD_NUMBER: _ClassVar[int]
+    GAMERECORDING_AUTOMATIC_GAIN_CONTROL_FIELD_NUMBER: _ClassVar[int]
+    SHOW_TIMESTAMPS_IN_CONSOLE_FIELD_NUMBER: _ClassVar[int]
+    FORCE_OOBE_FIELD_NUMBER: _ClassVar[int]
+    OVERRIDE_BROWSER_COMPOSER_MODE_FIELD_NUMBER: _ClassVar[int]
+    CEF_REMOTE_DEBUGGING_ENABLED_FIELD_NUMBER: _ClassVar[int]
+    FORCE_DECK_PERF_TAB_FIELD_NUMBER: _ClassVar[int]
+    FORCE_FAKE_MANDATORY_UPDATE_FIELD_NUMBER: _ClassVar[int]
+    HDR_COMPAT_TESTING_FIELD_NUMBER: _ClassVar[int]
+    DEVELOPER_MODE_ENABLED_FIELD_NUMBER: _ClassVar[int]
+    SHOW_ADVANCED_UPDATE_CHANNELS_FIELD_NUMBER: _ClassVar[int]
+    GAMESCOPE_HDR_VISUALIZATION_FIELD_NUMBER: _ClassVar[int]
+    GAMESCOPE_APP_TARGET_FRAMERATE_FIELD_NUMBER: _ClassVar[int]
+    GAMESCOPE_ENABLE_APP_TARGET_FRAMERATE_FIELD_NUMBER: _ClassVar[int]
+    GAMESCOPE_DISABLE_FRAMELIMIT_FIELD_NUMBER: _ClassVar[int]
+    GAMESCOPE_DISPLAY_REFRESH_RATE_FIELD_NUMBER: _ClassVar[int]
+    GAMESCOPE_USE_GAME_REFRESH_RATE_IN_STEAM_FIELD_NUMBER: _ClassVar[int]
+    GAMESCOPE_DISABLE_MURA_CORRECTION_FIELD_NUMBER: _ClassVar[int]
+    GAMESCOPE_INCLUDE_STEAMUI_IN_SCREENSHOTS_FIELD_NUMBER: _ClassVar[int]
+    GAMESCOPE_ALLOW_TEARING_FIELD_NUMBER: _ClassVar[int]
+    GAMESCOPE_COMPOSITE_DEBUG_FIELD_NUMBER: _ClassVar[int]
+    GAMESCOPE_FORCE_COMPOSITE_FIELD_NUMBER: _ClassVar[int]
+    GAMESCOPE_GAME_RESOLUTION_GLOBAL_FIELD_NUMBER: _ClassVar[int]
+    STEAMOS_STATUS_LED_BRIGHTNESS_FIELD_NUMBER: _ClassVar[int]
+    STEAMOS_TDP_LIMIT_ENABLED_FIELD_NUMBER: _ClassVar[int]
+    STEAMOS_TDP_LIMIT_FIELD_NUMBER: _ClassVar[int]
+    STEAMOS_CEC_ENABLED_FIELD_NUMBER: _ClassVar[int]
+    STEAMOS_CEC_WAKE_ON_RESUME_FIELD_NUMBER: _ClassVar[int]
+    STEAMOS_WIFI_DEBUG_FIELD_NUMBER: _ClassVar[int]
+    STEAMOS_WIFI_FORCE_WPA_SUPPLICANT_FIELD_NUMBER: _ClassVar[int]
+    STEAMOS_MAGNIFIER_SCALE_FIELD_NUMBER: _ClassVar[int]
+    SETTING_VALIDATION_BOOL_FIELD_NUMBER: _ClassVar[int]
+    SETTING_VALIDATION_ENUM_FIELD_NUMBER: _ClassVar[int]
+    SETTING_VALIDATION_INT32_FIELD_NUMBER: _ClassVar[int]
+    SETTING_VALIDATION_UINT32_FIELD_NUMBER: _ClassVar[int]
+    SETTING_VALIDATION_UINT64_FIELD_NUMBER: _ClassVar[int]
+    SETTING_VALIDATION_FLOAT_FIELD_NUMBER: _ClassVar[int]
+    SETTING_VALIDATION_STRING_FIELD_NUMBER: _ClassVar[int]
+    SYSTEM_BLUETOOTH_ENABLED_FIELD_NUMBER: _ClassVar[int]
+    no_save_personal_info: bool
+    oobe_test_mode_enabled: bool
+    in_client_beta: bool
+    is_steam_sideloaded: bool
+    preferred_monitor: str
+    steam_cef_gpu_blocklist_disabled: bool
+    bigpicture_windowed: bool
+    display_name: str
+    is_external_display: bool
+    steam_os_underscan_level: float
+    steam_os_underscan_enabled: bool
+    min_scale_factor: float
+    max_scale_factor: float
+    auto_scale_factor: float
+    small_mode: bool
+    skip_steamvr_install_dialog: bool
+    always_show_user_chooser: bool
+    os_version_unsupported: bool
+    show_family_sharing_notifications: bool
+    show_copy_count_in_library: bool
+    overlay_fps_counter_corner: int
+    overlay_fps_counter_high_contrast: bool
+    overlay_key: CMsgHotkey
+    screenshot_key: CMsgHotkey
+    enable_overlay: bool
+    enable_screenshot_notification: bool
+    enable_screenshot_sound: bool
+    save_uncompressed_screenshots: bool
+    screenshots_path: str
+    default_ping_rate: int
+    server_ping_rate: int
+    steam_networking_share_ip: int
+    web_browser_home: str
+    voice_mic_device_name: str
+    voice_mic_input_gain: float
+    voice_speaker_output_gain: float
+    voice_push_to_talk_setting: int
+    voice_push_to_talk_key: CMsgHotkey
+    overlay_toolbar_list_view: bool
+    always_use_gamepadui_overlay: bool
+    overlay_tabs: str
+    overlay_scale_interface: bool
+    overlay_restore_browser_tabs: bool
+    enable_avif_screenshots: bool
+    smooth_scroll_webviews: bool
+    enable_gpu_accelerated_webviews: bool
+    enable_hardware_video_decoding: bool
+    run_at_startup: bool
+    enable_dpi_scaling: bool
+    enable_marketing_messages: bool
+    start_in_big_picture_mode: bool
+    jumplist_flags: int
+    enable_ui_sounds: bool
+    disable_all_toasts: bool
+    disable_toasts_in_game: bool
+    play_sound_on_toast: bool
+    library_display_size: int
+    library_whats_new_show_only_product_updates: bool
+    show_store_content_on_home: bool
+    start_page: str
+    library_low_bandwidth_mode: bool
+    library_low_perf_mode: bool
+    library_disable_community_content: bool
+    library_display_icon_in_game_list: bool
+    ready_to_play_includes_streaming: bool
+    show_steam_deck_info: bool
+    enable_shader_precache: bool
+    enable_shader_background_processing: bool
+    shader_precached_size: int
+    needs_steam_service_repair: bool
+    download_peer_content: int
+    download_rate_bits_per_s: bool
+    restrict_auto_updates: bool
+    restrict_auto_updates_start: int
+    restrict_auto_updates_end: int
+    download_region: int
+    download_while_app_running: bool
+    download_throttle_while_streaming: bool
+    download_throttle_rate: int
+    cloud_enabled: bool
+    show_screenshot_manager: bool
+    music_volume: int
+    music_pause_on_app_start: bool
+    music_pause_on_voice_chat: bool
+    music_download_high_quality: bool
+    music_playlist_notification: bool
+    broadcast_permissions: _enums_pb2.EBroadcastPermission
+    broadcast_output_width: int
+    broadcast_output_height: int
+    broadcast_bitrate: int
+    broadcast_encoding_option: _enums_pb2.EBroadcastEncoderSetting
+    broadcast_record_all_video: bool
+    broadcast_record_all_audio: bool
+    broadcast_record_microphone: bool
+    broadcast_show_upload_stats: bool
+    broadcast_show_live_reminder: bool
+    broadcast_chat_corner: int
+    gamestream_hardware_video_encode: bool
+    gamestream_enable_video_h265: bool
+    steam_input_configurator_error_msg_enable: bool
+    controller_guide_button_focus_steam: bool
+    controller_ps_support: int
+    controller_xbox_support: bool
+    controller_xbox_driver: bool
+    controller_switch_support: bool
+    controller_generic_support: bool
+    controller_power_off_timeout: int
+    turn_off_controller_on_exit: bool
+    controller_combine_nintendo_joycons: bool
+    controller_enable_chord: bool
+    controller_poll_rate: bool
+    startup_movie_id: int
+    startup_movie_local_path: str
+    startup_movie_shuffle: bool
+    startup_movie_used_for_resume: bool
+    game_notes_enable_spellcheck: bool
+    screenshot_items_per_row: int
+    g_background_path: str
+    g_background_max_keep: str
+    g_background_time_resolution: int
+    g_background_mk: CMsgHotkey
+    g_background_tg: CMsgHotkey
+    g_background_a_m: bool
+    gamerecording_video_bitrate: str
+    g_background_a_s: bool
+    g_background_mode: EGRMode
+    g_background_audio: EGRAudio
+    g_max_fps: int
+    gamerecording_hotkey_ic: CMsgHotkey
+    gamerecording_ic_seconds: float
+    gamerecording_export_limit_type: EGRExportLimitType
+    gamerecording_export_limit_size_mb: int
+    gamerecording_export_limit_bitrate: int
+    gamerecording_export_limit_width: int
+    gamerecording_export_limit_height: int
+    gamerecording_export_limit_frame_rate: int
+    gamerecording_export_directory: str
+    gamerecording_export_codec: _enums_pb2.EExportCodec
+    gamerecording_video_maxheight: int
+    gamerecording_force_mic_mono: bool
+    gamerecording_automatic_gain_control: bool
+    show_timestamps_in_console: bool
+    force_oobe: bool
+    override_browser_composer_mode: int
+    cef_remote_debugging_enabled: bool
+    force_deck_perf_tab: bool
+    force_fake_mandatory_update: bool
+    hdr_compat_testing: bool
+    developer_mode_enabled: bool
+    show_advanced_update_channels: bool
+    gamescope_hdr_visualization: _enums_pb2.EHDRVisualization
+    gamescope_app_target_framerate: int
+    gamescope_enable_app_target_framerate: bool
+    gamescope_disable_framelimit: bool
+    gamescope_display_refresh_rate: int
+    gamescope_use_game_refresh_rate_in_steam: bool
+    gamescope_disable_mura_correction: bool
+    gamescope_include_steamui_in_screenshots: bool
+    gamescope_allow_tearing: bool
+    gamescope_composite_debug: bool
+    gamescope_force_composite: bool
+    gamescope_game_resolution_global: str
+    steamos_status_led_brightness: int
+    steamos_tdp_limit_enabled: bool
+    steamos_tdp_limit: int
+    steamos_cec_enabled: bool
+    steamos_cec_wake_on_resume: bool
+    steamos_wifi_debug: bool
+    steamos_wifi_force_wpa_supplicant: bool
+    steamos_magnifier_scale: int
+    setting_validation_bool: bool
+    setting_validation_enum: _enums_pb2.EHDRVisualization
+    setting_validation_int32: int
+    setting_validation_uint32: int
+    setting_validation_uint64: int
+    setting_validation_float: float
+    setting_validation_string: str
+    system_bluetooth_enabled: bool
+    def __init__(self, no_save_personal_info: bool = ..., oobe_test_mode_enabled: bool = ..., in_client_beta: bool = ..., is_steam_sideloaded: bool = ..., preferred_monitor: _Optional[str] = ..., steam_cef_gpu_blocklist_disabled: bool = ..., bigpicture_windowed: bool = ..., display_name: _Optional[str] = ..., is_external_display: bool = ..., steam_os_underscan_level: _Optional[float] = ..., steam_os_underscan_enabled: bool = ..., min_scale_factor: _Optional[float] = ..., max_scale_factor: _Optional[float] = ..., auto_scale_factor: _Optional[float] = ..., small_mode: bool = ..., skip_steamvr_install_dialog: bool = ..., always_show_user_chooser: bool = ..., os_version_unsupported: bool = ..., show_family_sharing_notifications: bool = ..., show_copy_count_in_library: bool = ..., overlay_fps_counter_corner: _Optional[int] = ..., overlay_fps_counter_high_contrast: bool = ..., overlay_key: _Optional[_Union[CMsgHotkey, _Mapping]] = ..., screenshot_key: _Optional[_Union[CMsgHotkey, _Mapping]] = ..., enable_overlay: bool = ..., enable_screenshot_notification: bool = ..., enable_screenshot_sound: bool = ..., save_uncompressed_screenshots: bool = ..., screenshots_path: _Optional[str] = ..., default_ping_rate: _Optional[int] = ..., server_ping_rate: _Optional[int] = ..., steam_networking_share_ip: _Optional[int] = ..., web_browser_home: _Optional[str] = ..., voice_mic_device_name: _Optional[str] = ..., voice_mic_input_gain: _Optional[float] = ..., voice_speaker_output_gain: _Optional[float] = ..., voice_push_to_talk_setting: _Optional[int] = ..., voice_push_to_talk_key: _Optional[_Union[CMsgHotkey, _Mapping]] = ..., overlay_toolbar_list_view: bool = ..., always_use_gamepadui_overlay: bool = ..., overlay_tabs: _Optional[str] = ..., overlay_scale_interface: bool = ..., overlay_restore_browser_tabs: bool = ..., enable_avif_screenshots: bool = ..., smooth_scroll_webviews: bool = ..., enable_gpu_accelerated_webviews: bool = ..., enable_hardware_video_decoding: bool = ..., run_at_startup: bool = ..., enable_dpi_scaling: bool = ..., enable_marketing_messages: bool = ..., start_in_big_picture_mode: bool = ..., jumplist_flags: _Optional[int] = ..., enable_ui_sounds: bool = ..., disable_all_toasts: bool = ..., disable_toasts_in_game: bool = ..., play_sound_on_toast: bool = ..., library_display_size: _Optional[int] = ..., library_whats_new_show_only_product_updates: bool = ..., show_store_content_on_home: bool = ..., start_page: _Optional[str] = ..., library_low_bandwidth_mode: bool = ..., library_low_perf_mode: bool = ..., library_disable_community_content: bool = ..., library_display_icon_in_game_list: bool = ..., ready_to_play_includes_streaming: bool = ..., show_steam_deck_info: bool = ..., enable_shader_precache: bool = ..., enable_shader_background_processing: bool = ..., shader_precached_size: _Optional[int] = ..., needs_steam_service_repair: bool = ..., download_peer_content: _Optional[int] = ..., download_rate_bits_per_s: bool = ..., restrict_auto_updates: bool = ..., restrict_auto_updates_start: _Optional[int] = ..., restrict_auto_updates_end: _Optional[int] = ..., download_region: _Optional[int] = ..., download_while_app_running: bool = ..., download_throttle_while_streaming: bool = ..., download_throttle_rate: _Optional[int] = ..., cloud_enabled: bool = ..., show_screenshot_manager: bool = ..., music_volume: _Optional[int] = ..., music_pause_on_app_start: bool = ..., music_pause_on_voice_chat: bool = ..., music_download_high_quality: bool = ..., music_playlist_notification: bool = ..., broadcast_permissions: _Optional[_Union[_enums_pb2.EBroadcastPermission, str]] = ..., broadcast_output_width: _Optional[int] = ..., broadcast_output_height: _Optional[int] = ..., broadcast_bitrate: _Optional[int] = ..., broadcast_encoding_option: _Optional[_Union[_enums_pb2.EBroadcastEncoderSetting, str]] = ..., broadcast_record_all_video: bool = ..., broadcast_record_all_audio: bool = ..., broadcast_record_microphone: bool = ..., broadcast_show_upload_stats: bool = ..., broadcast_show_live_reminder: bool = ..., broadcast_chat_corner: _Optional[int] = ..., gamestream_hardware_video_encode: bool = ..., gamestream_enable_video_h265: bool = ..., steam_input_configurator_error_msg_enable: bool = ..., controller_guide_button_focus_steam: bool = ..., controller_ps_support: _Optional[int] = ..., controller_xbox_support: bool = ..., controller_xbox_driver: bool = ..., controller_switch_support: bool = ..., controller_generic_support: bool = ..., controller_power_off_timeout: _Optional[int] = ..., turn_off_controller_on_exit: bool = ..., controller_combine_nintendo_joycons: bool = ..., controller_enable_chord: bool = ..., controller_poll_rate: bool = ..., startup_movie_id: _Optional[int] = ..., startup_movie_local_path: _Optional[str] = ..., startup_movie_shuffle: bool = ..., startup_movie_used_for_resume: bool = ..., game_notes_enable_spellcheck: bool = ..., screenshot_items_per_row: _Optional[int] = ..., g_background_path: _Optional[str] = ..., g_background_max_keep: _Optional[str] = ..., g_background_time_resolution: _Optional[int] = ..., g_background_mk: _Optional[_Union[CMsgHotkey, _Mapping]] = ..., g_background_tg: _Optional[_Union[CMsgHotkey, _Mapping]] = ..., g_background_a_m: bool = ..., gamerecording_video_bitrate: _Optional[str] = ..., g_background_a_s: bool = ..., g_background_mode: _Optional[_Union[EGRMode, str]] = ..., g_background_audio: _Optional[_Union[EGRAudio, str]] = ..., g_max_fps: _Optional[int] = ..., gamerecording_hotkey_ic: _Optional[_Union[CMsgHotkey, _Mapping]] = ..., gamerecording_ic_seconds: _Optional[float] = ..., gamerecording_export_limit_type: _Optional[_Union[EGRExportLimitType, str]] = ..., gamerecording_export_limit_size_mb: _Optional[int] = ..., gamerecording_export_limit_bitrate: _Optional[int] = ..., gamerecording_export_limit_width: _Optional[int] = ..., gamerecording_export_limit_height: _Optional[int] = ..., gamerecording_export_limit_frame_rate: _Optional[int] = ..., gamerecording_export_directory: _Optional[str] = ..., gamerecording_export_codec: _Optional[_Union[_enums_pb2.EExportCodec, str]] = ..., gamerecording_video_maxheight: _Optional[int] = ..., gamerecording_force_mic_mono: bool = ..., gamerecording_automatic_gain_control: bool = ..., show_timestamps_in_console: bool = ..., force_oobe: bool = ..., override_browser_composer_mode: _Optional[int] = ..., cef_remote_debugging_enabled: bool = ..., force_deck_perf_tab: bool = ..., force_fake_mandatory_update: bool = ..., hdr_compat_testing: bool = ..., developer_mode_enabled: bool = ..., show_advanced_update_channels: bool = ..., gamescope_hdr_visualization: _Optional[_Union[_enums_pb2.EHDRVisualization, str]] = ..., gamescope_app_target_framerate: _Optional[int] = ..., gamescope_enable_app_target_framerate: bool = ..., gamescope_disable_framelimit: bool = ..., gamescope_display_refresh_rate: _Optional[int] = ..., gamescope_use_game_refresh_rate_in_steam: bool = ..., gamescope_disable_mura_correction: bool = ..., gamescope_include_steamui_in_screenshots: bool = ..., gamescope_allow_tearing: bool = ..., gamescope_composite_debug: bool = ..., gamescope_force_composite: bool = ..., gamescope_game_resolution_global: _Optional[str] = ..., steamos_status_led_brightness: _Optional[int] = ..., steamos_tdp_limit_enabled: bool = ..., steamos_tdp_limit: _Optional[int] = ..., steamos_cec_enabled: bool = ..., steamos_cec_wake_on_resume: bool = ..., steamos_wifi_debug: bool = ..., steamos_wifi_force_wpa_supplicant: bool = ..., steamos_magnifier_scale: _Optional[int] = ..., setting_validation_bool: bool = ..., setting_validation_enum: _Optional[_Union[_enums_pb2.EHDRVisualization, str]] = ..., setting_validation_int32: _Optional[int] = ..., setting_validation_uint32: _Optional[int] = ..., setting_validation_uint64: _Optional[int] = ..., setting_validation_float: _Optional[float] = ..., setting_validation_string: _Optional[str] = ..., system_bluetooth_enabled: bool = ...) -> None: ...
