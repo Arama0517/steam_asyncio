@@ -103,9 +103,11 @@ from base64 import b64decode
 from binascii import crc32, unhexlify
 from collections import OrderedDict, deque
 from datetime import UTC, datetime
+from fnmatch import fnmatch
 from io import BytesIO
+from struct import pack
 from typing import Callable, Generator, Optional
-from zipfile import BadZipFile, ZipFile
+from zipfile import ZIP_DEFLATED, BadZipFile, ZipFile
 
 import requests
 import vdf
@@ -618,6 +620,55 @@ class CDNDepotManifest:
         # required for CDNDepotFile
         for mapping in self.payload.mappings:
             mapping.chunks.sort(key=lambda x: x.offset, reverse=False)
+
+    def serialize(self, compress=True):
+        """Serialize manifest
+
+        :param compress: wether the output should be Zip compressed
+        :type  compress: bytes
+        """
+        data = BytesIO()
+
+        part = self.payload.SerializeToString()
+        data.write(pack('<II', self.PROTOBUF_PAYLOAD_MAGIC, len(part)))
+        data.write(part)
+
+        part = self.metadata.SerializeToString()
+        data.write(pack('<II', self.PROTOBUF_METADATA_MAGIC, len(part)))
+        data.write(part)
+
+        part = self.signature.SerializeToString()
+        data.write(pack('<II', self.PROTOBUF_SIGNATURE_MAGIC, len(part)))
+        data.write(part)
+
+        data.write(pack('<I', self.PROTOBUF_ENDOFMANIFEST_MAGIC))
+
+        if compress:
+            zbuff = BytesIO()
+            with ZipFile(zbuff, 'w', ZIP_DEFLATED) as zf:
+                zf.writestr('z', data.getvalue())
+
+            return zbuff.getvalue()
+        else:
+            return data.getvalue()
+
+    def __iter__(self):
+        if not self.filenames_encrypted:
+            for mapping in self.payload.mappings:
+                yield CDNDepotFile(self, mapping)
+
+    def iter_files(self, pattern=None):
+        """
+        :param pattern: unix shell wildcard pattern, see :func:`.fnmatch`
+        :type  pattern: str
+        """
+        if not self.filenames_encrypted:
+            for mapping in self.payload.mappings:
+                if pattern is not None and not fnmatch(
+                    mapping.filename.rstrip('\x00 \n\t'), pattern
+                ):
+                    continue
+                yield CDNDepotFile(self, mapping)
 
 
 class CDNClient:
