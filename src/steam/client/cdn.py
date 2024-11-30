@@ -97,13 +97,15 @@ Reading a file directly from SteamPipe
 
 import logging
 import lzma
+import os
 import struct
+from base64 import b64decode
 from binascii import crc32, unhexlify
 from collections import OrderedDict, deque
 from datetime import UTC, datetime
 from io import BytesIO
 from typing import Callable, Generator, Optional
-from zipfile import ZipFile
+from zipfile import BadZipFile, ZipFile
 
 import requests
 import vdf
@@ -113,27 +115,28 @@ from gevent.pool import Pool as GPool
 from steam import webapi
 from steam.client import SteamClient
 from steam.core.crypto import symmetric_decrypt, symmetric_decrypt_ecb
-from steam.core.manifest import DepotFile, DepotManifest
 from steam.core.msg import MsgProto
-from steam.enums import EResult, EType
+from steam.enums import EDepotFileFlag, EResult, EType
 from steam.enums.emsg import EMsg
 from steam.exceptions import ManifestError, SteamError
-from steam.protobufs.content_manifest_pb2 import ContentManifestPayload
+from steam.protobufs.content_manifest_pb2 import (
+    ContentManifestMetadata,
+    ContentManifestPayload,
+    ContentManifestSignature,
+)
 from steam.protobufs.steammessages_publishedfile_pb2 import (
     PublishedFileDetails,
 )
+from steam.utils.binary import StructReader
 from steam.utils.web import make_requests_session
 
 
-def decrypt_manifest_gid_2(encrypted_gid, password):
+def decrypt_manifest_gid_2(encrypted_gid: bytes, password: bytes) -> int:
     """Decrypt manifest gid v2 bytes
 
     :param encrypted_gid: encrypted gid v2 bytes
-    :type  encrypted_gid: bytes
     :param password: encryption password
-    :type  password: byt
     :return: manifest gid
-    :rtype: int
     """
     return struct.unpack('<Q', symmetric_decrypt_ecb(encrypted_gid, password))[0]
 
@@ -237,7 +240,7 @@ class ContentServer:
         )
 
 
-class CDNDepotFile(DepotFile):
+class CDNDepotFile:
     def __init__(
         self,
         manifest: 'CDNDepotManifest',
@@ -257,8 +260,8 @@ class CDNDepotFile(DepotFile):
                 "Expected 'file_mapping' to be of type ContentManifestPayload.FileMapping"
             )
 
-        DepotFile.__init__(self, manifest, file_mapping)
-
+        self.manifest = manifest
+        self.file_mapping = file_mapping
         self.offset = 0
         self._lc = None
         self._lcbuff = b''
@@ -272,6 +275,98 @@ class CDNDepotFile(DepotFile):
             repr(self.filename_raw),
             'is_directory=True' if self.is_directory else self.size,
         )
+
+    @property
+    def filename_raw(self):
+        """Filename with null terminator and whitespaces removed
+
+        :type: str
+        """
+        return self.file_mapping.filename.rstrip('\x00 \n\t')
+
+    @property
+    def filename(self):
+        """Filename matching the OS
+
+        :type: str
+        """
+        return os.path.join(*self.filename_raw.split('\\'))
+
+    @property
+    def linktarget_raw(self):
+        """Link target with null terminator and whitespaces removed
+
+        :type: str
+        """
+        return self.file_mapping.linktarget.rstrip('\x00 \n\t')
+
+    @property
+    def linktarget(self):
+        """Link target matching the OS
+
+        :type: str
+        """
+        return os.path.join(*self.linktarget_raw.split('\\'))
+
+    @property
+    def sha_content(self):
+        """File content SHA1
+
+        :type: bytes
+        """
+        return self.file_mapping.sha_content
+
+    @property
+    def sha_filename(self):
+        """Filename SHA1
+
+        :type: bytes
+        """
+        return self.file_mapping.sha_filename
+
+    @property
+    def size(self):
+        """File size in bytes
+
+        :type: int
+        """
+        return self.file_mapping.size
+
+    @property
+    def chunks(self):
+        """File chunks instances
+
+        :type: :class:`list` [ContentManifestPayload.FileMapping.ChunkData]
+        """
+        return self.file_mapping.chunks
+
+    @property
+    def flags(self):
+        """File flags
+
+        :type: :class:`.EDepotFileFlag`
+        """
+        return self.file_mapping.flags
+
+    @property
+    def is_directory(self):
+        """:type: bool"""
+        return self.flags & EDepotFileFlag.Directory > 0
+
+    @property
+    def is_symlink(self):
+        """:type: bool"""
+        return not not self.file_mapping.linktarget
+
+    @property
+    def is_file(self):
+        """:type: bool"""
+        return not self.is_directory and not self.is_symlink
+
+    @property
+    def is_executable(self):
+        """:type: bool"""
+        return self.flags & EDepotFileFlag.Executable > 0
 
     @property
     def seekable(self) -> bool:
@@ -413,7 +508,12 @@ class CDNDepotFile(DepotFile):
         return [line for line in self]
 
 
-class CDNDepotManifest(DepotManifest):
+class CDNDepotManifest:
+    PROTOBUF_PAYLOAD_MAGIC = 0x71F617D0
+    PROTOBUF_METADATA_MAGIC = 0x1F4812BE
+    PROTOBUF_SIGNATURE_MAGIC = 0x1B81B817
+    PROTOBUF_ENDOFMANIFEST_MAGIC = 0x32C415AB
+
     name = None  #: set only by :meth:`CDNClient.get_manifests`
 
     def __init__(self, cdn_client, app_id, data):
@@ -428,7 +528,12 @@ class CDNDepotManifest(DepotManifest):
         """
         self.cdn_client = cdn_client
         self.app_id = app_id
-        DepotManifest.__init__(self, data)
+        self.metadata = ContentManifestMetadata()
+        self.payload = ContentManifestPayload()
+        self.signature = ContentManifestSignature()
+
+        if data:
+            self.deserialize(data)
 
     def __repr__(self):
         params = ', '.join([
@@ -449,13 +554,101 @@ class CDNDepotManifest(DepotManifest):
         if self.filenames_encrypted:
             params += ', filenames_encrypted=True'
 
-        return '<{}({})>'.format(
-            self.__class__.__name__,
-            params,
-        )
+        return f'<{self.__class__.__name__}({params})>'
 
-    def deserialize(self, data: bytes):
-        DepotManifest.deserialize(self, data)
+    @property
+    def depot_id(self):
+        """:type: int"""
+        return self.metadata.depot_id
+
+    @property
+    def gid(self):
+        """:type: int"""
+        return self.metadata.gid_manifest
+
+    @property
+    def creation_time(self):
+        """:type: int"""
+        return self.metadata.creation_time
+
+    @property
+    def size_original(self):
+        """:type: int"""
+        return self.metadata.cb_disk_original
+
+    @property
+    def size_compressed(self):
+        """:type: int"""
+        return self.metadata.cb_disk_compressed
+
+    @property
+    def filenames_encrypted(self):
+        """:type: bool"""
+        return self.metadata.filenames_encrypted
+
+    def decrypt_filenames(self, depot_key: bytes):
+        """Decrypt all filenames in the manifest
+
+        :param depot_key: depot key
+        :type  depot_key: bytes
+        :raises: :class:`RuntimeError`
+        """
+        if not self.metadata.filenames_encrypted:
+            return
+
+        try:
+            for m in self.payload.mappings:
+                m.filename = symmetric_decrypt(b64decode(m.filename), depot_key)
+
+                if m.linktarget:
+                    m.linktarget = symmetric_decrypt(b64decode(m.linktarget), depot_key)
+        except Exception:
+            raise RuntimeError('Unable to decrypt filename for depot manifest')
+
+        self.metadata.filenames_encrypted = False
+
+    def deserialize(self, data):
+        """Deserialize a manifest (compressed or uncompressed)
+
+        :param data: manifest data
+        :type  data: bytes
+        """
+        try:
+            with ZipFile(BytesIO(data)) as zf:
+                data = zf.read(zf.filelist[0])
+        except BadZipFile:
+            pass
+
+        data = StructReader(data)
+
+        magic, length = data.unpack('<II')
+
+        if magic != self.PROTOBUF_PAYLOAD_MAGIC:
+            raise Exception('Expecting protobuf payload')
+
+        self.payload = ContentManifestPayload()
+        self.payload.ParseFromString(data.read(length))
+
+        magic, length = data.unpack('<II')
+
+        if magic != self.PROTOBUF_METADATA_MAGIC:
+            raise Exception('Expecting protobuf metadata')
+
+        self.metadata = ContentManifestMetadata()
+        self.metadata.ParseFromString(data.read(length))
+
+        magic, length = data.unpack('<II')
+
+        if magic != self.PROTOBUF_SIGNATURE_MAGIC:
+            raise Exception('Expecting protobuf signature')
+
+        self.signature = ContentManifestSignature()
+        self.signature.ParseFromString(data.read(length))
+
+        (magic,) = data.unpack('<I')
+
+        if magic != self.PROTOBUF_ENDOFMANIFEST_MAGIC:
+            raise Exception('Expecting end of manifest')
 
         # order chunks in ascending order by their offset
         # required for CDNDepotFile
@@ -568,23 +761,25 @@ class CDNClient:
         """
 
         def update_cdn_auth_tokens():
-            resp = self.steam.send_um_and_wait(
+            resp: MsgProto = self.steam.send_um_and_wait(
                 'ContentServerDirectory.GetCDNAuthToken#1',
                 {'app_id': app_id, 'depot_id': depot_id, 'host_name': hostname},
                 timeout=10,
             )
 
-            if resp is None or resp.header.eresult != EResult.OK:
-                if resp and resp.header.eresult == EResult.Fail:
-                    # no need authtoken?
-                    pass
-                else:
-                    raise SteamError(
-                        f'Failed to get CDNAuthToken for {app_id}, {depot_id}, {hostname}',
-                        EResult.Timeout
-                        if resp is None
-                        else EResult(resp.header.eresult),
-                    )
+            if resp is None:
+                raise SteamError(
+                    f'Failed to get CDNAuthToken for {app_id}, {depot_id}, {hostname}',
+                    EResult.Timeout,
+                )
+            elif resp.header.eresult == EResult.Fail:
+                # no need authtoken?
+                pass
+            elif resp.header.eresult != EResult.OK:
+                raise SteamError(
+                    f'Failed to get CDNAuthToken for {app_id}, {depot_id}, {hostname}',
+                    EResult(resp.header.eresult),
+                )
 
             self.cdn_auth_tokens.update({
                 app_id: {

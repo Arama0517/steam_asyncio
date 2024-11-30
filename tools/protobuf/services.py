@@ -15,7 +15,7 @@ for proto_file in proto_files:
             parts = line.replace('/', ' ').replace('.', ' ').replace(':', ' ').split()
             if len(parts) >= 2:
                 temp_lines.append(
-                    f"    {"'%s':" % parts[1]:<35} 'steam.protobufs.{proto_file.stem}_pb2',"
+                    f"    '{parts[1]}': 'steam.protobufs.{proto_file.stem}_pb2',"
                 )
 
 temp_lines.extend(lines[end_index:])
