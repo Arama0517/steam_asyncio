@@ -657,7 +657,7 @@ class CDNDepotManifest:
             for mapping in self.payload.mappings:
                 yield CDNDepotFile(self, mapping)
 
-    def iter_files(self, pattern=None):
+    def iter_files(self, pattern: Optional[str] = None) -> Generator[CDNDepotFile]:
         """
         :param pattern: unix shell wildcard pattern, see :func:`.fnmatch`
         :type  pattern: str
