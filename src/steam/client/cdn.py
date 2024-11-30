@@ -249,9 +249,7 @@ class CDNDepotFile:
         """File-like object proxy for content files located on SteamPipe
 
         :param manifest: parrent manifest instance
-        :type  manifest: :class:`.CDNDepotManifest`
         :param file_mapping: file mapping instance from manifest
-        :type  file_mapping: ContentManifestPayload.FileMapping
         """
         if not isinstance(manifest, CDNDepotManifest):
             raise TypeError("Expected 'manifest' to be of type CDNDepotFile")
@@ -277,95 +275,64 @@ class CDNDepotFile:
         )
 
     @property
-    def filename_raw(self):
-        """Filename with null terminator and whitespaces removed
-
-        :type: str
-        """
+    def filename_raw(self) -> str:
+        """Filename with null terminator and whitespaces removed"""
         return self.file_mapping.filename.rstrip('\x00 \n\t')
 
     @property
-    def filename(self):
-        """Filename matching the OS
-
-        :type: str
-        """
+    def filename(self) -> str:
+        """Filename matching the OS"""
         return os.path.join(*self.filename_raw.split('\\'))
 
     @property
-    def linktarget_raw(self):
-        """Link target with null terminator and whitespaces removed
-
-        :type: str
-        """
+    def linktarget_raw(self) -> str:
+        """Link target with null terminator and whitespaces removed"""
         return self.file_mapping.linktarget.rstrip('\x00 \n\t')
 
     @property
-    def linktarget(self):
-        """Link target matching the OS
-
-        :type: str
-        """
+    def linktarget(self) -> str:
+        """Link target matching the OS"""
         return os.path.join(*self.linktarget_raw.split('\\'))
 
     @property
-    def sha_content(self):
-        """File content SHA1
-
-        :type: bytes
-        """
+    def sha_content(self) -> bytes:
+        """File content SHA1"""
         return self.file_mapping.sha_content
 
     @property
-    def sha_filename(self):
-        """Filename SHA1
-
-        :type: bytes
-        """
+    def sha_filename(self) -> bytes:
+        """Filename SHA1"""
         return self.file_mapping.sha_filename
 
     @property
-    def size(self):
-        """File size in bytes
-
-        :type: int
-        """
+    def size(self) -> int:
+        """File size in bytes"""
         return self.file_mapping.size
 
     @property
-    def chunks(self):
-        """File chunks instances
-
-        :type: :class:`list` [ContentManifestPayload.FileMapping.ChunkData]
-        """
-        return self.file_mapping.chunks
+    def chunks(self) -> list[ContentManifestPayload.FileMapping.ChunkData]:
+        """File chunks instances"""
+        return list(self.file_mapping.chunks)
 
     @property
-    def flags(self):
-        """File flags
-
-        :type: :class:`.EDepotFileFlag`
-        """
-        return self.file_mapping.flags
+    def flags(self) -> EDepotFileFlag:
+        """File flags"""
+        return EDepotFileFlag(self.file_mapping.flags)
 
     @property
-    def is_directory(self):
-        """:type: bool"""
+    def is_directory(self) -> bool:
         return self.flags & EDepotFileFlag.Directory > 0
 
     @property
-    def is_symlink(self):
-        """:type: bool"""
+    def is_symlink(self) -> bool:
         return not not self.file_mapping.linktarget
 
     @property
-    def is_file(self):
-        """:type: bool"""
+    def is_file(self) -> bool:
         return not self.is_directory and not self.is_symlink
 
     @property
-    def is_executable(self):
-        """:type: bool"""
+    def is_executable(self) -> bool:
         return self.flags & EDepotFileFlag.Executable > 0
 
     @property
@@ -514,17 +481,14 @@ class CDNDepotManifest:
     PROTOBUF_SIGNATURE_MAGIC = 0x1B81B817
     PROTOBUF_ENDOFMANIFEST_MAGIC = 0x32C415AB
 
-    name = None  #: set only by :meth:`CDNClient.get_manifests`
+    name: str = None  #: set only by :meth:`CDNClient.get_manifests`
 
-    def __init__(self, cdn_client, app_id, data):
+    def __init__(self, cdn_client: 'CDNClient', app_id: int, data: bytes):
         """Holds manifest metadata and file list.
 
         :param cdn_client: CDNClient instance
-        :type  cdn_client: :class:`.CDNClient`
         :param app_id: App ID
-        :type  app_id: int
         :param data: serialized manifest data
-        :type  data: bytes
         """
         self.cdn_client = cdn_client
         self.app_id = app_id
