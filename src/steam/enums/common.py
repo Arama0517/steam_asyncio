@@ -653,6 +653,7 @@ class ECurrencyCode(SteamIntEnum):
 
 
 class EDepotFileFlag(SteamIntEnum):
+    NoneFlag = 0
     UserConfig = 1
     VersionedUserConfig = 2
     Encrypted = 4
