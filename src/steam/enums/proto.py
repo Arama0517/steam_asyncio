@@ -88,19 +88,16 @@ class EAuthenticationType(SteamIntEnum):
     GuestAccount = 4
 
 
-EAuthSessionGuardType = SteamIntEnum(
-    'EAuthSessionGuardType',
-    {
-        'Unknown': 0,
-        'None': 1,
-        'EmailCode': 2,
-        'DeviceCode': 3,
-        'DeviceConfirmation': 4,
-        'EmailConfirmation': 5,
-        'MachineToken': 6,
-        'LegacyMachineAuth': 7,
-    },
-)
+EAuthSessionGuardType = SteamIntEnum('EAuthSessionGuardType', {
+    'Unknown': 0,
+    'None': 1,
+    'EmailCode': 2,
+    'DeviceCode': 3,
+    'DeviceConfirmation': 4,
+    'EmailConfirmation': 5,
+    'MachineToken': 6,
+    'LegacyMachineAuth': 7,
+    })
 
 
 class EAuthSessionSecurityHistory(SteamIntEnum):
@@ -310,17 +307,14 @@ class ECommunityItemClass(SteamIntEnum):
     SteamDeckStartupMovie = 17
 
 
-ECompromiseDetectionType = SteamIntEnum(
-    'ECompromiseDetectionType',
-    {
-        'None': 0,
-        'TradeEvent': 1,
-        'ApiCallRate': 2,
-        'Manual': 3,
-        'TicketAction': 4,
-        'MaliciousRefund': 5,
-    },
-)
+ECompromiseDetectionType = SteamIntEnum('ECompromiseDetectionType', {
+    'None': 0,
+    'TradeEvent': 1,
+    'ApiCallRate': 2,
+    'Manual': 3,
+    'TicketAction': 4,
+    'MaliciousRefund': 5,
+    })
 
 
 class EContentCheckProvider(SteamIntEnum):
@@ -429,15 +423,12 @@ class EFamilyGroupChangeLogType(SteamIntEnum):
     SupportForceAcceptedInvite = 25
 
 
-EFamilyGroupRole = SteamIntEnum(
-    'EFamilyGroupRole',
-    {
-        'None': 0,
-        'Adult': 1,
-        'Child': 2,
-        'MAX': 3,
-    },
-)
+EFamilyGroupRole = SteamIntEnum('EFamilyGroupRole', {
+    'None': 0,
+    'Adult': 1,
+    'Child': 2,
+    'MAX': 3,
+    })
 
 
 class EFamilyGroupsTwoFactorMethod(SteamIntEnum):
@@ -536,16 +527,13 @@ class EHDRToneMapOperator(SteamIntEnum):
     Reinhard = 2
 
 
-EHDRVisualization = SteamIntEnum(
-    'EHDRVisualization',
-    {
-        'None': 0,
-        'Heatmap': 1,
-        'Analysis': 2,
-        'HeatmapExtended': 3,
-        'HeatmapClassic': 4,
-    },
-)
+EHDRVisualization = SteamIntEnum('EHDRVisualization', {
+    'None': 0,
+    'Heatmap': 1,
+    'Analysis': 2,
+    'HeatmapExtended': 3,
+    'HeatmapClassic': 4,
+    })
 
 
 class EJSRegisterMethodType(SteamIntEnum):
@@ -601,15 +589,12 @@ class EPartnerEventDisplayLocation(SteamIntEnum):
     StoreHub = 10
 
 
-EPartnerLinkTrackingBackfillSource = SteamIntEnum(
-    'EPartnerLinkTrackingBackfillSource',
-    {
-        'None': 0,
-        'Web': 1,
-        'Mobile': 2,
-        'Desktop': 3,
-    },
-)
+EPartnerLinkTrackingBackfillSource = SteamIntEnum('EPartnerLinkTrackingBackfillSource', {
+    'None': 0,
+    'Web': 1,
+    'Mobile': 2,
+    'Desktop': 3,
+    })
 
 
 class EPhaseResultType(SteamIntEnum):
@@ -675,17 +660,14 @@ class EPublishedFileStorageSystem(SteamIntEnum):
     EPublishedFileStorageSystemUGCCloud = 3
 
 
-EPurchaseRequestAction = SteamIntEnum(
-    'EPurchaseRequestAction',
-    {
-        'None': 0,
-        'Decline': 1,
-        'Purchased': 2,
-        'Abandoned': 3,
-        'Cancel': 4,
-        'MAX': 5,
-    },
-)
+EPurchaseRequestAction = SteamIntEnum('EPurchaseRequestAction', {
+    'None': 0,
+    'Decline': 1,
+    'Purchased': 2,
+    'Abandoned': 3,
+    'Cancel': 4,
+    'MAX': 5,
+    })
 
 
 class ERecordingSessionChangeNotificationType(SteamIntEnum):
@@ -719,15 +701,12 @@ class ESessionPersistence(SteamIntEnum):
     Persistent = 1
 
 
-ESettingProfileMode = SteamIntEnum(
-    'ESettingProfileMode',
-    {
-        'None': 0,
-        'PerGame': 1,
-        'PerGamePerDisplay': 2,
-        'PerDisplay': 3,
-    },
-)
+ESettingProfileMode = SteamIntEnum('ESettingProfileMode', {
+    'None': 0,
+    'PerGame': 1,
+    'PerGamePerDisplay': 2,
+    'PerDisplay': 3,
+    })
 
 
 class ESharedLibraryExcludeReason(SteamIntEnum):
@@ -926,17 +905,14 @@ class EStoreAppType(SteamIntEnum):
     Advertising = 14
 
 
-EStoreBrowseFilterFailure = SteamIntEnum(
-    'EStoreBrowseFilterFailure',
-    {
-        'None': 0,
-        'Redundant': 10,
-        'NotPreferred': 20,
-        'NotInterested': 30,
-        'UnwantedContent': 40,
-        'Unavailable': 50,
-    },
-)
+EStoreBrowseFilterFailure = SteamIntEnum('EStoreBrowseFilterFailure', {
+    'None': 0,
+    'Redundant': 10,
+    'NotPreferred': 20,
+    'NotInterested': 30,
+    'UnwantedContent': 40,
+    'Unavailable': 50,
+    })
 
 
 class EStoreCategoryType(SteamIntEnum):
@@ -977,31 +953,28 @@ class EStoreItemType(SteamIntEnum):
     HubCategory = 6
 
 
-EStoreLinkType = SteamIntEnum(
-    'EStoreLinkType',
-    {
-        'None': 0,
-        'YouTube': 1,
-        'Facebook': 2,
-        'Twitter': 3,
-        'Twitch': 4,
-        'Discord': 5,
-        'QQ': 6,
-        'VK': 7,
-        'Bilibili': 8,
-        'Weibo': 9,
-        'Reddit': 10,
-        'Instagram': 11,
-        'Tumblr': 12,
-        'Tieba': 13,
-        'Tiktok': 14,
-        'Telegram': 15,
-        'LinkedIn': 16,
-        'WeChat': 17,
-        'QQLink': 18,
-        'MAX': 19,
-    },
-)
+EStoreLinkType = SteamIntEnum('EStoreLinkType', {
+    'None': 0,
+    'YouTube': 1,
+    'Facebook': 2,
+    'Twitter': 3,
+    'Twitch': 4,
+    'Discord': 5,
+    'QQ': 6,
+    'VK': 7,
+    'Bilibili': 8,
+    'Weibo': 9,
+    'Reddit': 10,
+    'Instagram': 11,
+    'Tumblr': 12,
+    'Tieba': 13,
+    'Tiktok': 14,
+    'Telegram': 15,
+    'LinkedIn': 16,
+    'WeChat': 17,
+    'QQLink': 18,
+    'MAX': 19,
+    })
 
 
 class ESystemAudioChannel(SteamIntEnum):
@@ -1037,14 +1010,11 @@ class ESystemAudioPortType(SteamIntEnum):
     SystemAudioPortType_Video32RGBA = 4
 
 
-ESystemDisplayCompatibilityMode = SteamIntEnum(
-    'ESystemDisplayCompatibilityMode',
-    {
-        'Invalid': 0,
-        'None': 1,
-        'MinimalBandwith': 2,
-    },
-)
+ESystemDisplayCompatibilityMode = SteamIntEnum('ESystemDisplayCompatibilityMode', {
+    'Invalid': 0,
+    'None': 1,
+    'MinimalBandwith': 2,
+    })
 
 
 class ESystemFanControlMode(SteamIntEnum):
@@ -1098,13 +1068,10 @@ class ETimelineEntryType(SteamIntEnum):
     GamePhase = 9
 
 
-ETokenRenewalType = SteamIntEnum(
-    'ETokenRenewalType',
-    {
-        'None': 0,
-        'Allow': 1,
-    },
-)
+ETokenRenewalType = SteamIntEnum('ETokenRenewalType', {
+    'None': 0,
+    'Allow': 1,
+    })
 
 
 class ETouchGesture(SteamIntEnum):
@@ -1146,21 +1113,18 @@ class EUpdaterType(SteamIntEnum):
     Dummy = 7
 
 
-EUserReviewScore = SteamIntEnum(
-    'EUserReviewScore',
-    {
-        'None': 0,
-        'OverwhelminglyNegative': 1,
-        'VeryNegative': 2,
-        'Negative': 3,
-        'MostlyNegative': 4,
-        'Mixed': 5,
-        'MostlyPositive': 6,
-        'Positive': 7,
-        'VeryPositive': 8,
-        'OverwhelminglyPositive': 9,
-    },
-)
+EUserReviewScore = SteamIntEnum('EUserReviewScore', {
+    'None': 0,
+    'OverwhelminglyNegative': 1,
+    'VeryNegative': 2,
+    'Negative': 3,
+    'MostlyNegative': 4,
+    'Mixed': 5,
+    'MostlyPositive': 6,
+    'Positive': 7,
+    'VeryPositive': 8,
+    'OverwhelminglyPositive': 9,
+    })
 
 
 class EUserReviewScorePreference(SteamIntEnum):

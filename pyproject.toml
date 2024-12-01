@@ -10,7 +10,6 @@ dependencies = [
     "gevent>=24.11.1",
     "pycryptodomex>=3.21.0",
     "requests>=2.32.3",
-    "urllib3>=2.2.3",
     "vdf",
     "wsproto>=1.2.0",
     "protobuf>=5.29.0",
@@ -18,13 +17,13 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "coverage>=7.6.7",
+    "coverage>=7.6.8",
     "coveralls>=4.0.1",
     "mock>=5.1.0",
     "pytest-cov>=6.0.0",
     "pyyaml>=6.0.2",
-    "ruff>=0.8.0",
-    "vcrpy>=5.1.0",
+    "ruff>=0.8.1",
+    "vcrpy>=6.0.2",
 ]
 
 [build-system]
