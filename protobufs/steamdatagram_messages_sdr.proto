@@ -1,4 +1,3 @@
-syntax = "proto2";
 import "steamnetworkingsockets_messages_certs.proto";
 import "steamnetworkingsockets_messages.proto";
 

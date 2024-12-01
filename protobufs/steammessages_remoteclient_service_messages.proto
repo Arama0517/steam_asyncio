@@ -1,4 +1,3 @@
-syntax = "proto2";
 enum ECLientTaskListType {
 	k_EClientTask_DownloadClip = 1;
 }

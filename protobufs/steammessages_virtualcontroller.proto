@@ -1,4 +1,3 @@
-syntax = "proto2";
 enum EInputMode {
 	k_EInputModeUnknown = 0;
 	k_EInputModeMouse = 1;

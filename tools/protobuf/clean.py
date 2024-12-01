@@ -1,7 +1,10 @@
+import shutil
+
 from tools.protobuf import protobufs_dir, protobufs_result_dir
 
-for file in protobufs_dir.rglob('*.proto'):
-    file.unlink()
+shutil.rmtree(protobufs_result_dir)
+protobufs_result_dir.mkdir(parents=True)
+(protobufs_result_dir / '__init__.py').write_text('', encoding='utf-8')
 
-for file in protobufs_result_dir.rglob('*_pb2.py'):
-    file.unlink()
+shutil.rmtree(protobufs_dir)
+protobufs_dir.mkdir(parents=True)
