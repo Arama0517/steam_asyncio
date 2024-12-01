@@ -14,9 +14,7 @@ class Friends:
         super().__init__(*args, **kwargs)
 
         #: :class:`.SteamFriendlist` instance
-        self.friends = SteamFriendlist(
-            self, logger_name='%s.friends' % self.__class__.__name__
-        )
+        self.friends = SteamFriendlist(self, logger_name='%s.friends' % self.__class__.__name__)
 
 
 class SteamFriendlist(EventEmitter):
@@ -206,9 +204,7 @@ class SteamFriendlist(EventEmitter):
         elif resp.header.eresult == EResult.OK:
             if steamid not in self._fr:
                 self._fr[steamid] = self._steam.get_user(steamid, False)
-            self._fr[steamid].relationship = EFriendRelationship(
-                resp.body.friend_relationship
-            )
+            self._fr[steamid].relationship = EFriendRelationship(resp.body.friend_relationship)
 
         return resp.header.eresult
 
@@ -234,8 +230,6 @@ class SteamFriendlist(EventEmitter):
             return EResult.Timeout
         elif resp.header.eresult == EResult.OK:
             if steamid in self._fr:
-                self._fr[steamid].relationship = EFriendRelationship(
-                    resp.body.friend_relationship
-                )
+                self._fr[steamid].relationship = EFriendRelationship(resp.body.friend_relationship)
 
         return resp.header.eresult

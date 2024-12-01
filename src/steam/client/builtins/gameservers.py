@@ -48,9 +48,7 @@ class GameServers:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.gameservers = SteamGameServers(
-            self
-        )  #: instance of :class:`SteamGameServers`
+        self.gameservers = SteamGameServers(self)  #: instance of :class:`SteamGameServers`
 
 
 class SteamGameServers:

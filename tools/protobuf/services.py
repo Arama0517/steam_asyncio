@@ -15,9 +15,9 @@ for proto_file in proto_files:
             parts = line.replace('/', ' ').replace('.', ' ').replace(':', ' ').split()
             if len(parts) >= 2:
                 temp_lines.append(
-                    f"    '{parts[1]}': 'steam.protobufs.{proto_file.stem}_pb2',"
+                    f"    '{parts[1]}': {' ' * (35 - len(parts[1]))}'steam.protobufs.{proto_file.stem}_pb2',"
                 )
 
 temp_lines.extend(lines[end_index:])
-temp_file.write_text('\n'.join(temp_lines), encoding='utf-8')
+temp_file.write_text('\n'.join(temp_lines) + '\n', encoding='utf-8')
 temp_file.replace(unified_file)

@@ -375,9 +375,7 @@ def make_steam64(id=0, *args, **kwargs):
     etype = EType(etype) if isinstance(etype, (int, EType)) else EType[etype]
 
     universe = (
-        EUniverse(universe)
-        if isinstance(universe, (int, EUniverse))
-        else EUniverse[universe]
+        EUniverse(universe) if isinstance(universe, (int, EUniverse)) else EUniverse[universe]
     )
 
     if instance is None:

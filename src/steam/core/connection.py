@@ -80,22 +80,16 @@ class Connection:
         self.send_queue.put(message)
 
     def _new_socket(self):
-        raise TypeError(
-            '{}: _new_socket is unimplemented'.format(self.__class__.__name__)
-        )
+        raise TypeError('{}: _new_socket is unimplemented'.format(self.__class__.__name__))
 
     def _connect(self, server_addr):
         raise TypeError('{}: _connect is unimplemented'.format(self.__class__.__name__))
 
     def _reader_loop(self):
-        raise TypeError(
-            '{}: _reader_loop is unimplemented'.format(self.__class__.__name__)
-        )
+        raise TypeError('{}: _reader_loop is unimplemented'.format(self.__class__.__name__))
 
     def _writer_loop(self):
-        raise TypeError(
-            '{}: _writer_loop is unimplemented'.format(self.__class__.__name__)
-        )
+        raise TypeError('{}: _writer_loop is unimplemented'.format(self.__class__.__name__))
 
 
 class TCPConnection(Connection):
@@ -123,10 +117,7 @@ class TCPConnection(Connection):
     def _writer_loop(self):
         while True:
             message = self.send_queue.get()
-            packet = (
-                struct.pack(TCPConnection.FMT, len(message), TCPConnection.MAGIC)
-                + message
-            )
+            packet = struct.pack(TCPConnection.FMT, len(message), TCPConnection.MAGIC) + message
             try:
                 self._write_data(packet)
             except:
@@ -193,14 +184,10 @@ class WebsocketConnection(Connection):
                 # tcp socket
                 _, _, _, _, sa = res
                 self.raw_socket.connect(sa)
-                self.socket = self.ssl_ctx.wrap_socket(
-                    self.raw_socket, server_hostname=host
-                )
+                self.socket = self.ssl_ctx.wrap_socket(self.raw_socket, server_hostname=host)
                 # websocket
                 ws_host = ':'.join(map(str, server_addr))
-                ws_send = self.ws.send(
-                    wsevents.Request(host=ws_host, target='/cmsocket/')
-                )
+                ws_send = self.ws.send(wsevents.Request(host=ws_host, target='/cmsocket/'))
                 self.socket.sendall(ws_send)
                 return
             except OSError:
@@ -250,29 +237,21 @@ class WebsocketConnection(Connection):
                 logger.debug('WebSocket negotiation complete. Connected.')
                 self.event_connected.set()
             elif isinstance(event, wsevents.RejectConnection):
-                logger.debug(
-                    "WebSocket connection was rejected. That's probably not good."
-                )
+                logger.debug("WebSocket connection was rejected. That's probably not good.")
             elif isinstance(event, wsevents.TextMessage):
                 logger.debug(
-                    'Received websocket text message of length: {}'.format(
-                        len(event.data)
-                    )
+                    'Received websocket text message of length: {}'.format(len(event.data))
                 )
             elif isinstance(event, wsevents.BytesMessage):
                 logger.debug(
-                    'Received websocket bytes message of length: {}'.format(
-                        len(event.data)
-                    )
+                    'Received websocket bytes message of length: {}'.format(len(event.data))
                 )
                 self.recv_queue.put(event.data)
             elif isinstance(event, wsevents.Pong):
                 logger.debug('Received pong: {}'.format(repr(event.payload)))
             elif isinstance(event, wsevents.CloseConnection):
                 logger.debug(
-                    'Connection closed: code={} reason={}'.format(
-                        event.code, event.reason
-                    )
+                    'Connection closed: code={} reason={}'.format(event.code, event.reason)
                 )
                 if self.ws.state == ConnectionState.REMOTE_CLOSING:
                     self.socket.send(self.ws.send(event.response()))
@@ -287,9 +266,7 @@ class WebsocketConnection(Connection):
         if self.ws.state == ConnectionState.OPEN:
             logger.debug('Disconnect called. Sending CloseConnection message.')
             self.socket.sendall(
-                self.ws.send(
-                    wsevents.CloseConnection(code=1000, reason='sample reason')
-                )
+                self.ws.send(wsevents.CloseConnection(code=1000, reason='sample reason'))
             )
             self.socket.shutdown(socket.SHUT_WR)
             # wait for notification from _reader_loop that the closing response was received

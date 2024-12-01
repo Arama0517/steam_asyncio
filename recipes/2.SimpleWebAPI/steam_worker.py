@@ -82,14 +82,10 @@ class SteamWorker:
         resp = proto_to_dict(resp)
 
         for app in resp.get('apps', []):
-            app['appinfo'] = vdf.loads(
-                app.pop('buffer')[:-1].decode('utf-8', 'replace')
-            )['appinfo']
+            app['appinfo'] = vdf.loads(app.pop('buffer')[:-1].decode('utf-8', 'replace'))['appinfo']
             app['sha'] = hexlify(app['sha']).decode('utf-8')
         for pkg in resp.get('packages', []):
-            pkg['appinfo'] = vdf.binary_loads(pkg.pop('buffer')[4:])[
-                str(pkg['packageid'])
-            ]
+            pkg['appinfo'] = vdf.binary_loads(pkg.pop('buffer')[4:])[str(pkg['packageid'])]
             pkg['sha'] = hexlify(pkg['sha']).decode('utf-8')
 
         return resp

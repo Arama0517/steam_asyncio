@@ -30,9 +30,7 @@ class User:
         self.on(self.EVENT_LOGGED_ON, self.__handle_set_persona)
         self.on(EMsg.ClientPersonaState, self.__handle_persona_state)
         self.on(EMsg.ClientFriendMsgIncoming, self.__handle_message_incoming)
-        self.on(
-            'FriendMessagesClient.IncomingMessage#1', self.__handle_message_incoming2
-        )
+        self.on('FriendMessagesClient.IncomingMessage#1', self.__handle_message_incoming2)
 
     def __handle_message_incoming(self, msg):
         # old chat
@@ -42,10 +40,7 @@ class User:
 
     def __handle_message_incoming2(self, msg):
         # new chat
-        if (
-            msg.body.chat_entry_type == EChatEntryType.ChatMsg
-            and not msg.body.local_echo
-        ):
+        if msg.body.chat_entry_type == EChatEntryType.ChatMsg and not msg.body.local_echo:
             user = self.get_user(msg.body.steamid_friend)
             self.emit('chat_message', user, msg.body.message)
 
@@ -56,10 +51,7 @@ class User:
     def __handle_set_persona(self):
         self.user = self.get_user(self.steam_id, False)
 
-        if (
-            self.steam_id.type == EType.Individual
-            and self.persona_state != EPersonaState.Offline
-        ):
+        if self.steam_id.type == EType.Individual and self.persona_state != EPersonaState.Offline:
             self.change_status(persona_state=self.persona_state)
 
     def __handle_persona_state(self, message):

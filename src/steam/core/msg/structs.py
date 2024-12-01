@@ -76,9 +76,7 @@ class ChannelEncryptResponse(StructMessage):
     crc = 0
 
     def serialize(self):
-        return struct.pack(
-            '<II128sII', self.protocolVersion, self.keySize, self.key, self.crc, 0
-        )
+        return struct.pack('<II128sII', self.protocolVersion, self.keySize, self.key, self.crc, 0)
 
     def load(self, data):
         (
@@ -185,8 +183,7 @@ class ClientChatMsg(StructMessage):
         # utf-8 encode only when unicode in py2 and str in py3
         rbytes += (
             self.text.encode('utf-8')
-            if (not isinstance(self.text, str) and bytes is str)
-            or isinstance(self.text, str)
+            if (not isinstance(self.text, str) and bytes is str) or isinstance(self.text, str)
             else self.text
         ) + b'\x00'
 

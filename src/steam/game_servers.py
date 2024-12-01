@@ -57,9 +57,7 @@ Team Fortress 2 (Source)
 .. code:: python
 
     >>> from steam import game_servers as gs
-    >>> server_addr = next(
-    ...     gs.query_master(r'\appid\40\empty\1\secure\1')
-    ... )  # single TF2 Server
+    >>> server_addr = next(gs.query_master(r'\appid\40\empty\1\secure\1'))  # single TF2 Server
     >>> gs.a2s_ping(server_addr)
     68.60899925231934
     >>> gs.a2s_info(server_addr)
@@ -97,9 +95,7 @@ Ricohet (GoldSrc)
 .. code:: python
 
     >>> from steam import game_servers as gs
-    >>> server_addr = next(
-    ...     gs.query_master(r'\appid\60')
-    ... )  # get a single ip from hl2 master
+    >>> server_addr = next(gs.query_master(r'\appid\60'))  # get a single ip from hl2 master
     >>> gs.a2s_info(server_addr, force_goldsrc=True)  # only accept goldsrc response
     {'_ping': 26.59320831298828,
      '_type': 'goldsrc',
@@ -305,9 +301,7 @@ def _handle_a2s_multi_packet_response(sock, packet):
         if len(data) != size:
             raise RuntimeError('Response size mismatch - %d %d' % (len(data), size))
         if checksum != crc32(data):
-            raise RuntimeError(
-                'Response checksum mismatch - %d %d' % (checksum, crc32(data))
-            )
+            raise RuntimeError('Response checksum mismatch - %d %d' % (checksum, crc32(data)))
 
     return data
 

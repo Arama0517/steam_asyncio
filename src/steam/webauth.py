@@ -162,13 +162,9 @@ class WebAuth:
         self.logged_on = False
 
     @staticmethod
-    def send_api_request(
-        data, steam_api_interface, steam_api_method, steam_api_version
-    ):
+    def send_api_request(data, steam_api_interface, steam_api_method, steam_api_version):
         """Send request to Steam API via requests"""
-        steam_url = API_URL.format(
-            steam_api_interface, steam_api_method, steam_api_version
-        )
+        steam_url = API_URL.format(steam_api_interface, steam_api_method, steam_api_version)
 
         if steam_api_method == 'GetPasswordRSAPublicKey':  # It's GET method
             res = requests.get(steam_url, timeout=10, headers=API_HEADERS, params=data)
@@ -203,9 +199,7 @@ class WebAuth:
 
         return tuple((b64.decode('ascii'), r['response']['timestamp']))
 
-    def _startSessionWithCredentials(
-        self, account_encrypted_password: str, time_stamp: int
-    ):
+    def _startSessionWithCredentials(self, account_encrypted_password: str, time_stamp: int):
         """Start login session via BeginAuthSessionViaCredentials"""
         resp = self.send_api_request(
             {
@@ -353,9 +347,7 @@ class WebAuth:
             if res.get('result') == 8:
                 # This usually mean code sent now.
                 def end_login(email_code: str):
-                    self._update_login_token(
-                        email_code, EAuthSessionGuardType.EmailCode
-                    )
+                    self._update_login_token(email_code, EAuthSessionGuardType.EmailCode)
                     self._pollLoginStatus()
                     self._finalizeLogin()
                     return self.session
@@ -379,9 +371,7 @@ class WebAuth:
         and allows user to logout on every device.
         Can be VERY useful e.g. for users, who practice account rent.
         """
-        session_id = self.session.cookies.get(
-            'sessionid', domain='store.steampowered.com'
-        )
+        session_id = self.session.cookies.get('sessionid', domain='store.steampowered.com')
 
         # By the times I saw session can be both of keys, so select valid.
         session_id = session_id or self.session.cookies.get(
@@ -425,9 +415,7 @@ class WebAuth:
                         "Couldn't find a supported auth type for this account."
                     )
 
-                can_confirm_with_app = (
-                    EAuthSessionGuardType.DeviceConfirmation in allowed
-                )
+                can_confirm_with_app = EAuthSessionGuardType.DeviceConfirmation in allowed
 
                 twofactor_code = ''
                 while twofactor_code.strip() == '':

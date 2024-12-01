@@ -13,9 +13,7 @@ def versions_report():
 
     import pkg_resources
 
-    installed_pkgs = {
-        pkg.project_name.lower(): pkg.version for pkg in pkg_resources.working_set
-    }
+    installed_pkgs = {pkg.project_name.lower(): pkg.version for pkg in pkg_resources.working_set}
 
     for dep in [
         'vdf',
@@ -28,9 +26,7 @@ def versions_report():
         'enum34',
         'win-inet-pton',
     ]:
-        print(
-            '{:>20}: {}'.format(dep, installed_pkgs.get(dep.lower(), 'Not Installed'))
-        )
+        print('{:>20}: {}'.format(dep, installed_pkgs.get(dep.lower(), 'Not Installed')))
 
     # python runtime
     print('\nPython runtime:')

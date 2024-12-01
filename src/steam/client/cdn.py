@@ -190,9 +190,7 @@ def get_content_servers_from_cs(
     return servers
 
 
-def get_content_servers_from_webapi(
-    cell_id: bytes, num_servers: int = 20
-) -> list['ContentServer']:
+def get_content_servers_from_webapi(cell_id: bytes, num_servers: int = 20) -> list['ContentServer']:
     """Get a list of CS servers from Steam WebAPI
 
     :param cell_id: location cell id
@@ -200,9 +198,7 @@ def get_content_servers_from_webapi(
     :return: list of CS servers
     """
     params = {'cell_id': cell_id, 'max_servers': num_servers}
-    resp = webapi.get(
-        'IContentServerDirectoryService', 'GetServersForSteamPipe', params=params
-    )
+    resp = webapi.get('IContentServerDirectoryService', 'GetServersForSteamPipe', params=params)
 
     servers = []
 
@@ -343,9 +339,7 @@ class CDNDepotFile:
 
     def tell(self) -> int:
         if not self.seekable:
-            raise ValueError(
-                'This file is not seekable, probably because its directory or symlink'
-            )
+            raise ValueError('This file is not seekable, probably because its directory or symlink')
         return self.offset
 
     def seek(self, offset: int, whence: int = 0):
@@ -355,9 +349,7 @@ class CDNDepotFile:
         :param whence: offset mode, see :meth:`io.IOBase.seek`
         """
         if not self.seekable:
-            raise ValueError(
-                'This file is not seekable, probably because its directory or symlink'
-            )
+            raise ValueError('This file is not seekable, probably because its directory or symlink')
 
         if whence == 0:
             if offset < 0:
@@ -660,7 +652,6 @@ class CDNDepotManifest:
     def iter_files(self, pattern: Optional[str] = None) -> Generator[CDNDepotFile]:
         """
         :param pattern: unix shell wildcard pattern, see :func:`.fnmatch`
-        :type  pattern: str
         """
         if not self.filenames_encrypted:
             for mapping in self.payload.mappings:
@@ -695,12 +686,8 @@ class CDNClient:
         self.manifests = {}  #: CDNDepotManifest instances
         self.app_depots = {}  #: app depot info
         self.beta_passwords = {}  #: beta branch decryption keys
-        self.licensed_app_ids = (
-            set()
-        )  #: app_ids that the SteamClient instance has access to
-        self.licensed_depot_ids = (
-            set()
-        )  #: depot_ids that the SteamClient instance has access to
+        self.licensed_app_ids = set()  #: app_ids that the SteamClient instance has access to
+        self.licensed_depot_ids = set()  #: depot_ids that the SteamClient instance has access to
 
         if not self.servers:
             self.fetch_content_servers()
@@ -735,9 +722,7 @@ class CDNClient:
                 )
             )
 
-        for package_id, info in self.steam.get_product_info(packages=packages)[
-            'packages'
-        ].items():
+        for package_id, info in self.steam.get_product_info(packages=packages)['packages'].items():
             self.licensed_app_ids.update(info['appids'].values())
             self.licensed_depot_ids.update(info['depotids'].values())
 
@@ -815,15 +800,11 @@ class CDNClient:
         ):
             update_cdn_auth_tokens()
         else:
-            if (
-                self.cdn_auth_tokens[app_id][depot_id][hostname]['eresult']
-                != EResult.OK
-            ):
+            if self.cdn_auth_tokens[app_id][depot_id][hostname]['eresult'] != EResult.OK:
                 pass
             elif (
                 datetime.fromtimestamp(
-                    self.cdn_auth_tokens[app_id][depot_id][hostname]['expiration_time']
-                    - 60
+                    self.cdn_auth_tokens[app_id][depot_id][hostname]['expiration_time'] - 60
                 )
                 < datetime.now()
             ):
@@ -904,9 +885,7 @@ class CDNClient:
         :raises SteamError: error message
         """
         if (depot_id, chunk_id) not in self._chunk_cache:
-            resp = self.cdn_cmd(
-                'depot', f'{depot_id}/chunk/{chunk_id}', app_id, depot_id
-            )
+            resp = self.cdn_cmd('depot', f'{depot_id}/chunk/{chunk_id}', app_id, depot_id)
 
             data = symmetric_decrypt(resp.content, self.get_depot_key(app_id, depot_id))
 
@@ -924,9 +903,7 @@ class CDNClient:
                 # together they get us the right data
                 data = vzdec.decompress(data[12:-9])[:decompressed_size]
                 if crc32(data) != checksum:
-                    raise SteamError(
-                        "VZ: CRC32 checksum doesn't match for decompressed data"
-                    )
+                    raise SteamError("VZ: CRC32 checksum doesn't match for decompressed data")
             else:
                 with ZipFile(BytesIO(data)) as zf:
                     data = zf.read(zf.filelist[0])
@@ -1045,17 +1022,15 @@ class CDNClient:
                     entry.betapassword
                 )
         else:
-            self._LOG.debug(
-                'App beta password check failed. %r' % EResult(resp.eresult)
-            )
+            self._LOG.debug('App beta password check failed. %r' % EResult(resp.eresult))
 
         return EResult(resp.eresult)
 
     def get_app_depot_info(self, app_id: int) -> dict:
         if app_id not in self.app_depots:
-            self.app_depots[app_id] = self.steam.get_product_info([app_id])['apps'][
-                app_id
-            ]['depots']
+            self.app_depots[app_id] = self.steam.get_product_info([app_id])['apps'][app_id][
+                'depots'
+            ]
         return self.app_depots[app_id]
 
     def has_license_for_depot(self, depot_id: int) -> bool:
@@ -1143,9 +1118,7 @@ class CDNClient:
                     manifest_request_code=manifest_code,
                 )
             except Exception as exc:
-                return ManifestError(
-                    'Failed download', app_id, depot_id, manifest_gid, exc
-                )
+                return ManifestError('Failed download', app_id, depot_id, manifest_gid, exc)
 
             manifest.name = depot_name
             return manifest
@@ -1174,17 +1147,13 @@ class CDNClient:
 
             # accumulate the shared depots
             if 'depotfromapp' in depot_info:
-                shared_depots.setdefault(int(depot_info['depotfromapp']), set()).add(
-                    depot_id
-                )
+                shared_depots.setdefault(int(depot_info['depotfromapp']), set()).add(depot_id)
                 continue
 
             # process depot, and get manifest for branch
             if is_enc_branch:
                 egid = (
-                    depot_info.get('encryptedmanifests', {})
-                    .get(branch, {})
-                    .get('encrypted_gid_2')
+                    depot_info.get('encryptedmanifests', {}).get(branch, {}).get('encrypted_gid_2')
                 )
 
                 if egid is not None:
@@ -1228,12 +1197,8 @@ class CDNClient:
         # load shared depot manifests
         for app_id, depot_ids in shared_depots.items():
 
-            def nested_ffunc(
-                depot_id, depot_info, depot_ids=depot_ids, ffunc=filter_func
-            ):
-                return int(depot_id) in depot_ids and (
-                    ffunc is None or ffunc(depot_id, depot_info)
-                )
+            def nested_ffunc(depot_id, depot_info, depot_ids=depot_ids, ffunc=filter_func):
+                return int(depot_id) in depot_ids and (ffunc is None or ffunc(depot_id, depot_info))
 
             manifests += self.get_manifests(app_id, filter_func=nested_ffunc)
 
@@ -1289,9 +1254,7 @@ class CDNClient:
             raise SteamError('Timeout', EResult.Timeout)
 
         if resp.header.eresult != EResult.OK:
-            raise SteamError(
-                resp.header.error_message or 'No message', resp.header.eresult
-            )
+            raise SteamError(resp.header.error_message or 'No message', resp.header.eresult)
 
         wf: PublishedFileDetails = resp.body.publishedfiledetails[0]
 
@@ -1306,9 +1269,7 @@ class CDNClient:
         app_id = ws_app_id = wf.consumer_appid
 
         try:
-            manifest_code = self.get_manifest_request_code(
-                app_id, ws_app_id, wf.hcontent_file
-            )
+            manifest_code = self.get_manifest_request_code(app_id, ws_app_id, wf.hcontent_file)
             manifest = self.get_manifest(
                 app_id, ws_app_id, wf.hcontent_file, manifest_request_code=manifest_code
             )

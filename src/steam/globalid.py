@@ -33,12 +33,7 @@ class GlobalID(int):
             start_time = datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S')
         start_time_seconds = int((start_time - datetime(2005, 1, 1)).total_seconds())
 
-        return (
-            (box_id << 54)
-            | (process_id << 50)
-            | (start_time_seconds << 20)
-            | sequence_count
-        )
+        return (box_id << 54) | (process_id << 50) | (start_time_seconds << 20) | sequence_count
 
     def __init__(self, *args, **kwargs):
         pass

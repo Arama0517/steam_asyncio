@@ -104,10 +104,7 @@ class SteamClient(CMClient, BuiltinBase):
             self.emit(msg.header.target_job_name, msg)
 
     def _handle_cm_list(self, msg):
-        if (
-            self.cm_servers.last_updated + 3600 * 24 > time()
-            and self.cm_servers.cell_id != 0
-        ):
+        if self.cm_servers.last_updated + 3600 * 24 > time() and self.cm_servers.cell_id != 0:
             return
         CMClient._handle_cm_list(self, msg)  # clear and merge
 

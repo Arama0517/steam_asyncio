@@ -29,9 +29,7 @@ class WACase(unittest.TestCase):
         with self.assertRaises(wa.HTTPError):
             wa.WebAuth('c', 'd').login()
 
-    @vcr.use_cassette(
-        'vcr/webauth_user_pass_only_success.yaml', mode='none', serializer='yaml'
-    )
+    @vcr.use_cassette('vcr/webauth_user_pass_only_success.yaml', mode='none', serializer='yaml')
     def test_login_user_and_pass_only_ok(self):
         user = wa.WebAuth('testuser', 'testpass')
         s = user.login()
@@ -47,15 +45,11 @@ class WACase(unittest.TestCase):
                 s.cookies.get('steamLoginSecure', domain=domain),
                 '0%7C%7C{}'.format('B' * 16),
             )
-            self.assertEqual(
-                s.cookies.get('steamMachineAuth0', domain=domain), 'C' * 16
-            )
+            self.assertEqual(s.cookies.get('steamMachineAuth0', domain=domain), 'C' * 16)
 
         self.assertEqual(s, user.login())
 
-    @vcr.use_cassette(
-        'vcr/webauth_user_pass_only_fail.yaml', mode='none', serializer='yaml'
-    )
+    @vcr.use_cassette('vcr/webauth_user_pass_only_fail.yaml', mode='none', serializer='yaml')
     def test_login_user_and_pass_only_fail(self):
         with self.assertRaises(wa.LoginIncorrect):
             wa.WebAuth('testuser', 'testpass').login()

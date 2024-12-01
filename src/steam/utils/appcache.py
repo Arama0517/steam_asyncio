@@ -19,9 +19,7 @@ Appache file parsing examples:
      'data_sha1': b'\\x87\\xfaCg\\x85\\x80\\r\\xb4\\x90Im\\xdc}\\xb4\\x81\\xeeQ\\x8b\\x825',
      'data': {'appinfo': {'appid': 5, 'public_only': 1}}}
 
-    >>> header, pkgs = parse_packageinfo(
-    ...     open('/d/Steam/appcache/packageinfo.vdf', 'rb')
-    ... )
+    >>> header, pkgs = parse_packageinfo(open('/d/Steam/appcache/packageinfo.vdf', 'rb'))
     >>> header
     {'magic': b"'UV\\x06", 'universe': 1}
 

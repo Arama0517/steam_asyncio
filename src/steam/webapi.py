@@ -303,9 +303,7 @@ class WebAPIMethod:
         )
 
     def __call__(self, **kwargs):
-        possible_kwargs = set(self._dict['parameters'].keys()) | set(
-            DEFAULT_PARAMS.keys()
-        )
+        possible_kwargs = set(self._dict['parameters'].keys()) | set(DEFAULT_PARAMS.keys())
         unrecognized = set(kwargs.keys()).difference(possible_kwargs)
         if unrecognized:
             raise ValueError('Unrecognized parameter %s' % repr(unrecognized.pop()))
@@ -389,9 +387,7 @@ class WebAPIMethod:
             for param in sorted(self.parameters.values(), key=lambda x: x['name']):
                 doc += '    {} {} {}{}\n'.format(
                     param['name'].ljust(25),
-                    (
-                        (param['type'] + '[]') if param['_array'] else param['type']
-                    ).ljust(8),
+                    ((param['type'] + '[]') if param['_array'] else param['type']).ljust(8),
                     'optional' if param['optional'] else 'required',
                     (
                         ('\n      - ' + param['description'])
@@ -421,9 +417,7 @@ def webapi_request(url, method='GET', caller=None, session=None, params=None):
     :rtype: :class:`dict`, :class:`lxml.etree.Element`, :class:`str`
     """
     if method not in ('GET', 'POST'):
-        raise ValueError(
-            'Only GET and POST methods are supported, got: %s' % repr(method)
-        )
+        raise ValueError('Only GET and POST methods are supported, got: %s' % repr(method))
     if params is None:
         params = {}
 
@@ -434,9 +428,7 @@ def webapi_request(url, method='GET', caller=None, session=None, params=None):
         del params[param]
 
     if onetime['format'] not in ('json', 'vdf', 'xml'):
-        raise ValueError(
-            'Expected format to be json,vdf or xml; got %s' % onetime['format']
-        )
+        raise ValueError('Expected format to be json,vdf or xml; got %s' % onetime['format'])
 
     for k, v in list(params.items()):  # serialize some types
         if isinstance(v, bool):
@@ -448,9 +440,7 @@ def webapi_request(url, method='GET', caller=None, session=None, params=None):
             for i, lvalue in enumerate(v):
                 params['%s[%d]' % (k, i)] = lvalue
 
-    kwargs = (
-        {'params': params} if method == 'GET' else {'data': params}
-    )  # params to data for POST
+    kwargs = {'params': params} if method == 'GET' else {'data': params}  # params to data for POST
 
     if session is None:
         session = _make_session()

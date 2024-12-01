@@ -50,9 +50,7 @@ class CMClient_Scenarios(unittest.TestCase):
         patcher = patch('steam.core.cm.CMServerList', autospec=True)
         self.addCleanup(patcher.stop)
         self.server_list = patcher.start().return_value
-        self.server_list.__iter__.return_value = [
-            (127001, 20000 + i) for i in range(10)
-        ]
+        self.server_list.__iter__.return_value = [(127001, 20000 + i) for i in range(10)]
         self.server_list.bootstrap_from_webapi.return_value = False
         self.server_list.bootstrap_from_dns.return_value = False
 

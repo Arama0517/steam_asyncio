@@ -55,15 +55,9 @@ class SteamID_initialization(unittest.TestCase):
         self.compare(SteamID('12'), [12, EType.Individual, EUniverse.Public, 1])
         self.compare(SteamID(123), [123, EType.Individual, EUniverse.Public, 1])
         self.compare(SteamID('123'), [123, EType.Individual, EUniverse.Public, 1])
-        self.compare(
-            SteamID(12345678), [12345678, EType.Individual, EUniverse.Public, 1]
-        )
-        self.compare(
-            SteamID('12345678'), [12345678, EType.Individual, EUniverse.Public, 1]
-        )
-        self.compare(
-            SteamID(0xFFFFFFFF), [0xFFFFFFFF, EType.Individual, EUniverse.Public, 1]
-        )
+        self.compare(SteamID(12345678), [12345678, EType.Individual, EUniverse.Public, 1])
+        self.compare(SteamID('12345678'), [12345678, EType.Individual, EUniverse.Public, 1])
+        self.compare(SteamID(0xFFFFFFFF), [0xFFFFFFFF, EType.Individual, EUniverse.Public, 1])
         self.compare(
             SteamID(str(0xFFFFFFFF)),
             [0xFFFFFFFF, EType.Individual, EUniverse.Public, 1],
@@ -79,9 +73,7 @@ class SteamID_initialization(unittest.TestCase):
             [123456, EType.Individual, EUniverse.Public, 4444],
         )
         self.compare(SteamID(103582791429521412), [4, EType.Clan, EUniverse.Public, 0])
-        self.compare(
-            SteamID('103582791429521412'), [4, EType.Clan, EUniverse.Public, 0]
-        )
+        self.compare(SteamID('103582791429521412'), [4, EType.Clan, EUniverse.Public, 0])
 
     def test_arg_steam64_invalid_universe(self):
         with self.assertRaises(ValueError):
@@ -127,9 +119,7 @@ class SteamID_initialization(unittest.TestCase):
         self.compare(test_instance, [4, 3, 2, 1])
 
     def test_arg_text_invalid(self):
-        self.compare(
-            SteamID('invalid_format'), [0, EType.Invalid, EUniverse.Invalid, 0]
-        )
+        self.compare(SteamID('invalid_format'), [0, EType.Invalid, EUniverse.Invalid, 0])
 
     def test_arg_too_large_invalid(self):
         self.compare(
@@ -226,35 +216,17 @@ class SteamID_properties(unittest.TestCase):
         # universe out of bound
         self.assertFalse(SteamID(1, universe=EUniverse.Max).is_valid())
         # individual
-        self.assertTrue(
-            SteamID(123, EType.Individual, EUniverse.Public, instance=0).is_valid()
-        )
-        self.assertTrue(
-            SteamID(123, EType.Individual, EUniverse.Public, instance=1).is_valid()
-        )
-        self.assertTrue(
-            SteamID(123, EType.Individual, EUniverse.Public, instance=2).is_valid()
-        )
-        self.assertTrue(
-            SteamID(123, EType.Individual, EUniverse.Public, instance=3).is_valid()
-        )
-        self.assertTrue(
-            SteamID(123, EType.Individual, EUniverse.Public, instance=4).is_valid()
-        )
-        self.assertFalse(
-            SteamID(123, EType.Individual, EUniverse.Public, instance=5).is_valid()
-        )
-        self.assertFalse(
-            SteamID(123, EType.Individual, EUniverse.Public, instance=333).is_valid()
-        )
+        self.assertTrue(SteamID(123, EType.Individual, EUniverse.Public, instance=0).is_valid())
+        self.assertTrue(SteamID(123, EType.Individual, EUniverse.Public, instance=1).is_valid())
+        self.assertTrue(SteamID(123, EType.Individual, EUniverse.Public, instance=2).is_valid())
+        self.assertTrue(SteamID(123, EType.Individual, EUniverse.Public, instance=3).is_valid())
+        self.assertTrue(SteamID(123, EType.Individual, EUniverse.Public, instance=4).is_valid())
+        self.assertFalse(SteamID(123, EType.Individual, EUniverse.Public, instance=5).is_valid())
+        self.assertFalse(SteamID(123, EType.Individual, EUniverse.Public, instance=333).is_valid())
         # clan
         self.assertTrue(SteamID(1, EType.Clan, EUniverse.Public, instance=0).is_valid())
-        self.assertFalse(
-            SteamID(1, EType.Clan, EUniverse.Public, instance=1).is_valid()
-        )
-        self.assertFalse(
-            SteamID(1, EType.Clan, EUniverse.Public, instance=1234).is_valid()
-        )
+        self.assertFalse(SteamID(1, EType.Clan, EUniverse.Public, instance=1).is_valid())
+        self.assertFalse(SteamID(1, EType.Clan, EUniverse.Public, instance=1234).is_valid())
 
         s = SteamID(123, type=EType.Clan, universe=EUniverse.Public, instance=333)
         self.assertFalse(s.is_valid())
@@ -327,9 +299,7 @@ class SteamID_properties(unittest.TestCase):
         self.assertEqual(
             SteamID(1, EType.Invalid, EUniverse.Public, instance=1).as_invite_code, None
         )
-        self.assertEqual(
-            SteamID(1, EType.Clan, EUniverse.Public, instance=1).as_invite_code, None
-        )
+        self.assertEqual(SteamID(1, EType.Clan, EUniverse.Public, instance=1).as_invite_code, None)
         self.assertEqual(
             SteamID(1, EType.Individual, EUniverse.Beta, instance=1).as_invite_code, 'c'
         )
@@ -338,23 +308,17 @@ class SteamID_properties(unittest.TestCase):
             'c',
         )
         self.assertEqual(
-            SteamID(
-                123456, EType.Individual, EUniverse.Public, instance=1
-            ).as_invite_code,
+            SteamID(123456, EType.Individual, EUniverse.Public, instance=1).as_invite_code,
             'cv-dgb',
         )
         self.assertEqual(
-            SteamID(
-                4294967295, EType.Individual, EUniverse.Public, instance=1
-            ).as_invite_code,
+            SteamID(4294967295, EType.Individual, EUniverse.Public, instance=1).as_invite_code,
             'wwww-wwww',
         )
 
     def test_as_csgo_friend_code(self):
         self.assertEqual(
-            SteamID(
-                0, EType.Individual, EUniverse.Public, instance=1
-            ).as_csgo_friend_code,
+            SteamID(0, EType.Individual, EUniverse.Public, instance=1).as_csgo_friend_code,
             None,
         )
         self.assertEqual(
@@ -366,27 +330,19 @@ class SteamID_properties(unittest.TestCase):
             None,
         )
         self.assertEqual(
-            SteamID(
-                1, EType.Individual, EUniverse.Beta, instance=1
-            ).as_csgo_friend_code,
+            SteamID(1, EType.Individual, EUniverse.Beta, instance=1).as_csgo_friend_code,
             'AJJJS-ABAA',
         )
         self.assertEqual(
-            SteamID(
-                1, EType.Individual, EUniverse.Public, instance=1
-            ).as_csgo_friend_code,
+            SteamID(1, EType.Individual, EUniverse.Public, instance=1).as_csgo_friend_code,
             'AJJJS-ABAA',
         )
         self.assertEqual(
-            SteamID(
-                123456, EType.Individual, EUniverse.Public, instance=1
-            ).as_csgo_friend_code,
+            SteamID(123456, EType.Individual, EUniverse.Public, instance=1).as_csgo_friend_code,
             'ABNBT-GBDC',
         )
         self.assertEqual(
-            SteamID(
-                4294967295, EType.Individual, EUniverse.Public, instance=1
-            ).as_csgo_friend_code,
+            SteamID(4294967295, EType.Individual, EUniverse.Public, instance=1).as_csgo_friend_code,
             'S9ZZR-999P',
         )
 
@@ -406,9 +362,7 @@ class SteamID_properties(unittest.TestCase):
             SteamID(123456, EType.Invalid, EUniverse.Public, instance=1).invite_url,
             None,
         )
-        self.assertEqual(
-            SteamID(123456, EType.Clan, EUniverse.Public, instance=1).invite_url, None
-        )
+        self.assertEqual(SteamID(123456, EType.Clan, EUniverse.Public, instance=1).invite_url, None)
 
 
 class steamid_functions(unittest.TestCase):
@@ -427,15 +381,11 @@ class steamid_functions(unittest.TestCase):
         mm = mrs_mock.return_value = mock.MagicMock()
 
         mm.get.side_effect = requests.exceptions.ConnectTimeout('test')
-        self.assertIsNone(
-            steamid.steam64_from_url('https://steamcommunity.com/id/timeout_me')
-        )
+        self.assertIsNone(steamid.steam64_from_url('https://steamcommunity.com/id/timeout_me'))
 
         mm.get.reset_mock()
         mm.get.side_effect = requests.exceptions.ReadTimeout('test')
-        self.assertIsNone(
-            steamid.steam64_from_url('https://steamcommunity.com/id/timeout_me')
-        )
+        self.assertIsNone(steamid.steam64_from_url('https://steamcommunity.com/id/timeout_me'))
 
     def test_steam64_from_url(self):
         def scrub_req(r):
@@ -459,19 +409,13 @@ class steamid_functions(unittest.TestCase):
         ):
             # invalid urls return None
             self.assertIsNone(steamid.steam64_from_url('asdasd'))
-            self.assertIsNone(
-                steamid.steam64_from_url('https://steamcommunity.com/gid/0')
-            )
+            self.assertIsNone(steamid.steam64_from_url('https://steamcommunity.com/gid/0'))
 
             # try profile urls
-            sid = steamid.steam64_from_url(
-                'https://steamcommunity.com/profiles/[U:1:12]'
-            )
+            sid = steamid.steam64_from_url('https://steamcommunity.com/profiles/[U:1:12]')
             self.assertEqual(sid, 76561197960265740)
 
-            sid = steamid.steam64_from_url(
-                'https://steamcommunity.com/profiles/76561197960265740'
-            )
+            sid = steamid.steam64_from_url('https://steamcommunity.com/profiles/76561197960265740')
             self.assertEqual(sid, 76561197960265740)
 
             sid = steamid.steam64_from_url('https://steamcommunity.com/id/johnc')
@@ -484,9 +428,7 @@ class steamid_functions(unittest.TestCase):
             sid = steamid.steam64_from_url('https://steamcommunity.com/gid/[g:1:4]')
             self.assertEqual(sid, 103582791429521412)
 
-            sid = steamid.steam64_from_url(
-                'https://steamcommunity.com/gid/103582791429521412'
-            )
+            sid = steamid.steam64_from_url('https://steamcommunity.com/gid/103582791429521412')
             self.assertEqual(sid, 103582791429521412)
 
             sid = steamid.steam64_from_url('https://steamcommunity.com/groups/Valve')
@@ -548,9 +490,7 @@ class steamid_functions(unittest.TestCase):
             steamid.steam3_to_tuple('[G:1:1234]'),
             (1234, EType.GameServer, EUniverse.Public, 1),
         )
-        self.assertEqual(
-            steamid.steam3_to_tuple('[g:1:4]'), (4, EType.Clan, EUniverse.Public, 0)
-        )
+        self.assertEqual(steamid.steam3_to_tuple('[g:1:4]'), (4, EType.Clan, EUniverse.Public, 0))
         self.assertEqual(
             steamid.steam3_to_tuple('[A:1:4]'),
             (4, EType.AnonGameServer, EUniverse.Public, 0),
@@ -574,9 +514,7 @@ class steamid_functions(unittest.TestCase):
 
     def test_from_invite_code(self):
         self.assertIsNone(steamid.from_invite_code('invalid_format'))
-        self.assertIsNone(
-            steamid.from_invite_code('https://steamcommunity.com/p/cv-dgb')
-        )
+        self.assertIsNone(steamid.from_invite_code('https://steamcommunity.com/p/cv-dgb'))
         self.assertIsNone(steamid.from_invite_code('b'))
         self.assertIsNone(steamid.from_invite_code('aaaaaaaaaaaaaaaaaaaaaaaaa'))
 

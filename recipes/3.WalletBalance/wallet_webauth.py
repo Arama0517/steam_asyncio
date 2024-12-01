@@ -19,11 +19,7 @@ except wa.TwoFactorCodeRequired:
     webclient.login(twofactor_code=input('2FA code: '))
 
 if webclient.complete:
-    resp = webclient.session.get(
-        'https://store.steampowered.com/account/store_transactions/'
-    )
+    resp = webclient.session.get('https://store.steampowered.com/account/store_transactions/')
     resp.raise_for_status()
-    balance = re.search(r'store_transactions/">(?P<balance>.*?)</a>', resp.text).group(
-        'balance'
-    )
+    balance = re.search(r'store_transactions/">(?P<balance>.*?)</a>', resp.text).group('balance')
     print('Current balance: %s' % balance)

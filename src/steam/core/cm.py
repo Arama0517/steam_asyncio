@@ -224,9 +224,7 @@ class CMClient(EventEmitter):
 
         if self.channel_key:
             if self.channel_hmac:
-                data = crypto.symmetric_encrypt_HMAC(
-                    data, self.channel_key, self.channel_hmac
-                )
+                data = crypto.symmetric_encrypt_HMAC(data, self.channel_key, self.channel_hmac)
             else:
                 data = crypto.symmetric_encrypt(data, self.channel_key)
 
@@ -546,9 +544,7 @@ class CMServerList:
                 return
 
             good_servers = list(
-                filter(
-                    lambda x: x[1]['quality'] == CMServerList.Good, self.list.items()
-                )
+                filter(lambda x: x[1]['quality'] == CMServerList.Good, self.list.items())
             )
 
             if len(good_servers) == 0:

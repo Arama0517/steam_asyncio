@@ -97,9 +97,7 @@ def get_cmsg(emsg):
 class Msg:
     proto = False
     body = None  #: message instance
-    payload = (
-        None  #: Will contain body payload, if we fail to find correct message class
-    )
+    payload = None  #: Will contain body payload, if we fail to find correct message class
 
     def __init__(self, msg, data=None, extended=False, parse=True):
         self.extended = extended
@@ -145,9 +143,7 @@ class Msg:
 
     @property
     def sessionID(self):
-        return (
-            self.header.sessionID if isinstance(self.header, ExtendedMsgHdr) else None
-        )
+        return self.header.sessionID if isinstance(self.header, ExtendedMsgHdr) else None
 
     @sessionID.setter
     def sessionID(self, value):
@@ -185,9 +181,7 @@ class Msg:
 class MsgProto:
     proto = True
     body = None  #: protobuf message instance
-    payload = (
-        None  #: Will contain body payload, if we fail to find correct proto message
-    )
+    payload = None  #: Will contain body payload, if we fail to find correct proto message
 
     def __init__(self, msg, data=None, parse=True):
         self._header = MsgHdrProtoBuf(data)

@@ -77,9 +77,7 @@ class SteamLeaderboard:
     name = ''  #: leaderboard name
     id = 0  #: leaderboard id
     entry_count = 0
-    sort_method = (
-        ELeaderboardSortMethod.NONE
-    )  #: :class:`steam.enums.common.ELeaderboardSortMethod`
+    sort_method = ELeaderboardSortMethod.NONE  #: :class:`steam.enums.common.ELeaderboardSortMethod`
     display_type = (
         ELeaderboardDisplayType.NONE
     )  #: :class:`steam.enums.common.ELeaderboardDisplayType`
@@ -157,18 +155,10 @@ class SteamLeaderboard:
         if isinstance(x, slice):
             stop_max = len(self)
             start = (
-                0
-                if x.start is None
-                else x.start
-                if x.start >= 0
-                else max(0, x.start + stop_max)
+                0 if x.start is None else x.start if x.start >= 0 else max(0, x.start + stop_max)
             )
             stop = (
-                stop_max
-                if x.stop is None
-                else x.stop
-                if x.stop >= 0
-                else max(0, x.stop + stop_max)
+                stop_max if x.stop is None else x.stop if x.stop >= 0 else max(0, x.stop + stop_max)
             )
             step = x.step or 1
             if step < 0:

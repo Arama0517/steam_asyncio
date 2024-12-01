@@ -34,9 +34,10 @@ build-backend = "setuptools.build_meta"
 vdf = { git = "https://github.com/solsticegamestudios/vdf.git", rev = "v4.0" }
 
 [tool.ruff]
+line-length = 100
 preview = true
 fix = true
-exclude = ["src/steam/protobufs"]
+exclude = ["src/steam/protobufs", "src/steam/enums/proto.py"]
 
 [tool.ruff.lint]
 select = ["E", "W", "F", "N", "I"]

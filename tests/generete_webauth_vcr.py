@@ -29,9 +29,7 @@ def response_scrubber(r):
     r['headers'].pop('date', None)
     r['headers'].pop('expires', None)
 
-    if 'set-cookie' in r['headers'] and 'steamLogin' in ''.join(
-        r['headers']['set-cookie']
-    ):
+    if 'set-cookie' in r['headers'] and 'steamLogin' in ''.join(r['headers']['set-cookie']):
         r['headers']['set-cookie'] = [
             'steamLogin=0%7C%7C{}; path=/; httponly'.format('A' * 16),
             'steamLoginSecure=0%7C%7C{}; path=/; httponly; secure'.format('B' * 16),

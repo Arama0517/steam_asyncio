@@ -22,21 +22,15 @@ class Util_Functions(unittest.TestCase):
     def test_ip6_from_bytes(self):
         self.assertEqual(
             '::1',
-            ut.ip6_from_bytes(
-                b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01'
-            ),
+            ut.ip6_from_bytes(b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01'),
         )
         self.assertEqual(
             '1:2:3:4:5:6:7:8',
-            ut.ip6_from_bytes(
-                b'\x00\x01\x00\x02\x00\x03\x00\x04\x00\x05\x00\x06\x00\x07\x00\x08'
-            ),
+            ut.ip6_from_bytes(b'\x00\x01\x00\x02\x00\x03\x00\x04\x00\x05\x00\x06\x00\x07\x00\x08'),
         )
         self.assertEqual(
             '1234:5678:9abc:def0:0:dead:beef:1',
-            ut.ip6_from_bytes(
-                b'\x12\x34\x56\x78\x9a\xbc\xde\xf0\x00\x00\xde\xad\xbe\xef\x00\x01'
-            ),
+            ut.ip6_from_bytes(b'\x12\x34\x56\x78\x9a\xbc\xde\xf0\x00\x00\xde\xad\xbe\xef\x00\x01'),
         )
 
     def test_ip6_to_bytes(self):
@@ -78,9 +72,7 @@ class Util_Proto_Functions(unittest.TestCase):
         self.assertEqual(utp.clear_proto_bit(0), 0)
         self.assertEqual(utp.clear_proto_bit(123), 123)
         self.assertEqual(utp.clear_proto_bit(proto_mask | 123), 123)
-        self.assertEqual(
-            utp.clear_proto_bit((proto_mask - 1) | proto_mask), proto_mask - 1
-        )
+        self.assertEqual(utp.clear_proto_bit((proto_mask - 1) | proto_mask), proto_mask - 1)
 
 
 class Util_Proto(unittest.TestCase):
@@ -156,9 +148,7 @@ class Util_Proto(unittest.TestCase):
         self.msg.messages.add(text='one')
         self.msg.messages.add(text='two')
 
-        utp.proto_fill_from_dict(
-            self.msg, {'messages': [{'text': 'three'}]}, clear=False
-        )
+        utp.proto_fill_from_dict(self.msg, {'messages': [{'text': 'three'}]}, clear=False)
 
         self.assertEqual(len(self.msg.messages), 1)
         self.assertEqual(self.msg.messages[0].text, 'three')
@@ -176,9 +166,7 @@ class Util_Proto(unittest.TestCase):
         self.assertEqual(self.msg.list_number32, [1, 2, 3])
 
     def test_proto_fill_from_dict__dict_list(self):
-        utp.proto_fill_from_dict(
-            self.msg, {'messages': [{'text': 'one'}, {'text': 'two'}]}
-        )
+        utp.proto_fill_from_dict(self.msg, {'messages': [{'text': 'one'}, {'text': 'two'}]})
         self.assertEqual(len(self.msg.messages), 2)
         self.assertEqual(self.msg.messages[0].text, 'one')
         self.assertEqual(self.msg.messages[1].text, 'two')
@@ -231,9 +219,7 @@ class Util_Proto(unittest.TestCase):
         self.assertEqual(self.msg.messages[1].text, 'two')
 
     def test_proto_fill_from_dict__filter(self):
-        utp.proto_fill_from_dict(
-            self.msg, {'list_number32': filter(lambda x: True, [1, 2, 3])}
-        )
+        utp.proto_fill_from_dict(self.msg, {'list_number32': filter(lambda x: True, [1, 2, 3])})
         self.assertEqual(self.msg.list_number32, [1, 2, 3])
 
     def test_proto_fill_from_dict__dict_filter(self):

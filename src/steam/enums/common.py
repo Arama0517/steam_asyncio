@@ -32,11 +32,11 @@ class EResult(SteamIntEnum):
     LimitExceeded = 25  #: Too much of a good thing
     Revoked = 26  #: Access has been revoked (used for revoked guest passes)
     Expired = 27  #: License/Guest pass the user is trying to access is expired
-    AlreadyRedeemed = (
-        28  #: Guest pass has already been redeemed by account, cannot be acked again
-    )
+    AlreadyRedeemed = 28  #: Guest pass has already been redeemed by account, cannot be acked again
     DuplicateRequest = 29  #: The request is a duplicate and the action has already occurred in the past, ignored this time
-    AlreadyOwned = 30  #: All the games in this guest pass redemption request are already owned by the user
+    AlreadyOwned = (
+        30  #: All the games in this guest pass redemption request are already owned by the user
+    )
     IPNotFound = 31  #: IP address not found
     PersistFailed = 32  #: failed to write change to the data store
     LockingFailed = 33  #: failed to acquire access lock for this operation
@@ -51,23 +51,19 @@ class EResult(SteamIntEnum):
     NoMatch = 42  #: nothing matching the request found
     AccountDisabled = 43
     ServiceReadOnly = 44  #: this service is not accepting content changes right now
-    AccountNotFeatured = (
-        45  #: account doesn't have value, so this feature isn't available
+    AccountNotFeatured = 45  #: account doesn't have value, so this feature isn't available
+    AdministratorOK = 46  #: allowed to take this action, but only because requester is admin
+    ContentVersion = 47  #: A Version mismatch in content transmitted within the Steam protocol.
+    TryAnotherCM = (
+        48  #: The current CM can't service the user making a request, user should try another.
     )
-    AdministratorOK = (
-        46  #: allowed to take this action, but only because requester is admin
+    PasswordRequiredToKickSession = (
+        49  #: You are already logged in elsewhere, this cached credential login has failed.
     )
-    ContentVersion = (
-        47  #: A Version mismatch in content transmitted within the Steam protocol.
-    )
-    TryAnotherCM = 48  #: The current CM can't service the user making a request, user should try another.
-    PasswordRequiredToKickSession = 49  #: You are already logged in elsewhere, this cached credential login has failed.
     AlreadyLoggedInElsewhere = 50  #: You are already logged in elsewhere, you must wait
     Suspended = 51  #: Long running operation (content download) suspended/paused
     Cancelled = 52  #: Operation canceled (typically by user: content download)
-    DataCorruption = (
-        53  #: Operation canceled because data is ill formed or unrecoverable
-    )
+    DataCorruption = 53  #: Operation canceled because data is ill formed or unrecoverable
     DiskFull = 54  #: Operation canceled - not enough disk space.
     RemoteCallFailed = 55  #: an remote call or IPC call failed
     PasswordUnset = 56  #: Password could not be verified as it's unset server side
@@ -76,17 +72,17 @@ class EResult(SteamIntEnum):
     )
     PSNTicketInvalid = 58  #: PSN ticket was invalid
     ExternalAccountAlreadyLinked = 59  #: External account (PSN, Facebook...) is already linked to some other account, must explicitly request to replace/delete the link first
-    RemoteFileConflict = 60  #: The sync cannot resume due to a conflict between the local and remote files
+    RemoteFileConflict = (
+        60  #: The sync cannot resume due to a conflict between the local and remote files
+    )
     IllegalPassword = 61  #: The requested new password is not legal
-    SameAsPreviousValue = (
-        62  #: new value is the same as the old one ( secret question and answer )
-    )
-    AccountLogonDenied = (
-        63  #: account login denied due to 2nd factor authentication failure
-    )
+    SameAsPreviousValue = 62  #: new value is the same as the old one ( secret question and answer )
+    AccountLogonDenied = 63  #: account login denied due to 2nd factor authentication failure
     CannotUseOldPassword = 64  #: The requested new password is not legal
     InvalidLoginAuthCode = 65  #: account login denied due to auth code invalid
-    AccountLogonDeniedNoMail = 66  #: account login denied due to 2nd factor auth failure - and no mail has been sent
+    AccountLogonDeniedNoMail = (
+        66  #: account login denied due to 2nd factor auth failure - and no mail has been sent
+    )
     HardwareNotCapableOfIPT = 67
     IPTInitError = 68
     ParentalControlRestricted = (
@@ -105,15 +101,9 @@ class EResult(SteamIntEnum):
     ValueOutOfRange = 78  #: the value entered is outside the acceptable range
     UnexpectedError = 79  #: something happened that we didn't expect to ever happen
     Disabled = 80  #: The requested service has been configured to be unavailable
-    InvalidCEGSubmission = (
-        81  #: The set of files submitted to the CEG server are not valid !
-    )
-    RestrictedDevice = (
-        82  #: The device being used is not allowed to perform this action
-    )
-    RegionLocked = (
-        83  #: The action could not be complete because it is region restricted
-    )
+    InvalidCEGSubmission = 81  #: The set of files submitted to the CEG server are not valid !
+    RestrictedDevice = 82  #: The device being used is not allowed to perform this action
+    RegionLocked = 83  #: The action could not be complete because it is region restricted
     RateLimitExceeded = 84  #: Temporary rate limit exceeded, try again later, different from k_EResultLimitExceeded which may be permanent
     AccountLoginDeniedNeedTwoFactor = 85  #: Need two-factor code to login
     ItemDeleted = 86  #: The thing we're trying to access has been deleted
@@ -122,9 +112,7 @@ class EResult(SteamIntEnum):
     )
     TwoFactorCodeMismatch = 88  #: two factor code mismatch
     TwoFactorActivationCodeMismatch = 89  #: activation code for two-factor didn't match
-    AccountAssociatedToMultiplePartners = (
-        90  #: account has been associated with multiple partners
-    )
+    AccountAssociatedToMultiplePartners = 90  #: account has been associated with multiple partners
     NotModified = 91  #: data not modified
     NoMobileDevice = 92  #: the account does not have a mobile device associated with it
     TimeNotSynced = 93  #: the time presented is out of range or tolerance
@@ -136,19 +124,17 @@ class EResult(SteamIntEnum):
     EmailSendFailure = 99  #: Cannot send an email
     NotSettled = 100  #: Can't perform operation till payment has settled
     NeedCaptcha = 101  #: Needs to provide a valid captcha
-    GSLTDenied = (
-        102  #: a game server login token owned by this token's owner has been banned
-    )
+    GSLTDenied = 102  #: a game server login token owned by this token's owner has been banned
     GSOwnerDenied = 103  #: game server owner is denied for other reason (account lock, community ban, vac ban, missing phone)
     InvalidItemType = 104  #: the type of thing we were requested to act on is invalid
     IPBanned = 105  #: the ip address has been banned from taking this action
     GSLTExpired = 106  #: this token has expired from disuse; can be reset for use
-    InsufficientFunds = (
-        107  #: user doesn't have enough wallet funds to complete the action
-    )
+    InsufficientFunds = 107  #: user doesn't have enough wallet funds to complete the action
     TooManyPending = 108  #: There are too many of this thing pending already
     NoSiteLicensesFound = 109  #: No site licenses found
-    WGNetworkSendExceeded = 110  #: the WG couldn't send a response because we exceeded max network send size
+    WGNetworkSendExceeded = (
+        110  #: the WG couldn't send a response because we exceeded max network send size
+    )
     AccountNotFriends = 111
     LimitedUserAccount = 112
     CantRemoveItem = 113
@@ -180,12 +166,8 @@ class EType(SteamIntEnum):
     ContentServer = 6  #: content server
     Clan = 7  #: Steam Group (clan)
     Chat = 8  #: Steam group chat or lobby
-    ConsoleUser = (
-        9  #: Fake SteamID for local PSN account on PS3 or Live account on 360, etc
-    )
-    AnonUser = (
-        10  #: Anonymous user account. (Used to create an account or reset a password)
-    )
+    ConsoleUser = 9  #: Fake SteamID for local PSN account on PS3 or Live account on 360, etc
+    AnonUser = 10  #: Anonymous user account. (Used to create an account or reset a password)
     Max = 11
 
 
@@ -588,14 +570,12 @@ class EChatEntryType(SteamIntEnum):
     Typing = 2  #: Another user is typing (not used in multi-user chat)
     InviteGame = 3  #: Invite from other user into that users current game
     Emote = 4  #: text emote message (deprecated, should be treated as ChatMsg)
-    LobbyGameStart = 5  #: lobby game is starting (dead - listen for LobbyGameCreated_t callback instead)
+    LobbyGameStart = (
+        5  #: lobby game is starting (dead - listen for LobbyGameCreated_t callback instead)
+    )
     LeftConversation = 6  #: user has left the conversation ( closed chat window )
-    Entered = (
-        7  #: user has entered the conversation (used in multi-user chat and group chat)
-    )
-    WasKicked = (
-        8  #: user was kicked (data: 64-bit steamid of actor performing the kick)
-    )
+    Entered = 7  #: user has entered the conversation (used in multi-user chat and group chat)
+    WasKicked = 8  #: user was kicked (data: 64-bit steamid of actor performing the kick)
     WasBanned = 9  #: user was banned (data: 64-bit steamid of actor performing the ban)
     Disconnected = 10  #: user disconnected
     HistoricalChat = 11  #: a chat message from user's chat history or offilne message
@@ -609,29 +589,21 @@ class EChatRoomEnterResponse(SteamIntEnum):
 
     Success = 1  #: Success
     DoesntExist = 2  #: Chat doesn't exist (probably closed)
-    NotAllowed = (
-        3  #: General Denied - You don't have the permissions needed to join the chat
-    )
+    NotAllowed = 3  #: General Denied - You don't have the permissions needed to join the chat
     Full = 4  #: Chat room has reached its maximum size
     Error = 5  #: Unexpected Error
     Banned = 6  #: You are banned from this chat room and may not join
-    Limited = 7  #: Joining this chat is not allowed because you are a limited user (no value on account)
+    Limited = (
+        7  #: Joining this chat is not allowed because you are a limited user (no value on account)
+    )
     ClanDisabled = 8  #: Attempt to join a clan chat when the clan is locked or disabled
-    CommunityBan = (
-        9  #: Attempt to join a chat when the user has a community lock on their account
-    )
-    MemberBlockedYou = (
-        10  #: Join failed - some member in the chat has blocked you from joining
-    )
-    YouBlockedMember = (
-        11  #: Join failed - you have blocked some member already in the chat
-    )
+    CommunityBan = 9  #: Attempt to join a chat when the user has a community lock on their account
+    MemberBlockedYou = 10  #: Join failed - some member in the chat has blocked you from joining
+    YouBlockedMember = 11  #: Join failed - you have blocked some member already in the chat
     NoRankingDataLobby = 12  #: No longer used
     NoRankingDataUser = 13  #: No longer used
     RankOutOfRange = 14  #: No longer used
-    RatelimitExceeded = (
-        15  #: Join failed - to many join attempts in a very short period of time
-    )
+    RatelimitExceeded = 15  #: Join failed - to many join attempts in a very short period of time
 
 
 class ECurrencyCode(SteamIntEnum):

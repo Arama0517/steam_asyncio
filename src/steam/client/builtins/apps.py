@@ -112,11 +112,7 @@ class Apps:
 
         if auto_access_tokens:
             tokens = self.get_access_tokens(
-                app_ids=list(
-                    map(
-                        lambda app: app['appid'] if isinstance(app, dict) else app, apps
-                    )
-                ),
+                app_ids=list(map(lambda app: app['appid'] if isinstance(app, dict) else app, apps)),
                 package_ids=list(
                     map(
                         lambda pkg: pkg['packageid'] if isinstance(pkg, dict) else pkg,
@@ -170,9 +166,9 @@ class Apps:
 
             for app in chunk.apps:
                 if app.buffer and not raw:
-                    data['apps'][app.appid] = vdf.loads(
-                        app.buffer[:-1].decode('utf-8', 'replace')
-                    )['appinfo']
+                    data['apps'][app.appid] = vdf.loads(app.buffer[:-1].decode('utf-8', 'replace'))[
+                        'appinfo'
+                    ]
                 else:
                     data['apps'][app.appid] = {}
 
@@ -186,17 +182,15 @@ class Apps:
 
             for pkg in chunk.packages:
                 if pkg.buffer and not raw:
-                    data['packages'][pkg.packageid] = vdf.binary_loads(
-                        pkg.buffer[4:]
-                    ).get(str(pkg.packageid), {})
+                    data['packages'][pkg.packageid] = vdf.binary_loads(pkg.buffer[4:]).get(
+                        str(pkg.packageid), {}
+                    )
                 else:
                     data['packages'][pkg.packageid] = {}
 
                 data['packages'][pkg.packageid]['_missing_token'] = pkg.missing_token
                 data['packages'][pkg.packageid]['_change_number'] = pkg.change_number
-                data['packages'][pkg.packageid]['_sha'] = hexlify(pkg.sha).decode(
-                    'ascii'
-                )
+                data['packages'][pkg.packageid]['_sha'] = hexlify(pkg.sha).decode('ascii')
                 data['packages'][pkg.packageid]['_size'] = pkg.size
 
                 if pkg.buffer and raw:
@@ -240,9 +234,7 @@ class Apps:
             MsgProto(EMsg.ClientGetAppOwnershipTicket), {'app_id': app_id}, timeout=10
         )
 
-    def get_encrypted_app_ticket(
-        self, app_id: int, userdata: bytes
-    ) -> EncryptedAppTicket:
+    def get_encrypted_app_ticket(self, app_id: int, userdata: bytes) -> EncryptedAppTicket:
         """Gets the encrypted app ticket
         :param app_id: app id
         :param userdata: userdata
@@ -254,9 +246,7 @@ class Apps:
             timeout=10,
         )
 
-    def get_depot_key(
-        self, app_id: int, depot_id: int
-    ) -> CMsgClientGetDepotDecryptionKeyResponse:
+    def get_depot_key(self, app_id: int, depot_id: int) -> CMsgClientGetDepotDecryptionKeyResponse:
         """Get depot decryption key
 
         :param app_id: app id
@@ -272,9 +262,7 @@ class Apps:
             timeout=10,
         )
 
-    def get_cdn_auth_token(
-        self, depot_id: int, hostname: str
-    ) -> CMsgClientGetCDNAuthTokenResponse:
+    def get_cdn_auth_token(self, depot_id: int, hostname: str) -> CMsgClientGetCDNAuthTokenResponse:
         """Get CDN authentication token
 
         .. note::
@@ -371,9 +359,7 @@ class Apps:
         )
 
         if resp:
-            details = vdf.binary_loads(resp.purchase_receipt_info).get(
-                'MessageObject', None
-            )
+            details = vdf.binary_loads(resp.purchase_receipt_info).get('MessageObject', None)
             return EResult(resp.eresult), resp.purchase_result_details, details
         else:
             return EResult.Timeout, None, None
