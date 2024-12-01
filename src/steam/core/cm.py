@@ -373,16 +373,12 @@ class CMClient(EventEmitter):
             self._parse_message(data[4 : 4 + size])
             data = data[4 + size :]
 
-    def __heartbeat(self, interval):
+    def __heartbeat(self, interval: int):
         message = MsgProto(EMsg.ClientHeartBeat)
-        last_sent_time = time()
 
         while True:
-            current_time = time()
-            if current_time - last_sent_time >= interval:
-                self.send(message)
-                last_sent_time = current_time
-            self.sleep(0.1)
+            self.sleep(interval)
+            self.send(message)
 
     def _handle_logon(self, msg):
         result = msg.body.eresult
