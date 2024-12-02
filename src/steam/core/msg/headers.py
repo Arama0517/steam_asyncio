@@ -3,7 +3,6 @@
 import struct
 
 from steam.enums.emsg import EMsg
-from steam.protobufs import steammessages_base_pb2
 from steam.protobufs.steammessages_base_pb2 import CMsgProtoBufHeader
 from steam.utils.proto import clear_proto_bit, set_proto_bit
 
@@ -96,7 +95,7 @@ class MsgHdrProtoBuf:
     msg = EMsg.Invalid
 
     def __init__(self, data=None):
-        self.proto = steammessages_base_pb2.CMsgProtoBufHeader()
+        self.proto = CMsgProtoBufHeader()
 
         if data:
             self.load(data)

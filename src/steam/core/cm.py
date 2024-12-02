@@ -13,7 +13,7 @@ import gevent.socket as socket
 from eventemitter import EventEmitter
 
 from steam.core import crypto
-from steam.core.connection import TCPConnection, WebsocketConnection
+from steam.core.connection import Connection, TCPConnection, WebsocketConnection
 from steam.core.msg import Msg, MsgProto
 from steam.enums import EResult, EUniverse
 from steam.enums.emsg import EMsg
@@ -66,6 +66,7 @@ class CMClient(EventEmitter):
     current_server_addr = None  #: (ip, port) tuple
     _seen_logon = False
     _connecting = False
+    connection: Connection = None
     connected = False  #: :class:`True` if connected to CM
     channel_secured = False  #: :class:`True` once secure channel handshake is complete
 
