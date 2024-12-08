@@ -986,28 +986,20 @@ class CInputMouseUpMsg(_message.Message):
     def __init__(self, input_mark: _Optional[int] = ..., button: _Optional[_Union[EStreamMouseButton, str]] = ...) -> None: ...
 
 class CInputKeyDownMsg(_message.Message):
-    __slots__ = ("input_mark", "scancode", "modifiers", "keycode")
+    __slots__ = ("input_mark", "scancode")
     INPUT_MARK_FIELD_NUMBER: _ClassVar[int]
     SCANCODE_FIELD_NUMBER: _ClassVar[int]
-    MODIFIERS_FIELD_NUMBER: _ClassVar[int]
-    KEYCODE_FIELD_NUMBER: _ClassVar[int]
     input_mark: int
     scancode: int
-    modifiers: int
-    keycode: int
-    def __init__(self, input_mark: _Optional[int] = ..., scancode: _Optional[int] = ..., modifiers: _Optional[int] = ..., keycode: _Optional[int] = ...) -> None: ...
+    def __init__(self, input_mark: _Optional[int] = ..., scancode: _Optional[int] = ...) -> None: ...
 
 class CInputKeyUpMsg(_message.Message):
-    __slots__ = ("input_mark", "scancode", "modifiers", "keycode")
+    __slots__ = ("input_mark", "scancode")
     INPUT_MARK_FIELD_NUMBER: _ClassVar[int]
     SCANCODE_FIELD_NUMBER: _ClassVar[int]
-    MODIFIERS_FIELD_NUMBER: _ClassVar[int]
-    KEYCODE_FIELD_NUMBER: _ClassVar[int]
     input_mark: int
     scancode: int
-    modifiers: int
-    keycode: int
-    def __init__(self, input_mark: _Optional[int] = ..., scancode: _Optional[int] = ..., modifiers: _Optional[int] = ..., keycode: _Optional[int] = ...) -> None: ...
+    def __init__(self, input_mark: _Optional[int] = ..., scancode: _Optional[int] = ...) -> None: ...
 
 class CInputTextMsg(_message.Message):
     __slots__ = ("input_mark", "text_utf8")
