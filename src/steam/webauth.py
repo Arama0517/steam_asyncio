@@ -252,7 +252,7 @@ class WebAuth(ClientSession):
 
     async def _startLoginSession(self):
         """Starts login session via credentials."""
-        encrypted_password = self._encrypt_password()
+        encrypted_password = await self._encrypt_password()
         await self._startSessionWithCredentials(encrypted_password[0], encrypted_password[1])
 
     async def _pollLoginStatus(self):
@@ -463,7 +463,9 @@ class WebAuth(ClientSession):
 
                     if can_confirm_with_app:
                         try:
-                            await self._pollLoginStatus()  # test to see if they've authenticated via app
+                            await (
+                                self._pollLoginStatus()
+                            )  # test to see if they've authenticated via app
                             break
                         except TwoFactorCodeRequired:
                             # they've not authenticated via the app, let's see if we can use their provided code
