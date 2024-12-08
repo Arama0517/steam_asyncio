@@ -111,6 +111,7 @@ from zipfile import ZIP_DEFLATED, BadZipFile, ZipFile
 
 import requests
 import vdf
+from aiohttp import ClientResponse
 from cachetools import LRUCache
 from gevent.pool import Pool as GPool
 
@@ -130,7 +131,7 @@ from steam.protobufs.steammessages_publishedfile_pb2 import (
     PublishedFileDetails,
 )
 from steam.utils.binary import StructReader
-from steam.utils.web import make_requests_session
+from steam.utils.web import AioHttpClientSessionWithUA, make_requests_session
 
 
 def decrypt_manifest_gid_2(encrypted_gid: bytes, password: bytes) -> int:
@@ -676,9 +677,9 @@ class CDNClient:
         :type  client: :class:`.SteamClient`
         """
         self.gpool = GPool(8)  #: task pool
-        self.steam: SteamClient = client  #: SteamClient instance
-        if self.steam:
-            self.cell_id = self.steam.cell_id
+        self.client: SteamClient = client  #: SteamClient instance
+        if self.client:
+            self.cell_id = self.client.cell_id
 
         self.web = make_requests_session()
         self.cdn_auth_tokens = {}  #: CDN authentication token
@@ -705,10 +706,10 @@ class CDNClient:
         self.licensed_app_ids.clear()
         self.licensed_depot_ids.clear()
 
-        if self.steam.steam_id.type == EType.AnonUser:
+        if self.client.steam_id.type == EType.AnonUser:
             packages = [17906]
         else:
-            if not self.steam.licenses:
+            if not self.client.licenses:
                 self._LOG.debug('No steam licenses found on SteamClient instance')
                 return
 
@@ -718,11 +719,11 @@ class CDNClient:
                         'packageid': l.package_id,
                         'access_token': l.access_token,
                     },
-                    self.steam.licenses.values(),
+                    self.client.licenses.values(),
                 )
             )
 
-        for package_id, info in self.steam.get_product_info(packages=packages)['packages'].items():
+        for package_id, info in self.client.get_product_info(packages=packages)['packages'].items():
             self.licensed_app_ids.update(info['appids'].values())
             self.licensed_depot_ids.update(info['depotids'].values())
 
@@ -761,7 +762,7 @@ class CDNClient:
         """
 
         def update_cdn_auth_tokens():
-            resp: MsgProto = self.steam.send_um_and_wait(
+            resp: MsgProto = self.client.send_um_and_wait(
                 'ContentServerDirectory.GetCDNAuthToken#1',
                 {'app_id': app_id, 'depot_id': depot_id, 'host_name': hostname},
                 timeout=10,
@@ -821,7 +822,7 @@ class CDNClient:
         :raises SteamError: error message
         """
         if depot_id not in self.depot_keys:
-            msg = self.steam.get_depot_key(app_id, depot_id)
+            msg = self.client.get_depot_key(app_id, depot_id)
 
             if msg and msg.eresult == EResult.OK:
                 self.depot_keys[depot_id] = msg.depot_encryption_key
@@ -833,13 +834,13 @@ class CDNClient:
 
         return self.depot_keys[depot_id]
 
-    def cdn_cmd(
+    async def cdn_cmd(
         self,
         command: str,
         args: str,
         app_id: Optional[int] = None,
         depot_id: Optional[int] = None,
-    ) -> requests.Response:
+    ) -> ClientResponse:
         """Run CDN command request
 
         :param command: command name
@@ -861,21 +862,31 @@ class CDNClient:
                 self.get_cdn_auth_token(app_id, depot_id, str(server.host)),
             )
 
+            # try:
+            #     resp = self.web.get(url, timeout=10)
+            # except Exception as exp:
+            #     self._LOG.debug('Request error: %s', exp)
+            # else:
+            #     if resp.ok:
+            #         return resp
+            #     elif 400 <= resp.status_code < 500:
+            #         self._LOG.debug('Got HTTP %s', resp.status_code)
+            #         raise SteamError('HTTP Error %s' % resp.status_code)
+            #     self.client.sleep(0.5)
             try:
-                resp = self.web.get(url, timeout=10)
+                async with AioHttpClientSessionWithUA() as session:
+                    async with session.get(url, timeout=10) as resp:
+                        if resp.ok:
+                            return resp
+                        elif 400 <= resp.status < 500:
+                            self._LOG.debug('Got HTTP %s', resp.status_code)
+                            raise SteamError('HTTP Error %s' % resp.status_code)
             except Exception as exp:
                 self._LOG.debug('Request error: %s', exp)
-            else:
-                if resp.ok:
-                    return resp
-                elif 400 <= resp.status_code < 500:
-                    self._LOG.debug('Got HTTP %s', resp.status_code)
-                    raise SteamError('HTTP Error %s' % resp.status_code)
-                self.steam.sleep(0.5)
 
             server = self.get_content_server(rotate=True)
 
-    def get_chunk(self, app_id: int, depot_id: int, chunk_id: int) -> bytes:
+    async def get_chunk(self, app_id: int, depot_id: int, chunk_id: int) -> bytes:
         """Download a single content chunk
 
         :param app_id: app ID
@@ -885,7 +896,7 @@ class CDNClient:
         :raises SteamError: error message
         """
         if (depot_id, chunk_id) not in self._chunk_cache:
-            resp = self.cdn_cmd('depot', f'{depot_id}/chunk/{chunk_id}', app_id, depot_id)
+            resp = await self.cdn_cmd('depot', f'{depot_id}/chunk/{chunk_id}', app_id, depot_id)
 
             data = symmetric_decrypt(resp.content, self.get_depot_key(app_id, depot_id))
 
@@ -942,7 +953,7 @@ class CDNClient:
             if branch_password_hash:
                 body['branch_password_hash'] = branch_password_hash
 
-        resp = self.steam.send_um_and_wait(
+        resp = self.client.send_um_and_wait(
             'ContentServerDirectory.GetManifestRequestCode#1',
             body,
             timeout=5,
@@ -1007,7 +1018,7 @@ class CDNClient:
         :param password: beta password
         :returns: result
         """
-        resp = self.steam.send_job_and_wait(
+        resp = self.client.send_job_and_wait(
             MsgProto(EMsg.ClientCheckAppBetaPassword),
             {'app_id': app_id, 'betapassword': password},
         )
@@ -1028,7 +1039,7 @@ class CDNClient:
 
     def get_app_depot_info(self, app_id: int) -> dict:
         if app_id not in self.app_depots:
-            self.app_depots[app_id] = self.steam.get_product_info([app_id])['apps'][app_id][
+            self.app_depots[app_id] = self.client.get_product_info([app_id])['apps'][app_id][
                 'depots'
             ]
         return self.app_depots[app_id]
@@ -1233,7 +1244,7 @@ class CDNClient:
         :returns: manifest instance
         :raises: ManifestError, SteamError
         """
-        resp: MsgProto = self.steam.send_um_and_wait(
+        resp: MsgProto = self.client.send_um_and_wait(
             'PublishedFile.GetDetails#1',
             {
                 'publishedfileids': [item_id],

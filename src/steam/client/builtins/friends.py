@@ -1,8 +1,7 @@
 import logging
 
-from eventemitter import EventEmitter
-
 from steam.client.user import SteamUser
+from steam.core.eventemitter import EventEmitter
 from steam.core.msg import MsgProto
 from steam.enums import EFriendRelationship, EResult
 from steam.enums.emsg import EMsg
@@ -57,6 +56,8 @@ class SteamFriendlist(EventEmitter):
     ready = False  #: indicates whether friend list is ready for use
 
     def __init__(self, client, logger_name='SteamFriendList'):
+        super().__init__()
+
         self._LOG = logging.getLogger(logger_name)
         self._fr = {}
         self._steam = client
@@ -65,23 +66,23 @@ class SteamFriendlist(EventEmitter):
         self._steam.on(EMsg.ClientFriendsList, self._handle_friends_list)
         self._steam.on(self._steam.EVENT_DISCONNECTED, self._handle_disconnect)
 
-    def emit(self, event, *args):
+    async def emit(self, event, *args):
         if event is not None:
             self._LOG.debug('Emit event: %s' % repr(event))
-        EventEmitter.emit(self, event, *args)
+        await EventEmitter.emit(self, event, *args)
 
-    def _handle_disconnect(self):
+    async def _handle_disconnect(self):
         self.ready = False
         self._fr.clear()
 
-    def _handle_add_friend_result(self, message):
+    async def _handle_add_friend_result(self, message):
         eresult = EResult(message.body.eresult)
         steam_id = SteamID(message.body.steam_id_added)
-        self.emit(self.EVENT_FRIEND_ADD_RESULT, eresult, steam_id)
+        await self.emit(self.EVENT_FRIEND_ADD_RESULT, eresult, steam_id)
 
-    def _handle_friends_list(self, message):
+    async def _handle_friends_list(self, message):
         incremental = message.body.bincremental
-        if incremental == False:
+        if incremental is False:
             self._fr.clear()
 
         steamids_to_check = set()
@@ -93,7 +94,7 @@ class SteamFriendlist(EventEmitter):
             if steamid.type != steamid.EType.Individual:
                 continue
 
-            suser = self._steam.get_user(steamid, False)
+            suser = await self._steam.get_user(steamid, False)
             rel = EFriendRelationship(friend.efriendrelationship)
 
             if steamid not in self._fr and rel != EFriendRelationship.NONE:  # 0
@@ -103,24 +104,24 @@ class SteamFriendlist(EventEmitter):
 
                 if rel in (2, 4):  # RequestRecipient = 2, RequestInitiator = 4
                     if rel == EFriendRelationship.RequestRecipient:
-                        self.emit(self.EVENT_FRIEND_INVITE, suser)
+                        await self.emit(self.EVENT_FRIEND_INVITE, suser)
             else:
                 oldrel, suser.relationship = suser.relationship, rel
 
                 if rel == EFriendRelationship.NONE:
                     suser = self._fr.pop(steamid, None)
                     if suser and oldrel not in (EFriendRelationship.Ignored, 0):
-                        self.emit(self.EVENT_FRIEND_REMOVED, suser)
+                        await self.emit(self.EVENT_FRIEND_REMOVED, suser)
                 elif oldrel in (2, 4) and rel == EFriendRelationship.Friend:
-                    self.emit(self.EVENT_FRIEND_NEW, suser)
+                    await self.emit(self.EVENT_FRIEND_NEW, suser)
 
         # request persona state for any new entries
         if steamids_to_check:
-            self._steam.request_persona_state(steamids_to_check)
+            await self._steam.request_persona_state(steamids_to_check)
 
         if not self.ready:
             self.ready = True
-            self.emit(self.EVENT_READY)
+            await self.emit(self.EVENT_READY)
 
     def __repr__(self):
         return '<%s %d users>' % (
@@ -181,7 +182,7 @@ class SteamFriendlist(EventEmitter):
 
         self._steam.send(MsgProto(EMsg.ClientRemoveFriend), {'friendid': steamid})
 
-    def block(self, steamid):
+    async def block(self, steamid):
         """
         Block Steam user
 
@@ -195,7 +196,7 @@ class SteamFriendlist(EventEmitter):
         elif not isinstance(steamid, SteamID):
             steamid = SteamID(steamid)
 
-        resp = self._steam.send_um_and_wait(
+        resp = await self._steam.send_um_and_wait(
             'Player.IgnoreFriend#1', {'steamid': steamid}, timeout=10
         )
 
@@ -203,12 +204,12 @@ class SteamFriendlist(EventEmitter):
             return EResult.Timeout
         elif resp.header.eresult == EResult.OK:
             if steamid not in self._fr:
-                self._fr[steamid] = self._steam.get_user(steamid, False)
+                self._fr[steamid] = await self._steam.get_user(steamid, False)
             self._fr[steamid].relationship = EFriendRelationship(resp.body.friend_relationship)
 
         return resp.header.eresult
 
-    def unblock(self, steamid):
+    async def unblock(self, steamid):
         """
         Unblock Steam user
 
@@ -222,7 +223,7 @@ class SteamFriendlist(EventEmitter):
         elif not isinstance(steamid, SteamID):
             steamid = SteamID(steamid)
 
-        resp = self._steam.send_um_and_wait(
+        resp = await self._steam.send_um_and_wait(
             'Player.IgnoreFriend#1', {'steamid': steamid, 'unignore': True}, timeout=10
         )
 

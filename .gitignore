@@ -169,3 +169,6 @@ cython_debug/
 
 # pb_update
 SteamTracking/
+
+# test for me
+test.py

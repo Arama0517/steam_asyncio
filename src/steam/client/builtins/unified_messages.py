@@ -31,50 +31,50 @@ from steam.enums.emsg import EMsg
 from steam.utils.proto import proto_fill_from_dict
 
 
-class UnifiedMessages:
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def send_um(self, method_name, params=None):
-        """Send service method request
-
-        :param method_name: method name (e.g. ``Player.GetGameBadgeLevels#1``)
-        :type  method_name: :class:`str`
-        :param params: message parameters
-        :type  params: :class:`dict`
-        :return: ``job_id`` identifier
-        :rtype: :class:`str`
-
-        Listen for ``jobid`` on this object to catch the response.
-        """
-        proto = get_um(method_name)
-
-        if proto is None:
-            raise ValueError('Failed to find method named: %s' % method_name)
-
-        message = MsgProto(EMsg.ServiceMethodCallFromClient)
-        message.header.target_job_name = method_name
-        message.body = proto()
-
-        if params:
-            proto_fill_from_dict(message.body, params)
-
-        return self.send_job(message)
-
-    def send_um_and_wait(self, method_name, params=None, timeout=10, raises=False):
-        """Send service method request and wait for response
-
-        :param method_name: method name (e.g. ``Player.GetGameBadgeLevels#1``)
-        :type  method_name: :class:`str`
-        :param params: message parameters
-        :type  params: :class:`dict`
-        :param timeout: (optional) seconds to wait
-        :type  timeout: :class:`int`
-        :param raises: (optional) On timeout if :class:`False` return :class:`None`, else raise :class:`gevent.Timeout`
-        :type  raises: :class:`bool`
-        :return: response message
-        :rtype: proto message instance
-        :raises: :class:`gevent.Timeout`
-        """
-        job_id = self.send_um(method_name, params)
-        return self.wait_msg(job_id, timeout, raises=raises)
+# class UnifiedMessages:
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#
+#     def send_um(self, method_name, params=None):
+#         """Send service method request
+#
+#         :param method_name: method name (e.g. ``Player.GetGameBadgeLevels#1``)
+#         :type  method_name: :class:`str`
+#         :param params: message parameters
+#         :type  params: :class:`dict`
+#         :return: ``job_id`` identifier
+#         :rtype: :class:`str`
+#
+#         Listen for ``jobid`` on this object to catch the response.
+#         """
+#         proto = get_um(method_name)
+#
+#         if proto is None:
+#             raise ValueError('Failed to find method named: %s' % method_name)
+#
+#         message = MsgProto(EMsg.ServiceMethodCallFromClient)
+#         message.header.target_job_name = method_name
+#         message.body = proto()
+#
+#         if params:
+#             proto_fill_from_dict(message.body, params)
+#
+#         return self.send_job(message)
+#
+#     def send_um_and_wait(self, method_name, params=None, timeout=10, raises=False):
+#         """Send service method request and wait for response
+#
+#         :param method_name: method name (e.g. ``Player.GetGameBadgeLevels#1``)
+#         :type  method_name: :class:`str`
+#         :param params: message parameters
+#         :type  params: :class:`dict`
+#         :param timeout: (optional) seconds to wait
+#         :type  timeout: :class:`int`
+#         :param raises: (optional) On timeout if :class:`False` return :class:`None`, else raise :class:`gevent.Timeout`
+#         :type  raises: :class:`bool`
+#         :return: response message
+#         :rtype: proto message instance
+#         :raises: :class:`gevent.Timeout`
+#         """
+#         job_id = self.send_um(method_name, params)
+#         return self.wait_msg(job_id, timeout, raises=raises)

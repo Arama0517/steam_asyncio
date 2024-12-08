@@ -32,29 +32,29 @@ class User:
         self.on(EMsg.ClientFriendMsgIncoming, self.__handle_message_incoming)
         self.on('FriendMessagesClient.IncomingMessage#1', self.__handle_message_incoming2)
 
-    def __handle_message_incoming(self, msg):
+    async def __handle_message_incoming(self, msg):
         # old chat
         if msg.body.chat_entry_type == EChatEntryType.ChatMsg:
-            user = self.get_user(msg.body.steamid_from)
-            self.emit('chat_message', user, msg.body.message.decode('utf-8'))
+            user = await self.get_user(msg.body.steamid_from)
+            await self.emit('chat_message', user, msg.body.message.decode('utf-8'))
 
-    def __handle_message_incoming2(self, msg):
+    async def __handle_message_incoming2(self, msg):
         # new chat
         if msg.body.chat_entry_type == EChatEntryType.ChatMsg and not msg.body.local_echo:
-            user = self.get_user(msg.body.steamid_friend)
-            self.emit('chat_message', user, msg.body.message)
+            user = await self.get_user(msg.body.steamid_friend)
+            await self.emit('chat_message', user, msg.body.message)
 
-    def __handle_disconnect(self):
+    async def __handle_disconnect(self):
         self.user = None
         self.current_games_played = []
 
-    def __handle_set_persona(self):
-        self.user = self.get_user(self.steam_id, False)
+    async def __handle_set_persona(self):
+        self.user = await self.get_user(self.steam_id, False)
 
         if self.steam_id.type == EType.Individual and self.persona_state != EPersonaState.Offline:
-            self.change_status(persona_state=self.persona_state)
+            await self.change_status(persona_state=self.persona_state)
 
-    def __handle_persona_state(self, message):
+    async def __handle_persona_state(self, message):
         for friend in message.body.friends:
             steamid = friend.friendid
 
@@ -63,7 +63,7 @@ class User:
                 suser._pstate = friend
                 suser._pstate_ready.set()
 
-    def change_status(self, **kwargs):
+    async def change_status(self, **kwargs):
         """
         Set name, persona state, flags
 
@@ -84,9 +84,9 @@ class User:
 
         message = MsgProto(EMsg.ClientChangeStatus)
         proto_fill_from_dict(message.body, kwargs)
-        self.send(message)
+        await self.send(message)
 
-    def request_persona_state(self, steam_ids, state_flags=863):
+    async def request_persona_state(self, steam_ids, state_flags=863):
         """Request persona state data
 
         :param steam_ids: list of steam ids
@@ -97,9 +97,9 @@ class User:
         m = MsgProto(EMsg.ClientRequestFriendData)
         m.body.persona_state_requested = state_flags
         m.body.friends.extend(steam_ids)
-        self.send(m)
+        await self.send(m)
 
-    def get_user(self, steam_id, fetch_persona_state=True):
+    async def get_user(self, steam_id, fetch_persona_state=True):
         """Get :class:`.SteamUser` instance for ``steam id``
 
         :param steam_id: steam id
@@ -117,11 +117,11 @@ class User:
             self._user_cache[steam_id] = suser
 
             if fetch_persona_state:
-                suser.refresh(wait=False)
+                await suser.refresh(wait=False)
 
         return suser
 
-    def games_played(self, app_ids):
+    async def games_played(self, app_ids):
         """
         Set the apps being played by the user
 
@@ -135,12 +135,12 @@ class User:
 
         self.current_games_played = app_ids = list(map(int, app_ids))
 
-        self.send(
+        await self.send(
             MsgProto(EMsg.ClientGamesPlayed),
             {'games_played': [{'game_id': app_id} for app_id in app_ids]},
         )
 
-    def set_ui_mode(self, uimode):
+    async def set_ui_mode(self, uimode):
         """
         Set UI mode. Show little icon next to name in friend list. (e.g phone, controller, other)
 
@@ -149,4 +149,4 @@ class User:
 
         These app ids will be recorded in :attr:`current_games_played`.
         """
-        self.send(MsgProto(EMsg.ClientCurrentUIMode), {'uimode': EClientUIMode(uimode)})
+        await self.send(MsgProto(EMsg.ClientCurrentUIMode), {'uimode': EClientUIMode(uimode)})

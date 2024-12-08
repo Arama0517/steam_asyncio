@@ -28,8 +28,14 @@ gdTckPv+T1JzZsuVcNfFjrocejN1oWI0Rrtgt4Bo+hOneoo3S57G9F1fOpn5nsQ6
 
 
 BS = 16
-pad = lambda s: s + (BS - len(s) % BS) * pack('B', BS - len(s) % BS)
-unpad = lambda s: s[0 : -s[-1]]
+
+
+def pad(s):
+    return s + (BS - len(s) % BS) * pack('B', BS - len(s) % BS)
+
+
+def unpad(s):
+    return s[0 : -s[-1]]
 
 
 def generate_session_key(hmac_secret=b''):

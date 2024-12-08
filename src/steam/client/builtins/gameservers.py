@@ -55,7 +55,7 @@ class SteamGameServers:
     def __init__(self, steam):
         self._s = steam
 
-    def query(self, filter_text, max_servers=10, timeout=30, **kw):
+    async def query(self, filter_text, max_servers=10, timeout=30, **kw):
         r"""
         Query game servers
 
@@ -93,7 +93,7 @@ class SteamGameServers:
         kw['filter_text'] = filter_text
         kw['max_servers'] = max_servers
 
-        resp = self._s.send_job_and_wait(
+        resp = await self._s.send_job_and_wait(
             MsgProto(EMsg.ClientGMSServerQuery),
             kw,
             timeout=timeout,
@@ -114,7 +114,7 @@ class SteamGameServers:
 
         return resp['servers']
 
-    def get_server_list(self, filter_text, max_servers=10, timeout=20):
+    async def get_server_list(self, filter_text, max_servers=10, timeout=20):
         """
         Get list of servers. Works similiarly to :meth:`query`, but the response has more details.
 
@@ -152,7 +152,7 @@ class SteamGameServers:
               'version': '1.35.4.0'}
             ]
         """
-        resp = self._s.send_um_and_wait(
+        resp = await self._s.send_um_and_wait(
             'GameServers.GetServerList#1',
             {
                 'filter': filter_text,
@@ -176,7 +176,7 @@ class SteamGameServers:
 
             return resp['servers']
 
-    def get_ips_from_steamids(self, server_steam_ids, timeout=30):
+    async def get_ips_from_steamids(self, server_steam_ids, timeout=30):
         """Resolve IPs from SteamIDs
 
         :param server_steam_ids: a list of steamids
@@ -193,7 +193,7 @@ class SteamGameServers:
 
             {SteamID(id=123456, type='AnonGameServer', universe='Public', instance=1234): '1.2.3.4:27060'}
         """
-        resp = self._s.send_um_and_wait(
+        resp = await self._s.send_um_and_wait(
             'GameServers.GetServerIPsBySteamID#1',
             {'server_steamids': server_steam_ids},
             timeout=timeout,
@@ -205,7 +205,7 @@ class SteamGameServers:
 
         return {SteamID(server.steamid): server.addr for server in resp.body.servers}
 
-    def get_steamids_from_ips(self, server_ips, timeout=30):
+    async def get_steamids_from_ips(self, server_ips, timeout=30):
         """Resolve SteamIDs from IPs
 
         :param steam_ids: a list of ips (e.g. ``['1.2.3.4:27015',...]``)
@@ -222,7 +222,7 @@ class SteamGameServers:
 
             {'1.2.3.4:27060': SteamID(id=123456, type='AnonGameServer', universe='Public', instance=1234)}
         """
-        resp = self._s.send_um_and_wait(
+        resp = await self._s.send_um_and_wait(
             'GameServers.GetServerSteamIDsByIP#1',
             {'server_ips': server_ips},
             timeout=timeout,

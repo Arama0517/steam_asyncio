@@ -17,12 +17,12 @@ class Web:
 
         self.on(self.EVENT_DISCONNECTED, self.__handle_disconnect)
 
-    def __handle_disconnect(self):
+    async def __handle_disconnect(self):
         self._web_session = None
 
     # TODO: DEPRECATED. This function not work anymore.
     # This function must be rewritten to use  WebAuth
-    def get_web_session_cookies(self):
+    async def get_web_session_cookies(self):
         """Get web authentication cookies via WebAPI's ``AuthenticateUser``
 
         .. note::
@@ -34,7 +34,7 @@ class Web:
         if not self.logged_on:
             return None
 
-        resp = self.send_job_and_wait(
+        resp = await self.send_job_and_wait(
             MsgProto(EMsg.ClientRequestWebAPIAuthenticateUserNonce), timeout=7
         )
 
@@ -52,7 +52,7 @@ class Web:
         }
 
         try:
-            resp = webapi.post('ISteamUserAuth', 'AuthenticateUser', 1, params=data)
+            resp = await webapi.post('ISteamUserAuth', 'AuthenticateUser', 1, params=data)
         except Exception as exp:
             self._LOG.debug('get_web_session_cookies error: %s' % str(exp))
             return None
@@ -62,7 +62,7 @@ class Web:
             'steamLoginSecure': resp['authenticateuser']['tokensecure'],
         }
 
-    def get_web_session(self, language='english'):
+    async def get_web_session(self, language='english'):
         """Get a :class:`requests.Session` that is ready for use
 
         See :meth:`get_web_session_cookies`
@@ -81,7 +81,7 @@ class Web:
         if self._web_session:
             return self._web_session
 
-        cookies = self.get_web_session_cookies()
+        cookies = await self.get_web_session_cookies()
         if cookies is None:
             return None
 

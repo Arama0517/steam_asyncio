@@ -2,6 +2,8 @@
 Reading the leaderboards with :class:`SteamLeaderboard` is as easy as iterating over a list.
 """
 
+import asyncio
+
 from steam.core.msg import MsgProto
 from steam.enums import (
     ELeaderboardDataRequest,
@@ -18,7 +20,7 @@ class Leaderboards:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def get_leaderboard(self, app_id, name):
+    async def get_leaderboard(self, app_id, name):
         """.. versionadded:: 0.8.2
 
         Find a leaderboard
@@ -37,7 +39,7 @@ class Leaderboards:
         message.body.leaderboard_name = name
         message.body.create_if_not_found = False
 
-        resp = self.send_job_and_wait(message, timeout=15)
+        resp = await self.send_job_and_wait(message, timeout=15)
 
         if not resp:
             raise LookupError("Didn't receive response within 15seconds :(")
@@ -112,7 +114,7 @@ class SteamLeaderboard:
     def __len__(self):
         return self.entry_count
 
-    def get_entries(self, start=0, end=0, data_request=None, steam_ids=None):
+    async def get_entries(self, start=0, end=0, data_request=None, steam_ids=None):
         """Get leaderboard entries.
 
         :param start: start entry, not index (e.g. rank 1 is ``start=1``)
@@ -139,7 +141,7 @@ class SteamLeaderboard:
         if steam_ids:
             message.body.steamids.extend(steam_ids)
 
-        resp = self._steam.send_job_and_wait(message, timeout=15)
+        resp = await self._steam.send_job_and_wait(message, timeout=15)
 
         if not resp:
             raise LookupError("Didn't receive response within 15seconds :(")
@@ -175,14 +177,14 @@ class SteamLeaderboard:
             if x < 0 or x >= self.entry_count:
                 raise IndexError('list index out of range')
 
-        entries = self.get_entries(start + 1, stop)
+        entries = asyncio.run(self.get_entries(start + 1, stop))
 
         if isinstance(x, slice):
             return [entries[i] for i in range(0, len(entries), step)]
         else:
             return entries[0]
 
-    def get_iter(self, times, seconds, chunk_size=2000):
+    async def get_iter(self, times, seconds, chunk_size=2000):
         """Make a iterator over the entries
 
         See :class:`steam.util.throttle.ConstantRateLimit` for ``times`` and ``seconds`` parameters.
@@ -197,13 +199,14 @@ class SteamLeaderboard:
         For example, the ``__iter__`` method on this class uses ``get_iter(1, 1, 2000)``
         """
 
-        def entry_generator():
-            with ConstantRateLimit(times, seconds, sleep_func=self._steam.sleep) as r:
+        async def entry_generator():
+            async with ConstantRateLimit(times, seconds, sleep_func=self._steam.sleep) as r:
                 for entries in chunks(self, chunk_size):
                     if not entries:
                         return
-                    yield from entries
-                    r.wait()
+                    for entry in entries:
+                        yield entry
+                    await r.wait()
 
         return entry_generator()
 

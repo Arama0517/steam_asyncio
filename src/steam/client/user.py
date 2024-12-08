@@ -1,7 +1,7 @@
+import asyncio
+from asyncio import Event
 from binascii import hexlify
-from datetime import datetime
-
-from gevent.event import Event
+from datetime import UTC, datetime
 
 from steam.core.msg import MsgProto
 from steam.enums import EChatEntryType, EFriendRelationship, EPersonaState
@@ -35,26 +35,26 @@ class SteamUser:
             self.state,
         )
 
-    def refresh(self, wait=True):
+    async def refresh(self, wait=True):
         if self._pstate_requested and self._pstate_ready.is_set():
             self._pstate_requested = False
 
         if not self._pstate_requested:
-            self._steam.request_persona_state([self.steam_id])
+            await self._steam.request_persona_state([self.steam_id])
             self._pstate_ready.clear()
             self._pstate_requested = True
 
         if wait:
-            self._pstate_ready.wait(timeout=5)
+            await asyncio.wait_for(self._pstate_ready.wait(), timeout=5)
             self._pstate_requested = False
 
-    def get_ps(self, field_name, wait_pstate=True):
+    async def get_ps(self, field_name, wait_pstate=True):
         """Get property from PersonaState
 
         `See full list of available fields_names <https://github.com/ValvePython/steam/blob/fa8a5127e9bb23185483930da0b6ae85e93055a7/protobufs/steammessages_clientserver_friends.proto#L125-L153>`_
         """
         if not self._pstate_ready.is_set() and wait_pstate:
-            self.refresh()
+            await self.refresh()
 
         if self._pstate is not None:
             return getattr(self._pstate, field_name)
@@ -64,14 +64,14 @@ class SteamUser:
     @property
     def last_logon(self):
         """:rtype: :class:`datetime`, :class:`None`"""
-        ts = self.get_ps('last_logon')
-        return datetime.utcfromtimestamp(ts) if ts else None
+        ts = asyncio.run(self.get_ps('last_logon'))
+        return datetime.fromtimestamp(ts, UTC) if ts else None
 
     @property
     def last_logoff(self):
         """:rtype: :class:`datetime`, :class:`None`"""
-        ts = self.get_ps('last_logoff')
-        return datetime.utcfromtimestamp(ts) if ts else None
+        ts = asyncio.run(self.get_ps('last_logoff'))
+        return datetime.fromtimestamp(ts, UTC) if ts else None
 
     @property
     def name(self):
@@ -79,7 +79,7 @@ class SteamUser:
 
         :rtype: :class:`str`, :class:`None`
         """
-        return self.get_ps('player_name')
+        return asyncio.run(self.get_ps('player_name'))
 
     @property
     def state(self):
@@ -87,7 +87,7 @@ class SteamUser:
 
         :rtype: :class:`.EPersonaState`
         """
-        state = self.get_ps('persona_state', False)
+        state = asyncio.run(self.get_ps('persona_state', False))
         return EPersonaState(state) if state else EPersonaState.Offline
 
     @property
@@ -96,7 +96,7 @@ class SteamUser:
 
         :rtype: dict
         """
-        kvs = self.get_ps('rich_presence')
+        kvs = asyncio.run(self.get_ps('rich_presence'))
         data = {}
 
         if kvs:
@@ -105,7 +105,7 @@ class SteamUser:
 
         return data
 
-    def get_avatar_url(self, size=2):
+    async def get_avatar_url(self, size=2):
         """Get URL to avatar picture
 
         :param size: possible values are ``0``, ``1``, or ``2`` corresponding to small, medium, large
@@ -113,7 +113,7 @@ class SteamUser:
         :return: url to avatar
         :rtype: :class:`str`
         """
-        hashbytes = self.get_ps('avatar_hash')
+        hashbytes = await self.get_ps('avatar_hash')
 
         if (
             hashbytes
@@ -128,11 +128,12 @@ class SteamUser:
             1: '_medium',
             2: '_full',
         }
-        url = 'http://cdn.akamai.steamstatic.com/steamcommunity/public/images/avatars/%s/%s%s.jpg'
+        # url = 'http://cdn.akamai.steamstatic.com/steamcommunity/public/images/avatars/%s/%s%s.jpg'
+        #
+        # return url % (ahash[:2], ahash, sizes[size])
+        return f'https://cdn.akamai.steamstatic.com/steamcommunity/public/images/avatars/{ahash[:2]}/{ahash}{sizes[size]}.jpg'
 
-        return url % (ahash[:2], ahash, sizes[size])
-
-    def send_message(self, message):
+    async def send_message(self, message):
         """Send chat message to this steam user
 
         :param message: message to send
@@ -140,7 +141,7 @@ class SteamUser:
         """
         # new chat
         if self._steam.chat_mode == 2:
-            self._steam.send_um(
+            await self._steam.send_um(
                 'FriendMessages.SendMessage#1',
                 {
                     'steamid': self.steam_id,
@@ -150,7 +151,7 @@ class SteamUser:
             )
         # old chat
         else:
-            self._steam.send(
+            await self._steam.send(
                 MsgProto(EMsg.ClientFriendMsg),
                 {
                     'steamid': self.steam_id,
@@ -159,10 +160,10 @@ class SteamUser:
                 },
             )
 
-    def block(self):
+    async def block(self):
         """Block user"""
-        self._steam.friends.block(self)
+        await self._steam.friends.block(self)
 
-    def unblock(self):
+    async def unblock(self):
         """Unblock user"""
-        self._steam.friends.unblock(self)
+        await self._steam.friends.unblock(self)

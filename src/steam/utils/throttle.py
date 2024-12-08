@@ -1,8 +1,16 @@
+import asyncio
 import time
+from typing import Awaitable, Callable
 
 
 class ConstantRateLimit:
-    def __init__(self, times, seconds, exit_wait=False, sleep_func=time.sleep):
+    def __init__(
+        self,
+        times,
+        seconds,
+        exit_wait=False,
+        sleep_func: Callable[[None], Awaitable[None]] = asyncio.sleep,
+    ):
         """Context manager for enforcing constant rate on code inside the block .
 
         `rate = seconds / times`
@@ -31,19 +39,20 @@ class ConstantRateLimit:
         self.__dict__.update(locals())
         self.rate = float(seconds) / times
         self.sleep_func = sleep_func
+        self.exit_wait = exit_wait
 
-    def __enter__(self):
+    async def __aenter__(self):
         self._update_ref()
         return self
 
-    def __exit__(self, etype, evalue, traceback):
+    async def __aexit__(self, etype, evalue, traceback):
         if self.exit_wait:
-            self.wait()
+            await self.wait()
 
     def _update_ref(self):
         self._ref = time.monotonic() + self.rate
 
-    def wait(self):
+    async def wait(self):
         """Blocks until the rate is met"""
         now = time.monotonic()
         if now < self._ref:

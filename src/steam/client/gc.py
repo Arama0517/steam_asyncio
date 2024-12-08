@@ -40,9 +40,8 @@ protobufs needed to (de)serialize message for communication with GC.
 
 import logging
 
-from eventemitter import EventEmitter
-
 from steam.client import SteamClient
+from steam.core.eventemitter import EventEmitter
 from steam.core.msg import GCMsgHdr, GCMsgHdrProto, MsgProto
 from steam.enums.emsg import EMsg
 from steam.utils.proto import clear_proto_bit, is_proto, set_proto_bit
@@ -69,19 +68,19 @@ class GameCoordinator(EventEmitter):
         if not isinstance(steam_client, SteamClient):
             raise ValueError('Expected an instance of SteamClient as first argument')
 
-        self.steam = steam_client
+        self.steam: SteamClient = steam_client
         self.app_id = app_id
         self._LOG = logging.getLogger('GC(appid:%d)' % app_id)
 
         # listen for GC messages
         self.steam.on(EMsg.ClientFromGC, self._handle_from_gc)
 
-    def emit(self, event, *args):
+    async def emit(self, event, *args):
         if event is not None:
             self._LOG.debug('Emit event: %s' % repr(event))
-        EventEmitter.emit(self, event, *args)
+        await EventEmitter.emit(self, event, *args)
 
-    def send(self, header, body):
+    async def send(self, header, body):
         """
         Send a message to GC
 
@@ -95,9 +94,9 @@ class GameCoordinator(EventEmitter):
         message.body.appid = self.app_id
         message.body.msgtype = set_proto_bit(header.msg) if header.proto else header.msg
         message.body.payload = header.serialize() + body
-        self.steam.send(message)
+        await self.steam.send(message)
 
-    def _handle_from_gc(self, msg):
+    async def _handle_from_gc(self, msg):
         if msg.body.appid != self.app_id:
             return
 
@@ -112,7 +111,7 @@ class GameCoordinator(EventEmitter):
 
         body = msg.body.payload[header_size:]
 
-        self._process_gc_message(clear_proto_bit(emsg), header, body)
+        await self._process_gc_message(clear_proto_bit(emsg), header, body)
 
-    def _process_gc_message(self, emsg, header, body):
-        self.emit(emsg, header, body)
+    async def _process_gc_message(self, emsg, header, body):
+        await self.emit(emsg, header, body)

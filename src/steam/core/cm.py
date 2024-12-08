@@ -1,3 +1,4 @@
+import asyncio
 import binascii
 import logging
 import struct
@@ -8,12 +9,12 @@ from itertools import count, cycle
 from random import shuffle
 from time import time
 
-import gevent
-import gevent.socket as socket
-from eventemitter import EventEmitter
+from dns.asyncresolver import Resolver
+from dns.rdatatype import A
 
 from steam.core import crypto
 from steam.core.connection import Connection, TCPConnection, WebsocketConnection
+from steam.core.eventemitter import EventEmitter
 from steam.core.msg import Msg, MsgProto
 from steam.enums import EResult, EUniverse
 from steam.enums.emsg import EMsg
@@ -82,6 +83,7 @@ class CMClient(EventEmitter):
     _LOG = logging.getLogger('CMClient')
 
     def __init__(self, protocol=PROTOCOL_TCP):
+        super().__init__()
         self.cm_servers = CMServerList()
 
         if protocol == CMClient.PROTOCOL_WEBSOCKET:
@@ -96,12 +98,12 @@ class CMClient(EventEmitter):
         (self.on(EMsg.ClientLogOnResponse, self._handle_logon),)
         (self.on(EMsg.ClientCMList, self._handle_cm_list),)
 
-    def emit(self, event, *args):
+    async def emit(self, event, *args):
         if event is not None:
             self._LOG.debug('Emit event: %s' % repr(event))
-        super().emit(event, *args)
+        await super().emit(event, *args)
 
-    def connect(self, retry=0, delay=0):
+    async def connect(self, retry=0, delay=0):
         """Initiate connection to CM. Blocks until connected unless ``retry`` is specified.
 
         :param retry: number of retries before returning. Unlimited when set to ``None``
@@ -121,8 +123,8 @@ class CMClient(EventEmitter):
 
         if delay:
             self._LOG.debug('Delayed connect: %d seconds' % delay)
-            self.emit(self.EVENT_RECONNECT, delay)
-            self.sleep(delay)
+            await self.emit(self.EVENT_RECONNECT, delay)
+            await self.sleep(delay)
 
         self._LOG.debug('Connect initiated.')
 
@@ -136,10 +138,10 @@ class CMClient(EventEmitter):
                 return False
 
             if isinstance(self.connection, WebsocketConnection):
-                self.cm_servers.bootstrap_from_webapi(cmtype='websockets')
+                await self.cm_servers.bootstrap_from_webapi(cmtype='websockets')
             elif isinstance(self.connection, TCPConnection):
-                if not self.cm_servers.bootstrap_from_webapi():
-                    self.cm_servers.bootstrap_from_dns()
+                if not await self.cm_servers.bootstrap_from_webapi():
+                    await self.cm_servers.bootstrap_from_dns()
 
         for i, server_addr in enumerate(cycle(self.cm_servers), start=next(i) - 1):
             if retry and i >= retry:
@@ -148,44 +150,44 @@ class CMClient(EventEmitter):
 
             start = time()
 
-            if self.connection.connect(server_addr):
+            if await self.connection.connect(server_addr):
                 break
             self._LOG.debug('Failed to connect. Retrying...')
 
             diff = time() - start
 
             if diff < 5:
-                self.sleep(5 - diff)
+                await self.sleep(5 - diff)
 
         self.current_server_addr = server_addr
         self.connected = True
-        self.emit(self.EVENT_CONNECTED)
+        await self.emit(self.EVENT_CONNECTED)
 
         # WebsocketConnection secures itself
         if isinstance(self.connection, WebsocketConnection):
             self.channel_secured = True
-            self.emit(self.EVENT_CHANNEL_SECURED)
+            await self.emit(self.EVENT_CHANNEL_SECURED)
 
-        self._recv_loop = gevent.spawn(self._recv_messages)
+        self._recv_loop = asyncio.create_task(self._recv_messages())
         self._connecting = False
         return True
 
-    def disconnect(self):
+    async def disconnect(self):
         """Close connection"""
 
         if not self.connected:
             return
         self.connected = False
 
-        self.connection.disconnect()
+        await self.connection.disconnect()
 
         if self._heartbeat_loop:
-            self._heartbeat_loop.kill()
-        self._recv_loop.kill()
+            self._heartbeat_loop.cancel()
+        self._recv_loop.cancel()
 
         self._reset_attributes()
 
-        self.emit(self.EVENT_DISCONNECTED)
+        await self.emit(self.EVENT_DISCONNECTED)
 
     def _reset_attributes(self):
         for name in [
@@ -201,7 +203,7 @@ class CMClient(EventEmitter):
         ]:
             self.__dict__.pop(name, None)
 
-    def send(self, message):
+    async def send(self, message: Msg | MsgProto):
         """
         Send a message
 
@@ -229,10 +231,10 @@ class CMClient(EventEmitter):
             else:
                 data = crypto.symmetric_encrypt(data, self.channel_key)
 
-        self.connection.put_message(data)
+        await self.connection.put_message(data)
 
-    def _recv_messages(self):
-        for message in self.connection:
+    async def _recv_messages(self):
+        async for message in self.connection:
             if not self.connected:
                 break
 
@@ -248,16 +250,17 @@ class CMClient(EventEmitter):
                 else:
                     message = crypto.symmetric_decrypt(message, self.channel_key)
 
-            gevent.spawn(self._parse_message, message)
-            self.idle()
+            # gevent.spawn(self._parse_message, message)
+            asyncio.create_task(self._parse_message(message))
+            await self.idle()
 
         if not self._seen_logon and self.channel_secured:
-            if self.wait_event('disconnected', timeout=5) is not None:
+            if await self.wait_event('disconnected', timeout=5) is not None:
                 return
 
-        gevent.spawn(self.disconnect)
+        asyncio.create_task(self.disconnect())
 
-    def _parse_message(self, message):
+    async def _parse_message(self, message):
         (emsg_id,) = struct.unpack_from('<I', message)
         emsg = EMsg(clear_proto_bit(emsg_id))
 
@@ -298,10 +301,10 @@ class CMClient(EventEmitter):
         else:
             self._LOG.debug('Incoming: %s', repr(msg))
 
-        self.emit(emsg, msg)
+        await self.emit(emsg, msg)
         return emsg, msg
 
-    def __handle_encrypt_request(self, req):
+    async def __handle_encrypt_request(self, req):
         self._LOG.debug('Securing channel')
 
         try:
@@ -311,7 +314,7 @@ class CMClient(EventEmitter):
                 raise RuntimeError('Unsupported universe')
         except RuntimeError as e:
             self._LOG.exception(e)
-            gevent.spawn(self.disconnect)
+            asyncio.create_task(self.disconnect())
             return
 
         resp = Msg(EMsg.ChannelEncryptResponse)
@@ -320,20 +323,20 @@ class CMClient(EventEmitter):
         key, resp.body.key = crypto.generate_session_key(challenge)
         resp.body.crc = binascii.crc32(resp.body.key) & 0xFFFFFFFF
 
-        self.send(resp)
+        await self.send(resp)
 
-        result = self.wait_event(EMsg.ChannelEncryptResult, timeout=5)
+        result = await self.wait_event(EMsg.ChannelEncryptResult, timeout=5)
 
         if result is None:
             self.cm_servers.mark_bad(self.current_server_addr)
-            gevent.spawn(self.disconnect)
+            asyncio.create_task(self.disconnect())
             return
 
         eresult = result[0].body.eresult
 
         if eresult != EResult.OK:
             self._LOG.error('Failed to secure channel: %s' % eresult)
-            gevent.spawn(self.disconnect)
+            asyncio.create_task(self.disconnect())
             return
 
         self.channel_key = key
@@ -345,9 +348,9 @@ class CMClient(EventEmitter):
             self._LOG.debug('Channel secured (legacy mode)')
 
         self.channel_secured = True
-        self.emit(self.EVENT_CHANNEL_SECURED)
+        await self.emit(self.EVENT_CHANNEL_SECURED)
 
-    def __handle_multi(self, msg):
+    async def __handle_multi(self, msg):
         self._LOG.debug('Multi: Unpacking')
 
         if msg.body.size_unzipped:
@@ -364,29 +367,29 @@ class CMClient(EventEmitter):
 
             if len(data) != msg.body.size_unzipped:
                 self._LOG.fatal('Unzipped size mismatch')
-                gevent.spawn(self.disconnect)
+                asyncio.create_task(self.disconnect())
                 return
         else:
             data = msg.body.message_body
 
         while len(data) > 0:
             (size,) = struct.unpack_from('<I', data)
-            self._parse_message(data[4 : 4 + size])
+            await self._parse_message(data[4 : 4 + size])
             data = data[4 + size :]
 
-    def __heartbeat(self, interval: int):
+    async def __heartbeat(self, interval: int):
         message = MsgProto(EMsg.ClientHeartBeat)
 
         while True:
-            self.sleep(interval)
-            self.send(message)
+            await self.sleep(interval)
+            await self.send(message)
 
-    def _handle_logon(self, msg):
+    async def _handle_logon(self, msg):
         result = msg.body.eresult
 
         if result in (EResult.TryAnotherCM, EResult.ServiceUnavailable):
             self.cm_servers.mark_bad(self.current_server_addr)
-            self.disconnect()
+            await self.disconnect()
         elif result == EResult.OK:
             self._seen_logon = True
 
@@ -397,31 +400,32 @@ class CMClient(EventEmitter):
             self.cell_id = msg.body.cell_id
 
             if self._heartbeat_loop:
-                self._heartbeat_loop.kill()
+                self._heartbeat_loop.cancel()
 
             self._LOG.debug('Heartbeat started.')
 
             interval = msg.body.heartbeat_seconds
-            self._heartbeat_loop = gevent.spawn(self.__heartbeat, interval)
+            self._heartbeat_loop = asyncio.create_task(self.__heartbeat(interval))
         else:
-            self.emit(self.EVENT_ERROR, EResult(result))
-            self.disconnect()
+            await self.emit(self.EVENT_ERROR, EResult(result))
+            await self.disconnect()
 
-    def _handle_cm_list(self, msg):
+    async def _handle_cm_list(self, msg):
         self._LOG.debug('Updating CM list')
 
-        new_servers = zip(map(ip4_from_int, msg.body.cm_addresses), msg.body.cm_ports)
+        new_servers = list(zip(map(ip4_from_int, msg.body.cm_addresses), msg.body.cm_ports))
         self.cm_servers.clear()
         self.cm_servers.merge_list(new_servers)
         self.cm_servers.cell_id = self.cell_id
 
-    def sleep(self, seconds):
+    @staticmethod
+    async def sleep(seconds):
         """Yeild and sleep N seconds. Allows other greenlets to run"""
-        gevent.sleep(seconds)
+        await asyncio.sleep(seconds)
 
-    def idle(self):
+    async def idle(self):
         """Yeild in the current greenlet and let other greenlets run"""
-        gevent.idle()
+        await self.sleep(0)
 
 
 class CMServerList:
@@ -465,21 +469,23 @@ class CMServerList:
             self._LOG.debug('List cleared.')
         self.list.clear()
 
-    def bootstrap_from_dns(self):
+    async def bootstrap_from_dns(self):
         """
         Fetches CM server list from WebAPI and replaces the current one
         """
         self._LOG.debug('Attempting bootstrap via DNS')
 
+        resolver = Resolver()
         try:
-            answer = socket.getaddrinfo(
-                'cm0.steampowered.com', 27017, socket.AF_INET, proto=socket.IPPROTO_TCP
-            )
+            # answer = socket.getaddrinfo(
+            #     'cm0.steampowered.com', 27017, socket.AF_INET, proto=socket.IPPROTO_TCP
+            # )
+            answer = await resolver.resolve('cm0.steampowered.com', A)
         except Exception as exp:
             self._LOG.error('DNS boostrap failed: %s' % str(exp))
             return False
 
-        servers = list(map(lambda addr: addr[4], answer))
+        servers = list(map(lambda addr: (addr.to_text(), 27017), answer))
 
         if servers:
             self.clear()
@@ -489,14 +495,14 @@ class CMServerList:
             self._LOG.error('DNS boostrap: cm0.steampowered.com resolved no A records')
             return False
 
-    def bootstrap_from_webapi(self, cell_id=0, cmtype='netfilter'):
+    async def bootstrap_from_webapi(self, cell_id=0, cmtype='netfilter'):
         """
         Fetches CM server list from WebAPI and replaces the current one
 
-        :param cellid: cell id (0 = global)
-        :type cellid: :class:`int`
+        :param cell_id: cell id (0 = global)
+        :type cell_id: :class:`int`
         :param cmtype: CM type filter
-        :type cellid: :class:`str`
+        :type cell_id: :class:`int`
         :return: booststrap success
         :rtype: :class:`bool`
         """
@@ -505,7 +511,7 @@ class CMServerList:
         from steam import webapi
 
         try:
-            resp = webapi.get(
+            resp: dict = await webapi.get(
                 'ISteamDirectory',
                 'GetCMListForConnect',
                 1,
@@ -530,7 +536,7 @@ class CMServerList:
 
         self.clear()
         self.cell_id = cell_id
-        self.merge_list(map(str_to_tuple, serverlist))
+        self.merge_list(list(map(str_to_tuple, serverlist)))
 
         return True
 

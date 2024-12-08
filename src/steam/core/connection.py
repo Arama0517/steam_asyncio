@@ -1,95 +1,79 @@
+import asyncio
 import logging
-import ssl
 import struct
+from asyncio import StreamReader, StreamWriter, Task
 
-import certifi
-import gevent
-from gevent import event, queue, socket
-from gevent.select import select as gselect
-from wsproto import WSConnection, events as wsevents
-from wsproto.connection import ConnectionState, ConnectionType
+import websockets
+from websockets.asyncio.client import ClientConnection
 
 logger = logging.getLogger('Connection')
 
 
 class Connection:
-    def __init__(self):
-        self.socket = None
-        self.connected = False
-        self.server_addr = None
+    connected = False
+    server_addr = None
 
-        self._reader = None
-        self._writer = None
-        self._readbuf = b''
-        self.send_queue = queue.Queue()
-        self.recv_queue = queue.Queue()
+    _stream_reader: StreamReader = None
+    _reader_loop: Task | None = None
 
-        self.event_connected = event.Event()
+    _stream_writer: StreamWriter = None
+    _writer_loop: Task | None = None
+
+    _readbuf = b''
+    send_queue = asyncio.Queue()
+    recv_queue = asyncio.Queue()
+
+    event_connected = asyncio.Event()
 
     @property
     def local_address(self):
-        return self.socket.getsockname()[0]
+        return self._stream_writer.get_extra_info('sockname')[0]
 
-    def connect(self, server_addr):
-        self._new_socket()
+    async def connect(self, server_addr):
+        raise NotImplementedError
 
-        logger.debug('Attempting connection to %s', str(server_addr))
-
-        try:
-            self._connect(server_addr)
-        except OSError:
-            return False
-
-        self.server_addr = server_addr
-        self.recv_queue.queue.clear()
-
-        self._reader = gevent.spawn(self._reader_loop)
-        self._writer = gevent.spawn(self._writer_loop)
-
-        # how this gets set is implementation dependent
-        self.event_connected.wait(timeout=10)
-        return True
-
-    def disconnect(self):
+    async def disconnect(self):
         if not self.event_connected.is_set():
             return
         self.event_connected.clear()
 
         self.server_addr = None
 
-        if self._reader:
-            self._reader.kill(block=False)
-            self._reader = None
-        if self._writer:
-            self._writer.kill(block=False)
-            self._writer = None
+        if self._reader_loop:
+            self._reader_loop.cancel()
+            self._reader_loop = None
+
+        if self._writer_loop:
+            self._writer_loop.cancel()
+            self._writer_loop = None
 
         self._readbuf = b''
-        self.send_queue.queue.clear()
-        self.recv_queue.queue.clear()
-        self.recv_queue.put(StopIteration)
+        self.send_queue._queue.clear()
+        self.recv_queue._queue.clear()
+        await self.recv_queue.put(StopIteration)
 
-        self.socket.close()
+        if self._stream_writer:
+            logger.debug('wait close')
+            self._stream_writer.close()
+            await self._stream_writer.wait_closed()
 
         logger.debug('Disconnected.')
 
-    def __iter__(self):
-        return self.recv_queue
+    async def __aiter__(self):
+        while True:
+            result = await self.recv_queue.get()
+            if result is StopIteration:
+                raise result
+            yield result
 
-    def put_message(self, message):
-        self.send_queue.put(message)
+    async def put_message(self, message):
+        await self.send_queue.put(message)
 
-    def _new_socket(self):
-        raise TypeError('{}: _new_socket is unimplemented'.format(self.__class__.__name__))
+    async def _reader_loop_func(self):
+        raise NotImplementedError
 
-    def _connect(self, server_addr):
-        raise TypeError('{}: _connect is unimplemented'.format(self.__class__.__name__))
-
-    def _reader_loop(self):
-        raise TypeError('{}: _reader_loop is unimplemented'.format(self.__class__.__name__))
-
-    def _writer_loop(self):
-        raise TypeError('{}: _writer_loop is unimplemented'.format(self.__class__.__name__))
+    async def _writer_loop_func(self):
+        raise NotImplementedError
 
 
 class TCPConnection(Connection):
@@ -97,184 +81,151 @@ class TCPConnection(Connection):
     FMT = '<I4s'
     FMT_SIZE = struct.calcsize(FMT)
 
-    def _new_socket(self):
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    def _connect(self, server_addr):
-        self.socket.connect(server_addr)
-        logger.debug('Connected.')
-        self.event_connected.set()
-
-    def _read_data(self):
+    async def connect(self, server_addr):
+        self.server_addr = server_addr
         try:
-            return self.socket.recv(16384)
-        except OSError:
-            return ''
+            # Open a TCP connection
+            self._stream_reader, self._stream_writer = await asyncio.open_connection(
+                self.server_addr[0], self.server_addr[1]
+            )
 
-    def _write_data(self, data):
-        self.socket.sendall(data)
+            logger.debug('Connected.')
+            self.event_connected.set()
 
-    def _writer_loop(self):
+            # Start reading and writing loops
+            self._reader_loop = asyncio.create_task(self._reader_loop_func())
+            self._writer_loop = asyncio.create_task(self._writer_loop_func())
+
+            await self.event_connected.wait()
+            return True
+        except Exception as e:
+            logger.error(f'Connection failed: {e}')
+            return False
+
+    async def _writer_loop_func(self):
         while True:
-            message = self.send_queue.get()
+            message = await self.send_queue.get()
             packet = struct.pack(TCPConnection.FMT, len(message), TCPConnection.MAGIC) + message
             try:
-                self._write_data(packet)
-            except:
+                self._stream_writer.write(packet)
+                await self._stream_writer.drain()
+            except Exception:
                 logger.debug('Connection error (writer).')
-                self.disconnect()
+                await self.disconnect()
                 return
 
-    def _reader_loop(self):
+    async def _reader_loop_func(self):
         while True:
-            rlist, _, _ = gselect([self.socket], [], [])
-
-            if self.socket in rlist:
-                data = self._read_data()
-
+            try:
+                data = await self._stream_reader.read(16384)
                 if not data:
-                    logger.debug('Connection error (reader).')
-                    self.disconnect()
+                    logger.debug('Connection closed or no data received.')
+                    await self.disconnect()
                     return
 
+                logger.debug(f'Received data: {data}')
                 self._readbuf += data
-                self._read_packets()
+                await self._read_packets()
 
-    def _read_packets(self):
+            except asyncio.CancelledError:
+                logger.debug('Reader loop was cancelled.')
+                break
+            except Exception as e:
+                logger.debug(f'Reader error: {e}')
+                await self.disconnect()
+                return
+
+    async def _read_packets(self):
         header_size = TCPConnection.FMT_SIZE
         buf = self._readbuf
 
-        while len(buf) > header_size:
-            message_length, magic = struct.unpack_from(TCPConnection.FMT, buf)
+        while len(buf) >= header_size:
+            try:
+                message_length, magic = struct.unpack_from(TCPConnection.FMT, buf)
 
-            if magic != TCPConnection.MAGIC:
-                logger.debug('invalid magic, got %s' % repr(magic))
-                self.disconnect()
+                if magic != TCPConnection.MAGIC:
+                    logger.debug(f'Invalid magic, got {repr(magic)}')
+                    await self.disconnect()
+                    return
+
+                packet_length = header_size + message_length
+
+                if len(buf) < packet_length:
+                    return  # not enough data to read the full message
+
+                message = buf[header_size:packet_length]
+                buf = buf[packet_length:]  # remove processed data
+
+                await self.recv_queue.put(message)
+
+            except struct.error as e:
+                logger.error(f'Error unpacking packet: {e}')
+                await self.disconnect()
                 return
-
-            packet_length = header_size + message_length
-
-            if len(buf) < packet_length:
-                return
-
-            message = buf[header_size:packet_length]
-            buf = buf[packet_length:]
-
-            self.recv_queue.put(message)
 
         self._readbuf = buf
 
 
 class WebsocketConnection(Connection):
+    ws: ClientConnection = None
+
     def __init__(self):
-        super(WebsocketConnection, self).__init__()
-        self.ws = WSConnection(ConnectionType.CLIENT)
-        self.ssl_ctx = ssl.create_default_context(cafile=certifi.where())
-        self.event_wsdisconnected = event.Event()
-        self._readbuf = b''
+        super().__init__()
+        self.event_wsdisconnected = asyncio.Event()
 
-    def _new_socket(self):
-        self.raw_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    def _connect(self, server_addr):
+    async def connect(self, server_addr: tuple[str, int]):
         host, port = server_addr
+        uri = f'wss://{host}:{port}/cmsocket/'
 
-        for res in socket.getaddrinfo(host, port, 0, socket.SOCK_STREAM):
-            try:
-                # tcp socket
-                _, _, _, _, sa = res
-                self.raw_socket.connect(sa)
-                self.socket = self.ssl_ctx.wrap_socket(self.raw_socket, server_hostname=host)
-                # websocket
-                ws_host = ':'.join(map(str, server_addr))
-                ws_send = self.ws.send(wsevents.Request(host=ws_host, target='/cmsocket/'))
-                self.socket.sendall(ws_send)
-                return
-            except OSError:
-                if self.socket is not None:
-                    self.socket.close()
+        try:
+            # Create websocket connection
+            self.ws = await websockets.connect(uri)
+            logger.debug('Connected to WebSocket.')
 
-    def _writer_loop(self):
+            self.event_connected.set()
+
+            # Start reading and writing loops
+            asyncio.create_task(self._reader_loop_func())
+            asyncio.create_task(self._writer_loop_func())
+
+            await self.event_connected.wait()
+            return True
+        except Exception as e:
+            logger.error(f'WebSocket connection failed: {e}')
+            return False
+
+    async def _writer_loop_func(self):
         while True:
-            message = self.send_queue.get()
+            message = await self.send_queue.get()
             try:
-                logger.debug('sending message of length {}'.format(len(message)))
-                self.socket.sendall(self.ws.send(wsevents.Message(data=message)))
-            except:
+                logger.debug(f'Sending WebSocket message of length {len(message)}')
+                await self.ws.send(message)
+            except Exception:
                 logger.debug('Connection error (writer).')
-                self.disconnect()
+                await self.disconnect()
                 return
 
-    def _reader_loop(self):
+    async def _reader_loop_func(self):
         while True:
-            rlist, _, _ = gselect([self.socket], [], [])
-
-            if self.socket in rlist:
-                try:
-                    data = self.socket.recv(16384)
-                except OSError:
-                    data = ''
-
-                if not data:
+            try:
+                data = await self.ws.recv()
+                if data is None:
                     logger.debug('Connection error (reader).')
-                    # A receive of zero bytes indicates the TCP socket has been closed. We
-                    # need to pass None to wsproto to update its internal state.
-                    logger.debug('Received 0 bytes (connection closed)')
-                    self.ws.receive_data(None)
-                    # now disconnect
-                    self.disconnect()
+                    await self.disconnect()
                     return
 
-                logger.debug('Received {} bytes'.format(len(data)))
-                self._readbuf += data
-                self.ws.receive_data(self._readbuf)
-                self._readbuf = b''
-                self._handle_events()
+                logger.debug(f'Received WebSocket message of length {len(data)}')
+                await self.recv_queue.put(data)
+            except Exception as e:
+                logger.debug(f'Reader error: {e}')
+                await self.disconnect()
+                return
 
-    def _handle_events(self):
-        for event in self.ws.events():
-            if isinstance(event, wsevents.AcceptConnection):
-                logger.debug('WebSocket negotiation complete. Connected.')
-                self.event_connected.set()
-            elif isinstance(event, wsevents.RejectConnection):
-                logger.debug("WebSocket connection was rejected. That's probably not good.")
-            elif isinstance(event, wsevents.TextMessage):
-                logger.debug(
-                    'Received websocket text message of length: {}'.format(len(event.data))
-                )
-            elif isinstance(event, wsevents.BytesMessage):
-                logger.debug(
-                    'Received websocket bytes message of length: {}'.format(len(event.data))
-                )
-                self.recv_queue.put(event.data)
-            elif isinstance(event, wsevents.Pong):
-                logger.debug('Received pong: {}'.format(repr(event.payload)))
-            elif isinstance(event, wsevents.CloseConnection):
-                logger.debug(
-                    'Connection closed: code={} reason={}'.format(event.code, event.reason)
-                )
-                if self.ws.state == ConnectionState.REMOTE_CLOSING:
-                    self.socket.send(self.ws.send(event.response()))
-                self.event_wsdisconnected.set()
-            else:
-                raise TypeError('Do not know how to handle event: {}'.format((event)))
-
-    def disconnect(self):
+    async def disconnect(self):
         self.event_wsdisconnected.clear()
 
-        # WebSocket closing handshake
-        if self.ws.state == ConnectionState.OPEN:
-            logger.debug('Disconnect called. Sending CloseConnection message.')
-            self.socket.sendall(
-                self.ws.send(wsevents.CloseConnection(code=1000, reason='sample reason'))
-            )
-            self.socket.shutdown(socket.SHUT_WR)
-            # wait for notification from _reader_loop that the closing response was received
-            self.event_wsdisconnected.wait()
+        if self.ws is not None:
+            logger.debug('Disconnecting WebSocket...')
+            await self.ws.close()
 
-        super(WebsocketConnection, self).disconnect()
-
-
-class UDPConnection(Connection):
-    def _new_socket(self):
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        await super().disconnect()

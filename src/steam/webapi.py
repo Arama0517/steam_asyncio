@@ -31,9 +31,14 @@ All globals params (``key``, ``https``, ``format``, ``raw``) can be specified on
     }
 """
 
+import asyncio
 import json as _json
+from typing import Literal, Optional
+from xml.etree.ElementTree import Element
 
-from steam.utils.web import make_requests_session as _make_session
+import requests
+
+from steam.utils.web import AioHttpClientSessionWithUA
 
 
 class APIHost:
@@ -52,7 +57,7 @@ class APIHost:
 DEFAULT_PARAMS = {
     # api parameters
     'apihost': APIHost.Public,
-    'key': None,
+    'key': 'key',
     'format': 'json',
     # internal
     'https': True,
@@ -92,6 +97,7 @@ class WebAPI:
     http_timeout = DEFAULT_PARAMS['http_timeout']
     apihost = DEFAULT_PARAMS['apihost']
     interfaces = []
+    session: requests.Session
 
     def __init__(
         self,
@@ -110,12 +116,9 @@ class WebAPI:
         self.http_timeout = http_timeout  #: HTTP timeout in seconds
         self.apihost = apihost  #: ..versionadded:: 0.8.3 apihost hostname
         self.interfaces = []  #: list of all interfaces
-        self.session = (
-            _make_session()
-        )  #: :class:`requests.Session` from :func:`.make_requests_session`
 
         if auto_load_interfaces:
-            self.load_interfaces(self.fetch_interfaces())
+            self.load_interfaces(asyncio.run(self.fetch_interfaces()))
 
     def __repr__(self):
         return '{}(key={}, https={})'.format(
@@ -124,7 +127,7 @@ class WebAPI:
             repr(self.https),
         )
 
-    def fetch_interfaces(self):
+    async def fetch_interfaces(self):
         """
         Returns a dict with the response from ``GetSupportedAPIList``
 
@@ -132,14 +135,13 @@ class WebAPI:
 
         The returned value can passed to :meth:`load_interfaces`
         """
-        return get(
+        return await get(
             'ISteamWebAPIUtil',
             'GetSupportedAPIList',
             1,
             https=self.https,
             apihost=self.apihost,
             caller=None,
-            session=self.session,
             params={
                 'format': 'json',
                 'key': self.key,
@@ -168,7 +170,7 @@ class WebAPI:
             self.interfaces.append(obj)
             setattr(self, obj.name, obj)
 
-    def call(self, method_path, **kwargs):
+    async def call(self, method_path, **kwargs):
         """
         Make an API call for specific method
 
@@ -180,7 +182,7 @@ class WebAPI:
         """
 
         interface, method = method_path.split('.', 1)
-        return getattr(getattr(self, interface), method)(**kwargs)
+        return await getattr(getattr(self, interface), method)(**kwargs)
 
     def doc(self):
         """
@@ -249,10 +251,6 @@ class WebAPIInterface:
     def raw(self):
         return self._parent.raw
 
-    @property
-    def session(self):
-        return self._parent.session
-
     def doc(self):
         """
         :return: Documentation for all methods on this interface
@@ -302,7 +300,7 @@ class WebAPIMethod:
             ),
         )
 
-    def __call__(self, **kwargs):
+    async def __call__(self, **kwargs):
         possible_kwargs = set(self._dict['parameters'].keys()) | set(DEFAULT_PARAMS.keys())
         unrecognized = set(kwargs.keys()).difference(possible_kwargs)
         if unrecognized:
@@ -343,11 +341,10 @@ class WebAPIMethod:
             self.version,
         )
 
-        return webapi_request(
+        return await webapi_request(
             url=url,
             method=self.method,
             caller=self,
-            session=self._parent.session,
             params=params,
         )
 
@@ -399,22 +396,21 @@ class WebAPIMethod:
         return doc
 
 
-def webapi_request(url, method='GET', caller=None, session=None, params=None):
+async def webapi_request(
+    url: str,
+    method: Literal['GET', 'POST'] = 'GET',
+    caller: Optional[WebAPIMethod] = None,
+    params: Optional[dict] = None,
+) -> dict | Element | str:
     """Low level function for calling Steam's WebAPI
 
     .. versionchanged:: 0.8.3
 
     :param url: request url (e.g. ``https://api.steampowered.com/A/B/v001/``)
-    :type url: :class:`str`
     :param method: HTTP method (GET or POST)
-    :type method: :class:`str`
     :param caller: caller reference, caller.last_response is set to the last response
     :param params: dict of WebAPI and endpoint specific params
-    :type params: :class:`dict`
-    :param session: an instance requests session, or one is created per call
-    :type session: :class:`requests.Session`
     :return: response based on paramers
-    :rtype: :class:`dict`, :class:`lxml.etree.Element`, :class:`str`
     """
     if method not in ('GET', 'POST'):
         raise ValueError('Only GET and POST methods are supported, got: %s' % repr(method))
@@ -442,42 +438,37 @@ def webapi_request(url, method='GET', caller=None, session=None, params=None):
 
     kwargs = {'params': params} if method == 'GET' else {'data': params}  # params to data for POST
 
-    if session is None:
-        session = _make_session()
+    async with AioHttpClientSessionWithUA() as session:
+        async with session.request(method, url, timeout=onetime['http_timeout'], **kwargs) as resp:
+            # we keep a reference of the last response instance on the caller
+            if caller is not None:
+                caller.last_response = resp
+            # 4XX and 5XX will cause this to raise
+            resp.raise_for_status()
 
-    f = getattr(session, method.lower())
-    resp = f(url, stream=False, timeout=onetime['http_timeout'], **kwargs)
+            if onetime['raw']:
+                return await resp.text()
+            elif onetime['format'] == 'json':
+                return await resp.json()
+            elif onetime['format'] == 'xml':
+                from lxml import etree as _etree
 
-    # we keep a reference of the last response instance on the caller
-    if caller is not None:
-        caller.last_response = resp
-    # 4XX and 5XX will cause this to raise
-    resp.raise_for_status()
+                return _etree.fromstring(resp.content)
+            elif onetime['format'] == 'vdf':
+                import vdf as _vdf
 
-    if onetime['raw']:
-        return resp.text
-    elif onetime['format'] == 'json':
-        return resp.json()
-    elif onetime['format'] == 'xml':
-        from lxml import etree as _etree
-
-        return _etree.fromstring(resp.content)
-    elif onetime['format'] == 'vdf':
-        import vdf as _vdf
-
-        return _vdf.loads(resp.text)
+                return _vdf.loads(await resp.text())
 
 
-def get(
-    interface,
-    method,
-    version=1,
-    apihost=DEFAULT_PARAMS['apihost'],
-    https=DEFAULT_PARAMS['https'],
-    caller=None,
-    session=None,
-    params=None,
-):
+async def get(
+    interface: str,
+    method: str,
+    version: int = 1,
+    apihost: str = DEFAULT_PARAMS['apihost'],
+    https: bool = DEFAULT_PARAMS['https'],
+    caller: Optional[WebAPIMethod] = None,
+    params: Optional[dict] = None,
+) -> dict | Element | str:
     """Send GET request to an API endpoint
 
     .. versionadded:: 0.8.3
@@ -497,22 +488,26 @@ def get(
     :return: endpoint response
     :rtype: :class:`dict`, :class:`lxml.etree.Element`, :class:`str`
     """
-    url = '{}://{}/{}/{}/v{}/'.format(
-        'https' if https else 'http', apihost, interface, method, version
+    # url = '{}://{}/{}/{}/v{}/'.format(
+    #     'https' if https else 'http', apihost, interface, method, version
+    # )
+    return await webapi_request(
+        f'{"https" if https else "http"}://{apihost}/{interface}/{method}/v{version}',
+        'GET',
+        caller=caller,
+        params=params,
     )
-    return webapi_request(url, 'GET', caller=caller, session=session, params=params)
 
 
-def post(
-    interface,
-    method,
-    version=1,
-    apihost=DEFAULT_PARAMS['apihost'],
-    https=DEFAULT_PARAMS['https'],
-    caller=None,
-    session=None,
-    params=None,
-):
+async def post(
+    interface: str,
+    method: str,
+    version: int = 1,
+    apihost: str = DEFAULT_PARAMS['apihost'],
+    https: bool = DEFAULT_PARAMS['https'],
+    caller: Optional[WebAPIMethod] = None,
+    params: Optional[dict] = None,
+) -> dict | Element | str:
     """Send POST request to an API endpoint
 
     .. versionadded:: 0.8.3
@@ -532,7 +527,12 @@ def post(
     :return: endpoint response
     :rtype: :class:`dict`, :class:`lxml.etree.Element`, :class:`str`
     """
-    url = '{}://{}/{}/{}/v{}/'.format(
-        'https' if https else 'http', apihost, interface, method, version
+    # url = '{}://{}/{}/{}/v{}/'.format(
+    #     'https' if https else 'http', apihost, interface, method, version
+    # )
+    return await webapi_request(
+        f'{"https" if https else "http"}://{apihost}/{interface}/{method}/v{version}',
+        'POST',
+        caller=caller,
+        params=params,
     )
-    return webapi_request(url, 'POST', caller=caller, session=session, params=params)
