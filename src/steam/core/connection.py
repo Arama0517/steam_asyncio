@@ -63,7 +63,7 @@ class Connection:
         while True:
             result = await self.recv_queue.get()
             if result is StopIteration:
-                raise result
+                raise StopAsyncIteration
             yield result
 
     async def put_message(self, message):

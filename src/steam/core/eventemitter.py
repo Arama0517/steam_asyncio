@@ -45,7 +45,12 @@ class EventEmitter:
 
             await asyncio.sleep(0)
 
-    def on(self, event, callback: Callable[..., Awaitable[None]] | asyncio.Future, once=False):
+    def on(
+        self,
+        event,
+        callback: Optional[Callable[..., Awaitable[None]] | asyncio.Future] = None,
+        once=False,
+    ):
         """
         Registers a callback for the specified event
 
@@ -66,7 +71,9 @@ class EventEmitter:
 
         return wrapper
 
-    def once(self, event: Any, callback: Callable[..., Awaitable[None]] | asyncio.Future):
+    def once(
+        self, event: Any, callback: Optional[Callable[..., Awaitable[None]] | asyncio.Future] = None
+    ):
         """
         Register a callback, but call it exactly one time
         """

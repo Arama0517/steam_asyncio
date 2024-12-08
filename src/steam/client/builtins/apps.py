@@ -159,7 +159,7 @@ class Apps:
 
         message.body.meta_data_only = meta_data_only
         message.body.num_prev_failed = 0
-        message.body.supports_package_tokens = 1
+        # message.body.supports_package_tokens = 1
 
         job_id = await self.send_job(message)
 
