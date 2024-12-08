@@ -698,11 +698,7 @@ class CDNClient:
         self.beta_passwords = {}  #: beta branch decryption keys
         self.licensed_app_ids = set()  #: app_ids that the SteamClient instance has access to
         self.licensed_depot_ids = set()  #: depot_ids that the SteamClient instance has access to
-
-        if not self.servers:
-            asyncio.run(self.fetch_content_servers())
-
-        self.load_licenses()
+        self._loaded_licenses = False
 
     def clear_cache(self):
         """Cleared cached information. Next call on methods with caching will return fresh data"""
@@ -754,11 +750,13 @@ class CDNClient:
         if not self.servers:
             raise SteamError('Failed to fetch content servers')
 
-    def get_content_server(self, rotate: bool = False):
+    async def get_content_server(self, rotate: bool = False):
         """Get a CS server for content download
 
         :param rotate: forcefully rotate server list and get a new server
         """
+        if not self.servers:
+            await self.fetch_content_servers()
         if rotate:
             self.servers.rotate(-1)
         return self.servers[0]
@@ -851,7 +849,7 @@ class CDNClient:
         args: str,
         app_id: Optional[int] = None,
         depot_id: Optional[int] = None,
-    ) -> ClientResponse:
+    ) -> tuple[ClientResponse, bytes]:
         """Run CDN command request
 
         :param command: command name
@@ -861,7 +859,7 @@ class CDNClient:
         :returns: requests response
         :raises SteamError: on error
         """
-        server = self.get_content_server()
+        server = await self.get_content_server()
 
         while True:
             url = '{}://{}:{}/{}/{}{}'.format(
@@ -870,7 +868,7 @@ class CDNClient:
                 server.port,
                 command,
                 args,
-                self.get_cdn_auth_token(app_id, depot_id, str(server.host)),
+                await self.get_cdn_auth_token(app_id, depot_id, str(server.host)),
             )
 
             # try:
@@ -886,16 +884,19 @@ class CDNClient:
             #     self.client.sleep(0.5)
             try:
                 async with AioHttpClientSessionWithUA() as session:
-                    async with session.get(url, timeout=10) as resp:
-                        if resp.ok:
-                            return resp
-                        elif 400 <= resp.status < 500:
-                            self._LOG.debug('Got HTTP %s', resp.status)
-                            raise SteamError('HTTP Error %s' % resp.status)
+                    resp = await session.get(url, timeout=10)
+                    if resp.ok:
+                        return resp, await resp.read()
+                    elif 400 <= resp.status < 500:
+                        self._LOG.debug('Got HTTP %s', resp.status)
+                        raise SteamError('HTTP Error %s' % resp.status)
+                    await self.client.sleep(0.5)
+            except SteamError:
+                raise
             except Exception as exp:
                 self._LOG.debug('Request error: %s', exp)
 
-            server = self.get_content_server(rotate=True)
+            server = await self.get_content_server(rotate=True)
 
     async def get_chunk(self, app_id: int, depot_id: int, chunk_id: int) -> bytes:
         """Download a single content chunk
@@ -907,9 +908,11 @@ class CDNClient:
         :raises SteamError: error message
         """
         if (depot_id, chunk_id) not in self._chunk_cache:
-            resp = await self.cdn_cmd('depot', f'{depot_id}/chunk/{chunk_id}', app_id, depot_id)
+            _, content = await self.cdn_cmd(
+                'depot', f'{depot_id}/chunk/{chunk_id}', app_id, depot_id
+            )
 
-            data = symmetric_decrypt(resp.content, self.get_depot_key(app_id, depot_id))
+            data = symmetric_decrypt(content, await self.get_depot_key(app_id, depot_id))
 
             if data[:2] == b'VZ':
                 if data[-2:] != b'zv':
@@ -1002,20 +1005,26 @@ class CDNClient:
         :rtype: :class:`.CDNDepotManifest`
         """
         if (app_id, depot_id, manifest_gid) not in self.manifests:
-            if manifest_request_code:
-                resp = await self.cdn_cmd(
-                    'depot',
-                    f'{depot_id}/manifest/{manifest_gid}/5/{manifest_request_code}',
-                    app_id,
-                    depot_id,
-                )
-            else:
-                resp = await self.cdn_cmd(
-                    'depot', f'{depot_id}/manifest/{manifest_gid}/5', app_id, depot_id
-                )
+            # if manifest_request_code:
+            #     resp, content = await self.cdn_cmd(
+            #         'depot',
+            #         f'{depot_id}/manifest/{manifest_gid}/5/{manifest_request_code}',
+            #         app_id,
+            #         depot_id,
+            #     )
+            # else:
+            #     resp, content = await self.cdn_cmd(
+            #         'depot', f'{depot_id}/manifest/{manifest_gid}/5', app_id, depot_id
+            #     )
+            resp, content = await self.cdn_cmd(
+                'depot',
+                f'{depot_id}/manifest/{manifest_gid}/5/{manifest_request_code or ""}',
+                app_id,
+                depot_id,
+            )
 
             if resp.ok:
-                manifest = CDNDepotManifest(self, app_id, await resp.read())
+                manifest = CDNDepotManifest(self, app_id, content)
                 if decrypt:
                     manifest.decrypt_filenames(await self.get_depot_key(app_id, depot_id))
                 self.manifests[(app_id, depot_id, manifest_gid)] = manifest
@@ -1055,12 +1064,14 @@ class CDNClient:
             ]['depots']
         return self.app_depots[app_id]
 
-    def has_license_for_depot(self, depot_id: int) -> bool:
+    async def has_license_for_depot(self, depot_id: int) -> bool:
         """Check if there is license for depot
 
         :param depot_id: depot ID
         :returns: True if we have license
         """
+        if not self._loaded_licenses:
+            await self.load_licenses()
         return depot_id in self.licensed_depot_ids or depot_id in self.licensed_app_ids
 
     async def get_manifests(
@@ -1157,7 +1168,7 @@ class CDNClient:
                 continue
 
             # if we have no license for the depot, no point trying as we won't get depot_key
-            if not self.has_license_for_depot(depot_id):
+            if not await self.has_license_for_depot(depot_id):
                 self._LOG.debug(
                     'No license for depot %s (%s). Skipped',
                     repr(depot_info.get('name', depot_id)),
@@ -1279,7 +1290,6 @@ class CDNClient:
                 'includemetadata': False,
                 'language': 0,
             },
-            timeout=7,
         )
 
         if resp is None:
