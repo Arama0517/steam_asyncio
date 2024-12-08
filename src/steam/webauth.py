@@ -60,6 +60,8 @@ from getpass import getpass
 from time import time
 
 import requests
+from aiohttp import ClientSession
+from yarl import URL
 
 from steam.core.crypto import pkcs1v15_encrypt, rsa_publickey
 from steam.enums.common import EResult
@@ -86,7 +88,7 @@ SUPPORTED_AUTH_TYPES = [
 ]
 
 
-class WebAuth:
+class WebAuth(ClientSession):
     """New WEB Auth class.
 
     This class works with Steam API:
@@ -142,16 +144,20 @@ class WebAuth:
         self,
         username='',
         password='',
-        userAgent='Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+        user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
         ' AppleWebKit/537.36 (KHTML, like Gecko)'
         ' Chrome/118.0.0.0 Safari/537.36',
+        *args,
+        **kwargs,
     ):
+        super().__init__(*args, **kwargs)
         # ALL FUNCTIONS RENAMED TO PEP8 NOTATION.
-        self.session = requests.session()
-        self.user_agent = userAgent
+        # self.session = requests.session()
+        self.user_agent = user_agent
         self.username = username
         self.password = password
-        self.session.headers['User-Agent'] = self.user_agent
+        # self.session.headers['User-Agent'] = self.user_agent
+        self.headers['User-Agent'] = self.user_agent
         self.steam_id = None
         self.client_id = None
         self.request_id = None
@@ -161,34 +167,46 @@ class WebAuth:
         self.email_auth_waits = False  # Not used yet.
         self.logged_on = False
 
-    @staticmethod
-    def send_api_request(data, steam_api_interface, steam_api_method, steam_api_version):
+    async def send_api_request(
+        self, data, steam_api_interface, steam_api_method, steam_api_version
+    ):
         """Send request to Steam API via requests"""
         steam_url = API_URL.format(steam_api_interface, steam_api_method, steam_api_version)
 
-        if steam_api_method == 'GetPasswordRSAPublicKey':  # It's GET method
-            res = requests.get(steam_url, timeout=10, headers=API_HEADERS, params=data)
-        else:  # Every other API endpoints are POST.
-            res = requests.post(steam_url, timeout=10, headers=API_HEADERS, data=data)
+        # if steam_api_method == 'GetPasswordRSAPublicKey':  # It's GET method
+        #     res = await self.get(steam_url, timeout=10, headers=API_HEADERS, params=data)
+        # else:  # Every other API endpoints are POST.
+        #     res = await self.post(steam_url, timeout=10, headers=API_HEADERS, data=data)
+        #
+        # res.raise_for_status()
+        # return await res.json()
+        params = {'url': steam_url, 'timeout': 10, 'headers': API_HEADERS}
+        if steam_api_method == 'GetPasswordRSAPublicKey':
+            params['method'] = 'GET'
+            params['params'] = data
+        else:
+            params['method'] = 'POST'
+            params['data'] = data
 
-        res.raise_for_status()
-        return res.json()
+        async with self.request(**params) as resp:
+            resp.raise_for_status()
+            return await resp.json()
 
-    def _get_rsa_key(self):
+    async def _get_rsa_key(self):
         """Get rsa key to crypt password."""
-        return self.send_api_request(
+        return await self.send_api_request(
             {'account_name': self.username},
             'IAuthentication',
             'GetPasswordRSAPublicKey',
             1,
         )
 
-    def _encrypt_password(self):
+    async def _encrypt_password(self):
         """Encrypt password via RSA key
 
         Steam handles every password only in encoded way.
         """
-        r = self._get_rsa_key()
+        r = await self._get_rsa_key()
 
         mod = int(r['response']['publickey_mod'], 16)
         exp = int(r['response']['publickey_exp'], 16)
@@ -199,9 +217,9 @@ class WebAuth:
 
         return tuple((b64.decode('ascii'), r['response']['timestamp']))
 
-    def _startSessionWithCredentials(self, account_encrypted_password: str, time_stamp: int):
+    async def _startSessionWithCredentials(self, account_encrypted_password: str, time_stamp: int):
         """Start login session via BeginAuthSessionViaCredentials"""
-        resp = self.send_api_request(
+        resp = await self.send_api_request(
             {
                 'device_friendly_name': self.user_agent,
                 'account_name': self.username,
@@ -232,12 +250,12 @@ class WebAuth:
             else:
                 raise WebAuthException(e, resp)
 
-    def _startLoginSession(self):
+    async def _startLoginSession(self):
         """Starts login session via credentials."""
         encrypted_password = self._encrypt_password()
-        self._startSessionWithCredentials(encrypted_password[0], encrypted_password[1])
+        await self._startSessionWithCredentials(encrypted_password[0], encrypted_password[1])
 
-    def _pollLoginStatus(self):
+    async def _pollLoginStatus(self):
         """Get status of current Login Session
 
         This function asks server about login session status.
@@ -246,7 +264,7 @@ class WebAuth:
         TODO: add check of interval, returned from _startSessionWithCredentials
             actually it has no need now, but
         """
-        resp = self.send_api_request(
+        resp = await self.send_api_request(
             {'client_id': str(self.client_id), 'request_id': str(self.request_id)},
             'IAuthentication',
             'PollAuthSessionStatus',
@@ -260,7 +278,7 @@ class WebAuth:
                 'Authentication requires 2fa token, which is not provided or invalid'
             )
 
-    def _finalizeLogin(self):
+    async def _finalizeLogin(self):
         self.sessionID = generate_session_id()
         self.logged_on = True
         for domain in [
@@ -268,14 +286,21 @@ class WebAuth:
             'help.steampowered.com',
             'steamcommunity.com',
         ]:
-            self.session.cookies.set('sessionid', self.sessionID, domain=domain)
-            self.session.cookies.set(
-                'steamLoginSecure',
-                str(self.steam_id.as_64) + '||' + str(self.access_token),
-                domain=domain,
+            # self.session.cookies.set('sessionid', self.sessionID, domain=domain)
+            # self.session.cookies.set(
+            #     'steamLoginSecure',
+            #     str(self.steam_id.as_64) + '||' + str(self.access_token),
+            #     domain=domain,
+            # )
+            self.cookie_jar.update_cookies(
+                {
+                    'sessionid': self.sessionID,
+                    'steamLoginSecure': str(self.steam_id.as_64) + '||' + str(self.access_token),
+                },
+                response_url=URL(f'https://{domain}'),
             )
 
-    def _update_login_token(
+    async def _update_login_token(
         self,
         code: str,
         code_type: EAuthSessionGuardType = EAuthSessionGuardType.DeviceCode,
@@ -293,12 +318,12 @@ class WebAuth:
             'code': code,
             'code_type': code_type,
         }
-        res = self.send_api_request(
+        res = await self.send_api_request(
             data, 'IAuthentication', 'UpdateAuthSessionWithSteamGuardCode', 1
         )
         return res
 
-    def login(
+    async def login(
         self,
         username: str = '',
         password: str = '',
@@ -322,7 +347,7 @@ class WebAuth:
 
         """
         if self.logged_on:
-            return self.session
+            return self
 
         username = username or self.username
         password = password or self.password
@@ -333,24 +358,25 @@ class WebAuth:
             self.username = username
             self.password = password
 
-        self._startLoginSession()
+        await self._startLoginSession()
         if code:
-            self._update_login_token(code)
+            await self._update_login_token(code)
         if email_required:
             # We do another request, which force steam to send email code
             # (otherwise code just not sent).
 
             url = f'https://login.steampowered.com/jwt/checkdevice/{self.steam_id}'
-            res = self.session.post(
+            async with self.post(
                 url, data={'clientid': self.client_id, 'steamid': self.steam_id}
-            ).json()
+            ) as resp:
+                res = await resp.json()
             if res.get('result') == 8:
                 # This usually mean code sent now.
-                def end_login(email_code: str):
-                    self._update_login_token(email_code, EAuthSessionGuardType.EmailCode)
-                    self._pollLoginStatus()
-                    self._finalizeLogin()
-                    return self.session
+                async def end_login(email_code: str):
+                    await self._update_login_token(email_code, EAuthSessionGuardType.EmailCode)
+                    await self._pollLoginStatus()
+                    await self._finalizeLogin()
+                    return self
 
                 return end_login
             if res.get('result') == 29:
@@ -358,12 +384,12 @@ class WebAuth:
                 # Actually this must will never be called, because
                 # Errors can be only like wrong cookies. (Theoretically)
                 raise WebAuthException('Something invalid went. Try again later.')
-        self._pollLoginStatus()
-        self._finalizeLogin()
+        await self._pollLoginStatus()
+        await self._finalizeLogin()
 
-        return self.session
+        return self
 
-    def logout_everywhere(self):
+    async def logout_everywhere(self):
         """Log out on every device.
 
         This function works just like button at
@@ -371,20 +397,18 @@ class WebAuth:
         and allows user to logout on every device.
         Can be VERY useful e.g. for users, who practice account rent.
         """
-        session_id = self.session.cookies.get('sessionid', domain='store.steampowered.com')
-
+        cookies = self.cookie_jar.filter_cookies(URL('https://store.steampowered.com'))
+        session_id = cookies.get('sessionid')
         # By the times I saw session can be both of keys, so select valid.
-        session_id = session_id or self.session.cookies.get(
-            'sessionId', domain='store.steampowered.com'
-        )
+        session_id = session_id or cookies.get('sessionId')
+
         data = {'action': 'deauthorize', 'sessionid': session_id}
-        resp = self.session.post(
+        async with self.post(
             'https://store.steampowered.com/twofactor/manage_action', data=data
-        )
+        ) as resp:
+            return resp.status == 200
 
-        return resp.status_code == 200
-
-    def cli_login(
+    async def cli_login(
         self,
         username: str = '',
         password: str = '',
@@ -398,7 +422,7 @@ class WebAuth:
         """
         while True:
             try:
-                res = self.login(username, password, code, email_required)
+                res = await self.login(username, password, code, email_required)
             except LoginIncorrect:
                 prompt = (
                     'Enter password for %s: '
@@ -439,7 +463,7 @@ class WebAuth:
 
                     if can_confirm_with_app:
                         try:
-                            self._pollLoginStatus()  # test to see if they've authenticated via app
+                            await self._pollLoginStatus()  # test to see if they've authenticated via app
                             break
                         except TwoFactorCodeRequired:
                             # they've not authenticated via the app, let's see if we can use their provided code
@@ -447,14 +471,14 @@ class WebAuth:
 
                     if twofactor_code.strip():
                         using_email_code = EAuthSessionGuardType.EmailCode in allowed
-                        self._update_login_token(
+                        await self._update_login_token(
                             twofactor_code,
                             EAuthSessionGuardType.EmailCode
                             if using_email_code
                             else EAuthSessionGuardType.DeviceCode,
                         )
                         try:
-                            self._pollLoginStatus()
+                            await self._pollLoginStatus()
                             break
                         except TwoFactorCodeRequired:
                             print('Invalid auth code. Please try again')
@@ -462,8 +486,8 @@ class WebAuth:
                             continue
                     else:
                         print('Unauthenticated. Please try again')
-                self._finalizeLogin()
-                return self.session
+                await self._finalizeLogin()
+                return self
             if hasattr(res, '__call__'):
                 # this should not ever happen at this point as we don't use `email_required` on login()
                 while True:
@@ -474,7 +498,7 @@ class WebAuth:
                     except WebAuthException:
                         pass
             else:
-                return self.session
+                return self
 
 
 # TODO: DEPRECATED, must be rewritten, like WebAuth
