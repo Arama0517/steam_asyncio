@@ -1,5 +1,5 @@
 from binascii import hexlify
-from typing import Any
+from typing import Any, Optional
 
 import vdf
 
@@ -57,8 +57,8 @@ class Apps:
 
     async def get_product_info(
         self,
-        apps: list,
-        packages: list,
+        apps: Optional[list] = None,
+        packages: Optional[list] = None,
         meta_data_only: bool = False,
         raw: bool = False,
         auto_access_tokens: bool = True,
@@ -109,6 +109,12 @@ class Apps:
                                                         'access_token': client.licenses[123].access_token,
                                                         }])
         """
+        if apps is None:
+            apps = []
+        if packages is None:
+            packages = []
+        if not apps and not packages:
+            return
 
         if auto_access_tokens:
             tokens = await self.get_access_tokens(

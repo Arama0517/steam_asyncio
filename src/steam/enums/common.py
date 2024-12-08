@@ -1081,7 +1081,7 @@ class EPackageStatus(SteamIntEnum):
 
 
 # Do not remove
-from enum import EnumMeta
+from enum import EnumMeta  # noqa: E402
 
 __all__ = [
     obj.__name__

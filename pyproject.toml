@@ -6,12 +6,9 @@ readme = "README.rst"
 requires-python = ">=3.13"
 dependencies = [
     "cachetools>=5.5.0",
-    "gevent-eventemitter>=2.1",
-    "gevent>=24.11.1",
     "pycryptodomex>=3.21.0",
     "requests>=2.32.3",
     "vdf",
-    "wsproto>=1.2.0",
     "protobuf>=5.29.1",
     "websockets>=14.1",
     "aiohttp>=3.11.9",

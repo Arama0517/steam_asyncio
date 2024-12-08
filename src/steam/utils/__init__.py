@@ -2,7 +2,6 @@
 
 import socket
 import struct
-import sys
 import weakref
 
 
