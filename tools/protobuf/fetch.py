@@ -29,7 +29,6 @@ git(
     '--depth=1',
     '--config',
     'core.sparsecheckout=true',
-    '--no-recurse-submodules',
     'https://github.com/SteamDatabase/SteamTracking.git',
     steam_tracking_repo_dir,
     cwd=current_dir,

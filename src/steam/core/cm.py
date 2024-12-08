@@ -58,7 +58,7 @@ class CMClient(EventEmitter):
     """
 
     PROTOCOL_TCP = 0  #: TCP protocol enum
-    PROTOCOL_UDP = 1  #: UDP protocol enum
+    # PROTOCOL_UDP = 1  #: UDP protocol enum
     PROTOCOL_WEBSOCKET = 2  #: WEBSOCKET protocol enum
     verbose_debug = False  #: print message connects in debug
 
