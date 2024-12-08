@@ -173,6 +173,12 @@ class WebsocketConnection(Connection):
         super().__init__()
         self.event_wsdisconnected = asyncio.Event()
 
+    @property
+    def local_address(self):
+        if self.ws is None:
+            raise RuntimeError('WebSocket connection not established yet.')
+        return self.ws.local_address[0]
+
     async def connect(self, server_addr: tuple[str, int]):
         host, port = server_addr
         uri = f'wss://{host}:{port}/cmsocket/'

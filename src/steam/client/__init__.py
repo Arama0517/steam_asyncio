@@ -324,7 +324,7 @@ class SteamClient(CMClient, BuiltinBase):
 
         return EResult.OK
 
-    async def login(self, username, password='', access_token='', login_id=None):
+    async def login(self, username, password='', access_token='', login_id=None) -> EResult:
         """Login as a specific user.
 
         :param username: optionally provide username
