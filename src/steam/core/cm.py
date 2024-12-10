@@ -515,7 +515,7 @@ class CMServerList:
                 'ISteamDirectory',
                 'GetCMListForConnect',
                 1,
-                params={'cellid': cell_id, 'cmtype': cmtype, 'http_timeout': 3},
+                params={'cellid': cell_id, 'cmtype': cmtype},
             )
         except Exception as exp:
             self._LOG.error('WebAPI boostrap failed: %s' % str(exp))
