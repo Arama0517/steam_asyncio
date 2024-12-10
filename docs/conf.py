@@ -291,9 +291,9 @@ texinfo_documents = [
 # LINK PYTHON DOCS
 
 intersphinx_mapping = {
-    'python': ('https://docs.python.org/3.6', None),
-    'gevent': ('http://www.gevent.org', None),
-    'requests': ('https://2.python-requests.org/en/master/', None),
+    'python': ('https://docs.python.org/3.13', None),
+    'asyncio': ('https://docs.python.org/3.13/library/asyncio.html', None),
+    'aiohttp': ('https://docs.aiohttp.org', None),
 }
 
 # AUTODOC

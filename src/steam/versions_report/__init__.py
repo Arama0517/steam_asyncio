@@ -1,44 +1,36 @@
+import platform
 import sys
+from importlib.metadata import distribution
+
+from rich import print
+from rich.markdown import Markdown
 
 
 def versions_report():
-    """Print a report of al dependacy versions, and environment"""
+    """Print a report of all dependency versions, and environment"""
 
-    from steam import __version__
-
-    print(f'steam: {__version__}')
-
-    # dependecy versions
-    print('\nDependencies:')
-
-    import pkg_resources
-
-    installed_pkgs = {pkg.project_name.lower(): pkg.version for pkg in pkg_resources.working_set}
-
+    text = f'# Dependencies\n- **steam**: `{distribution("steam").version}`'
     for dep in [
+        'cachetools',
+        'pycryptodomex',
+        'requests',
         'vdf',
         'protobuf',
-        'requests',
-        'cachetools',
-        'gevent',
-        'gevent-eventemitter',
-        'pycryptodomex',
-        'enum34',
-        'win-inet-pton',
+        'websockets',
+        'aiohttp',
+        'dnspython',
+        'lxml',
     ]:
-        print('{:>20}: {}'.format(dep, installed_pkgs.get(dep.lower(), 'Not Installed')))
-
-    # python runtime
-    print('\nPython runtime:')
-    print('          executable: %s' % sys.executable)
-    print('             version: %s' % sys.version.replace('\n', ''))
-    print('            platform: %s' % sys.platform)
-
-    # system info
-    import platform
-
-    print('\nSystem info:')
-    print('              system: %s' % platform.system())
-    print('             machine: %s' % platform.machine())
-    print('             release: %s' % platform.release())
-    print('             version: %s' % platform.version())
+        text += f'\n- {dep}: `{distribution(dep).version}`'
+    text += f"""
+# Python runtime
+- executable: `{sys.executable}`
+- version: `{sys.version}`
+- platform: `{sys.platform}`
+# System info
+- system: `{platform.system()}`
+- machine: `{platform.machine()}`
+- release: `{platform.release()}`
+- version: `{platform.version()}`
+"""
+    print(Markdown(text))

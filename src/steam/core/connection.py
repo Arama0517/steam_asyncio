@@ -11,7 +11,7 @@ logger = logging.getLogger('Connection')
 
 class Connection:
     connected = False
-    server_addr = None
+    cm_type: str
 
     _stream_reader: StreamReader = None
     _reader_loop: Task | None = None
@@ -36,8 +36,6 @@ class Connection:
         if not self.event_connected.is_set():
             return
         self.event_connected.clear()
-
-        self.server_addr = None
 
         if self._reader_loop:
             self._reader_loop.cancel()
@@ -77,17 +75,17 @@ class Connection:
 
 
 class TCPConnection(Connection):
+    cm_type = 'netfilter'
+
     MAGIC = b'VT01'
     FMT = '<I4s'
     FMT_SIZE = struct.calcsize(FMT)
 
     async def connect(self, server_addr):
-        self.server_addr = server_addr
+        host, port = server_addr
         try:
             # Open a TCP connection
-            self._stream_reader, self._stream_writer = await asyncio.open_connection(
-                self.server_addr[0], self.server_addr[1]
-            )
+            self._stream_reader, self._stream_writer = await asyncio.open_connection(host, port)
 
             logger.debug('Connected.')
             self.event_connected.set()
@@ -105,12 +103,15 @@ class TCPConnection(Connection):
     async def _writer_loop_func(self):
         while True:
             message = await self.send_queue.get()
-            packet = struct.pack(TCPConnection.FMT, len(message), TCPConnection.MAGIC) + message
+            packet = struct.pack(self.FMT, len(message), self.MAGIC) + message
             try:
                 self._stream_writer.write(packet)
                 await self._stream_writer.drain()
-            except Exception:
-                logger.debug('Connection error (writer).')
+            except asyncio.CancelledError:
+                logger.debug('Writer loop was cancelled.')
+                break
+            except Exception as e:
+                logger.debug(f'Writer error: {e}')
                 await self.disconnect()
                 return
 
@@ -126,7 +127,6 @@ class TCPConnection(Connection):
                 logger.debug(f'Received data: {data}')
                 self._readbuf += data
                 await self._read_packets()
-
             except asyncio.CancelledError:
                 logger.debug('Reader loop was cancelled.')
                 break
@@ -136,14 +136,14 @@ class TCPConnection(Connection):
                 return
 
     async def _read_packets(self):
-        header_size = TCPConnection.FMT_SIZE
+        header_size = self.FMT_SIZE
         buf = self._readbuf
 
         while len(buf) >= header_size:
             try:
-                message_length, magic = struct.unpack_from(TCPConnection.FMT, buf)
+                message_length, magic = struct.unpack_from(self.FMT, buf)
 
-                if magic != TCPConnection.MAGIC:
+                if magic != self.MAGIC:
                     logger.debug(f'Invalid magic, got {repr(magic)}')
                     await self.disconnect()
                     return
@@ -167,15 +167,11 @@ class TCPConnection(Connection):
 
 
 class WebsocketConnection(Connection):
-    ws: ClientConnection = None
-
-    def __init__(self):
-        super().__init__()
+    cm_type = 'websockets'
+    ws: ClientConnection
 
     @property
     def local_address(self):
-        if self.ws is None:
-            raise RuntimeError('WebSocket connection not established yet.')
         return self.ws.local_address[0]
 
     async def connect(self, server_addr: tuple[str, int]):

@@ -8,17 +8,15 @@ from io import BytesIO
 from itertools import count, cycle
 from random import shuffle
 from time import time
-from typing import Literal, Optional
-
-from dns.asyncresolver import Resolver
-from dns.rdatatype import A
+from typing import Optional
 
 from steam.core import crypto
-from steam.core.connection import Connection, TCPConnection, WebsocketConnection
+from steam.core.connection import Connection, WebsocketConnection
 from steam.core.eventemitter import EventEmitter
 from steam.core.msg import Msg, MsgProto
 from steam.enums import EResult, EUniverse
 from steam.enums.emsg import EMsg
+from steam.exceptions import SteamError
 from steam.steamid import SteamID
 from steam.utils import ip4_from_int
 from steam.utils.proto import clear_proto_bit, is_proto
@@ -96,10 +94,10 @@ class CMClient(EventEmitter):
         #     raise ValueError('Only Websocket and TCP are supported')
         self.connection = connection or WebsocketConnection()
 
-        (self.on(EMsg.ChannelEncryptRequest, self.__handle_encrypt_request),)
-        (self.on(EMsg.Multi, self.__handle_multi),)
-        (self.on(EMsg.ClientLogOnResponse, self._handle_logon),)
-        (self.on(EMsg.ClientCMList, self._handle_cm_list),)
+        self.on(EMsg.ChannelEncryptRequest, self.__handle_encrypt_request)
+        self.on(EMsg.Multi, self.__handle_multi)
+        self.on(EMsg.ClientLogOnResponse, self._handle_logon)
+        self.on(EMsg.ClientCMList, self._handle_cm_list)
 
     async def emit(self, event, *args):
         if event is not None:
@@ -140,12 +138,11 @@ class CMClient(EventEmitter):
                 self._connecting = False
                 return False
 
-            if isinstance(self.connection, WebsocketConnection):
-                await self.cm_servers.bootstrap_from_webapi(cm_type='websockets')
-            elif isinstance(self.connection, TCPConnection):
-                if not await self.cm_servers.bootstrap_from_webapi():
-                    await self.cm_servers.bootstrap_from_dns()
-
+            # if isinstance(self.connection, WebsocketConnection):
+            #     await self.cm_servers.bootstrap_from_webapi(cm_type='websockets')
+            # elif isinstance(self.connection, TCPConnection):
+            #     await self.cm_servers.bootstrap_from_webapi(cm_type='netfilter')
+            await self.cm_servers.bootstrap_from_webapi(cm_type=self.connection.cm_type)
         for i, server_addr in enumerate(cycle(self.cm_servers), start=next(i) - 1):
             if retry and i >= retry:
                 self._connecting = False
@@ -472,35 +469,33 @@ class CMServerList:
             self._LOG.debug('List cleared.')
         self.list.clear()
 
-    async def bootstrap_from_dns(self):
-        """
-        Fetches CM server list from WebAPI and replaces the current one
-        """
-        self._LOG.debug('Attempting bootstrap via DNS')
+    # async def bootstrap_from_dns(self):
+    #     """
+    #     Fetches CM server list from WebAPI and replaces the current one
+    #     """
+    #     self._LOG.debug('Attempting bootstrap via DNS')
+    #
+    #     resolver = Resolver()
+    #     try:
+    #         # answer = socket.getaddrinfo(
+    #         #     'cm0.steampowered.com', 27017, socket.AF_INET, proto=socket.IPPROTO_TCP
+    #         # )
+    #         answer = await resolver.resolve('cm0.steampowered.com', A)
+    #     except Exception as exp:
+    #         self._LOG.error('DNS boostrap failed: %s' % str(exp))
+    #         return False
+    #
+    #     servers = list(map(lambda addr: (addr.to_text(), 27017), answer))
+    #
+    #     if servers:
+    #         self.clear()
+    #         self.merge_list(servers)
+    #         return True
+    #     else:
+    #         self._LOG.error('DNS boostrap: cm0.steampowered.com resolved no A records')
+    #         return False
 
-        resolver = Resolver()
-        try:
-            # answer = socket.getaddrinfo(
-            #     'cm0.steampowered.com', 27017, socket.AF_INET, proto=socket.IPPROTO_TCP
-            # )
-            answer = await resolver.resolve('cm0.steampowered.com', A)
-        except Exception as exp:
-            self._LOG.error('DNS boostrap failed: %s' % str(exp))
-            return False
-
-        servers = list(map(lambda addr: (addr.to_text(), 27017), answer))
-
-        if servers:
-            self.clear()
-            self.merge_list(servers)
-            return True
-        else:
-            self._LOG.error('DNS boostrap: cm0.steampowered.com resolved no A records')
-            return False
-
-    async def bootstrap_from_webapi(
-        self, cell_id: int = 0, cm_type: Literal['netfilter', 'websockets'] = 'netfilter'
-    ) -> bool:
+    async def bootstrap_from_webapi(self, cm_type: str, cell_id: int = 0):
         """
         Fetches CM server list from WebAPI and replaces the current one
 
@@ -512,22 +507,17 @@ class CMServerList:
 
         from steam import webapi
 
-        try:
-            resp: dict = await webapi.get(
-                'ISteamDirectory',
-                'GetCMListForConnect',
-                1,
-                params={'cellid': cell_id, 'cmtype': cm_type},
-            )
-        except Exception as exp:
-            self._LOG.error('WebAPI boostrap failed: %s' % str(exp))
-            return False
-
+        resp: dict = await webapi.get(
+            'ISteamDirectory',
+            'GetCMListForConnect',
+            1,
+            params={'cellid': cell_id, 'cmtype': cm_type},
+        )
         result = EResult(resp['response']['success'])
 
         if result != EResult.OK:
             self._LOG.error('GetCMList failed with %s' % repr(result))
-            return False
+            raise SteamError('GetCMList failed.', result)
 
         serverlist = resp['response']['serverlist']
         self._LOG.debug('Received %d servers from WebAPI' % len(serverlist))
@@ -539,8 +529,6 @@ class CMServerList:
         self.clear()
         self.cell_id = cell_id
         self.merge_list(list(map(str_to_tuple, serverlist)))
-
-        return True
 
     def __iter__(self):
         def cm_server_iter():
