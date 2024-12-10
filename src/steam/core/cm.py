@@ -8,7 +8,7 @@ from io import BytesIO
 from itertools import count, cycle
 from random import shuffle
 from time import time
-from typing import Literal
+from typing import Literal, Optional
 
 from dns.asyncresolver import Resolver
 from dns.rdatatype import A
@@ -58,9 +58,10 @@ class CMClient(EventEmitter):
     """All incoming messages are emitted with their :class:`.EMsg` number.
     """
 
-    PROTOCOL_TCP = 0  #: TCP protocol enum
-    # PROTOCOL_UDP = 1  #: UDP protocol enum
-    PROTOCOL_WEBSOCKET = 2  #: WEBSOCKET protocol enum
+    # PROTOCOL_TCP = 0  #: TCP protocol enum
+    # # PROTOCOL_UDP = 1  #: UDP protocol enum
+    # PROTOCOL_WEBSOCKET = 2  #: WEBSOCKET protocol enum
+
     verbose_debug = False  #: print message connects in debug
 
     auto_discovery = True  #: enables automatic CM discovery
@@ -83,16 +84,17 @@ class CMClient(EventEmitter):
     _heartbeat_loop = None
     _LOG = logging.getLogger('CMClient')
 
-    def __init__(self, protocol=PROTOCOL_TCP):
+    def __init__(self, connection: Optional[Connection] = None):
         super().__init__()
         self.cm_servers = CMServerList()
 
-        if protocol == CMClient.PROTOCOL_WEBSOCKET:
-            self.connection = WebsocketConnection()
-        elif protocol == CMClient.PROTOCOL_TCP:
-            self.connection = TCPConnection()
-        else:
-            raise ValueError('Only Websocket and TCP are supported')
+        # if protocol == CMClient.PROTOCOL_WEBSOCKET:
+        #     self.connection = WebsocketConnection()
+        # elif protocol == CMClient.PROTOCOL_TCP:
+        #     self.connection = TCPConnection()
+        # else:
+        #     raise ValueError('Only Websocket and TCP are supported')
+        self.connection = connection or WebsocketConnection()
 
         (self.on(EMsg.ChannelEncryptRequest, self.__handle_encrypt_request),)
         (self.on(EMsg.Multi, self.__handle_multi),)

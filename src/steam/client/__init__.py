@@ -17,9 +17,11 @@ Implementation of Steam client based on ``gevent``
 import logging
 from random import random
 from time import time
+from typing import Optional
 
 from steam.client.builtins import BuiltinBase
 from steam.core.cm import CMClient
+from steam.core.connection import Connection as Connection
 from steam.core.msg import MsgProto, get_um
 from steam.enums import EOSType, EResult
 from steam.enums.emsg import EMsg
@@ -39,8 +41,8 @@ class SteamClient(CMClient, BuiltinBase):
     login_key = None
     chat_mode = 2  #: chat mode (0=old chat, 2=new chat)
 
-    def __init__(self, protocol=CMClient.PROTOCOL_WEBSOCKET):
-        CMClient.__init__(self, protocol=protocol)
+    def __init__(self, connection: Optional[Connection] = None) -> None:
+        CMClient.__init__(self, connection=connection)
 
         # register listners
         self.on(self.EVENT_DISCONNECTED, self._handle_disconnect)
