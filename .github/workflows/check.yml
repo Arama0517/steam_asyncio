@@ -23,7 +23,7 @@ permissions:
 
 jobs:
   pytest:
-    name: Run pytest
+    name: PyTest
     runs-on: ${{ matrix.os }}-latest
     strategy:
       fail-fast: false
@@ -39,7 +39,7 @@ jobs:
       - name: Get Python version
         run: uv run -m tools.set_python_version
 
-      - name: Run Pytest
+      - name: Run PyTest
         run: task test
 
       - name: Upload to Coveralls

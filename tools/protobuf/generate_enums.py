@@ -8,7 +8,7 @@ from steam.enums import common as common_enums
 from tools import source_code_dir
 from tools.protobuf import protobufs_dir
 
-kwlist = set(kwlist + ['None'])
+kwlist = set(kwlist)
 
 _proto_modules = ['enums_pb2']
 
@@ -31,7 +31,7 @@ for name in _proto_modules:
         if not isinstance(value, EnumTypeWrapper) or hasattr(common_enums, class_name):
             continue
 
-        attrs_starting_with_number = False
+        invalid_key = False
         attrs = {}
 
         for ikey, ivalue in value.items():
@@ -39,22 +39,20 @@ for name in _proto_modules:
             attrs[ikey] = ivalue
 
             if ikey[0:1].isdigit() or ikey in kwlist:
-                attrs_starting_with_number = True
+                invalid_key = True
 
-        classes[class_name] = attrs, attrs_starting_with_number
+        classes[class_name] = attrs, invalid_key
 
 # write enums as python Enum
 with (source_code_dir / 'enums' / 'proto.py').open('w', encoding='utf-8') as f:
     f.write('from steam.enums.base import SteamIntEnum\n\n')
 
-    for class_name, (attrs, attrs_starting_with_number) in sorted(
-        classes.items(), key=lambda x: x[0].lower()
-    ):
-        if attrs_starting_with_number:
-            f.write(f'\n{class_name} = SteamIntEnum({class_name!r}, {{\n')
+    for class_name, (attrs, invalid_key) in sorted(classes.items(), key=lambda x: x[0].lower()):
+        if invalid_key:
+            f.write(f'\n{class_name} = SteamIntEnum(\n    {class_name!r},\n    {{\n')
             for ikey, ivalue in attrs.items():
-                f.write(f'    {ikey!r}: {ivalue!r},\n')
-            f.write('    })\n')
+                f.write(f'        {ikey!r}: {ivalue!r},\n')
+            f.write('    },\n)\n')
         else:
             f.write(f'\nclass {class_name}(SteamIntEnum):\n')
             for ikey, ivalue in attrs.items():
