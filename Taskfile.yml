@@ -8,18 +8,18 @@ tasks:
   check:
     aliases:
       - default
-    cmd: uv run -m ruff check
+    cmd: uv run -m ruff check {{ .CLI_ARGS }} .
 
   format:
     aliases:
       - fmt
-    cmd: uv run -m ruff format
+    cmd: uv run -m ruff format {{ .CLI_ARGS }} .
 
   test:
     desc: pytest
     cmds:
       - uv run -m coverage erase
-      - PYTHONHASHSEED=0 uv run -m pytest --cov-config=pyproject.toml --cov=steam --tb=short tests
+      - PYTHONHASHSEED=0 uv run -m pytest --cov-config=pyproject.toml --cov=steam --tb=short {{ .CLI_ARGS }} tests
 
   clean:
     cmd: uv run -m tools.clean

@@ -24,7 +24,11 @@ permissions:
 jobs:
   pytest:
     name: Run pytest
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu, macos, windows]
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v4
@@ -32,8 +36,19 @@ jobs:
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Run pytest
+      - name: Get Python version
+        run: uv run -m tools.set_python_version
+
+      - name: Run Pytest
         run: task test
+
+      - name: Upload to Coveralls
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COVERALLS_PARALLEL: true
+          COVERALLS_FLAG_NAME: "${{ matrix.os }}_${{ env.PYTHON_VERSION }}"
+        run: |
+          coveralls --service=github
 
   ruff:
     name: Ruff
@@ -45,7 +60,7 @@ jobs:
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Run ruff
+      - name: Run Ruff
         run: task check -- --no-fix --output-format=github
 
   codeql:
