@@ -171,7 +171,6 @@ class WebsocketConnection(Connection):
 
     def __init__(self):
         super().__init__()
-        self.event_wsdisconnected = asyncio.Event()
 
     @property
     def local_address(self):
@@ -228,8 +227,6 @@ class WebsocketConnection(Connection):
                 return
 
     async def disconnect(self):
-        self.event_wsdisconnected.clear()
-
         if self.ws is not None:
             logger.debug('Disconnecting WebSocket...')
             await self.ws.close()

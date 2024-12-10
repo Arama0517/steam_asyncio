@@ -177,7 +177,8 @@ class SteamLeaderboard:
             if x < 0 or x >= self.entry_count:
                 raise IndexError('list index out of range')
 
-        entries = asyncio.run(self.get_entries(start + 1, stop))
+        loop = asyncio.get_event_loop()
+        entries = loop.run_until_complete(self.get_entries(start + 1, stop))
 
         if isinstance(x, slice):
             return [entries[i] for i in range(0, len(entries), step)]

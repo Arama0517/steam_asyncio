@@ -39,7 +39,7 @@ class SteamClient(CMClient, BuiltinBase):
     login_key = None
     chat_mode = 2  #: chat mode (0=old chat, 2=new chat)
 
-    def __init__(self, protocol=CMClient.PROTOCOL_TCP):
+    def __init__(self, protocol=CMClient.PROTOCOL_WEBSOCKET):
         CMClient.__init__(self, protocol=protocol)
 
         # register listners

@@ -8,6 +8,7 @@ from io import BytesIO
 from itertools import count, cycle
 from random import shuffle
 from time import time
+from typing import Literal
 
 from dns.asyncresolver import Resolver
 from dns.rdatatype import A
@@ -138,7 +139,7 @@ class CMClient(EventEmitter):
                 return False
 
             if isinstance(self.connection, WebsocketConnection):
-                await self.cm_servers.bootstrap_from_webapi(cmtype='websockets')
+                await self.cm_servers.bootstrap_from_webapi(cm_type='websockets')
             elif isinstance(self.connection, TCPConnection):
                 if not await self.cm_servers.bootstrap_from_webapi():
                     await self.cm_servers.bootstrap_from_dns()
@@ -495,18 +496,17 @@ class CMServerList:
             self._LOG.error('DNS boostrap: cm0.steampowered.com resolved no A records')
             return False
 
-    async def bootstrap_from_webapi(self, cell_id=0, cmtype='netfilter'):
+    async def bootstrap_from_webapi(
+        self, cell_id: int = 0, cm_type: Literal['netfilter', 'websockets'] = 'netfilter'
+    ) -> bool:
         """
         Fetches CM server list from WebAPI and replaces the current one
 
         :param cell_id: cell id (0 = global)
-        :type cell_id: :class:`int`
-        :param cmtype: CM type filter
-        :type cell_id: :class:`int`
+        :param cm_type: CM type filter
         :return: booststrap success
-        :rtype: :class:`bool`
         """
-        self._LOG.debug('Attempting bootstrap via WebAPI for %s' % cmtype)
+        self._LOG.debug('Attempting bootstrap via WebAPI for %s' % cm_type)
 
         from steam import webapi
 
@@ -515,7 +515,7 @@ class CMServerList:
                 'ISteamDirectory',
                 'GetCMListForConnect',
                 1,
-                params={'cellid': cell_id, 'cmtype': cmtype},
+                params={'cellid': cell_id, 'cmtype': cm_type},
             )
         except Exception as exp:
             self._LOG.error('WebAPI boostrap failed: %s' % str(exp))
