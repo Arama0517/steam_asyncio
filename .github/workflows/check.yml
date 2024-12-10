@@ -8,17 +8,6 @@ on:
       - 'Taskfile.yml'
       - '.github/workflows/*.yml'
       - '.github/dependabot.yml'
-      - 'protobufs/**'
-      - 'recipes/**'
-    paths-ignore:
-      - '.gitignore'
-      - '*.md'
-      - '*.rst'
-      - 'LICENSE'
-      - 'Vagrantfile'
-      - 'protobufs/**'
-      - 'recipes/**'
-
   pull_request:
     paths:
       - 'pyproject.toml'
@@ -26,14 +15,6 @@ on:
       - 'Taskfile.yml'
       - '.github/workflows/*.yml'
       - '.github/dependabot.yml'
-    paths-ignore:
-      - '.gitignore'
-      - '*.md'
-      - '*.rst'
-      - 'LICENSE'
-      - 'Vagrantfile'
-      - 'protobufs/**'
-      - 'recipes/**'
   schedule:
     - cron: '37 23 * * 5'
 
