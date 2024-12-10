@@ -21,10 +21,9 @@ for file_path in protobufs_result_dir.rglob('*_pb2.py'):
         if line.startswith('import sys'):
             modified_lines.append(line)
         elif line.startswith('import '):
-            modified_lines.append('import steam.protobufs.' + line[7:])  # 替换前缀
+            modified_lines.append('import steam.protobufs.' + line[7:])
         else:
             modified_lines.append(line)
 
-    # 将修改后的内容写回文件
-    with open(file_path, 'w') as file:
+    with file_path.open('w') as file:
         file.writelines(modified_lines)

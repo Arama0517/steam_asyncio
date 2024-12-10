@@ -5,7 +5,8 @@ from pathlib import Path
 from google.protobuf.internal.enum_type_wrapper import EnumTypeWrapper
 
 from steam.enums import common as common_enums
-from tools.protobuf import protobufs_dir, source_code_dir
+from tools import source_code_dir
+from tools.protobuf import protobufs_dir
 
 kwlist = set(kwlist + ['None'])
 

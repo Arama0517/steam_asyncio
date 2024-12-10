@@ -1,4 +1,5 @@
-from tools.protobuf import protobufs_dir, source_code_dir
+from tools import source_code_dir
+from tools.protobuf import protobufs_dir
 
 unified_file = source_code_dir / 'core' / 'msg' / 'unified.py'
 temp_file = unified_file.with_suffix('.tmp')

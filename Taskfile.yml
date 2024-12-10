@@ -17,7 +17,24 @@ tasks:
 
   test:
     desc: pytest
-    cmd: uv run -m pytest
+    cmds:
+      - uv run -m coverage erase
+      - PYTHONHASHSEED=0 uv run -m pytest --cov-config=pyproject.toml --cov=steam --tb=short tests
+
+  clean:
+    cmd: uv run -m tools.clean
+
+  dist:
+    desc: build source distribution
+    cmds:
+      - task: clean
+      - uv build --sdist
+
+  upload:
+    desc: upload to pypi
+    cmds:
+      - task: dist
+      - twine upload -r pypi dist/*
 
   protobuf_fetch:
     aliases:
@@ -31,11 +48,11 @@ tasks:
     desc: compile with protoc
     cmd: uv run -m tools.protobuf.compile
 
-  protobuf_clean:
+  protobuf_clear:
     aliases:
-      - pb_clean
+      - pb_clear
     desc: removes *.proto
-    cmd: uv run -m tools.protobuf.clean
+    cmd: uv run -m tools.protobuf.clear
 
   protobuf_services:
     aliases:
@@ -52,7 +69,7 @@ tasks:
       - pb_update
     desc: pb_fetch + pb_compile
     cmds:
-      - task: protobuf_clean
+      - task: protobuf_clear
       - task: protobuf_fetch
       - task: protobuf_compile
       - task: protobuf_services

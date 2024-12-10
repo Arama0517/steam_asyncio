@@ -3,7 +3,8 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from tools.protobuf import current_dir, protobufs_dir
+from tools import current_dir
+from tools.protobuf import protobufs_dir
 
 protobufs_dir.mkdir(parents=True, exist_ok=True)
 steam_tracking_repo_dir = current_dir / 'SteamTracking'
@@ -19,7 +20,6 @@ def remove_read_only(func, path, exc_info):
 
 
 if steam_tracking_repo_dir.exists():
-    print('delete')
     shutil.rmtree(steam_tracking_repo_dir, onerror=remove_read_only)
 
 git(
