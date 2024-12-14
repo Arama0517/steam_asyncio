@@ -849,7 +849,7 @@ class CDNClient:
         args: str,
         app_id: Optional[int] = None,
         depot_id: Optional[int] = None,
-    ) -> tuple[ClientResponse, bytes]:
+    ) -> ClientResponse:
         """Run CDN command request
 
         :param command: command name
@@ -886,7 +886,7 @@ class CDNClient:
                 async with AioHttpClientSessionWithUA() as session:
                     resp = await session.get(url, timeout=10)
                     if resp.ok:
-                        return resp, await resp.read()
+                        return resp
                     elif 400 <= resp.status < 500:
                         self._LOG.debug('Got HTTP %s', resp.status)
                         raise SteamError('HTTP Error %s' % resp.status)
@@ -908,11 +908,9 @@ class CDNClient:
         :raises SteamError: error message
         """
         if (depot_id, chunk_id) not in self._chunk_cache:
-            _, content = await self.cdn_cmd(
-                'depot', f'{depot_id}/chunk/{chunk_id}', app_id, depot_id
-            )
+            resp = await self.cdn_cmd('depot', f'{depot_id}/chunk/{chunk_id}', app_id, depot_id)
 
-            data = symmetric_decrypt(content, await self.get_depot_key(app_id, depot_id))
+            data = symmetric_decrypt(await resp.read(), await self.get_depot_key(app_id, depot_id))
 
             if data[:2] == b'VZ':
                 if data[-2:] != b'zv':
@@ -1016,7 +1014,7 @@ class CDNClient:
             #     resp, content = await self.cdn_cmd(
             #         'depot', f'{depot_id}/manifest/{manifest_gid}/5', app_id, depot_id
             #     )
-            resp, content = await self.cdn_cmd(
+            resp = await self.cdn_cmd(
                 'depot',
                 f'{depot_id}/manifest/{manifest_gid}/5/{manifest_request_code or ""}',
                 app_id,
@@ -1024,7 +1022,7 @@ class CDNClient:
             )
 
             if resp.ok:
-                manifest = CDNDepotManifest(self, app_id, content)
+                manifest = CDNDepotManifest(self, app_id, await resp.read())
                 if decrypt:
                     manifest.decrypt_filenames(await self.get_depot_key(app_id, depot_id))
                 self.manifests[(app_id, depot_id, manifest_gid)] = manifest
