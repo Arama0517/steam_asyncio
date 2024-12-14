@@ -1,10 +1,9 @@
 import steammessages_base_pb2 as _steammessages_base_pb2
 import webuimessages_base_pb2 as _webuimessages_base_pb2
-from google.protobuf.internal import containers as _containers
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
 from google.protobuf import service as _service
-from typing import ClassVar as _ClassVar, Iterable as _Iterable, Optional as _Optional
+from typing import ClassVar as _ClassVar, Optional as _Optional
 
 DESCRIPTOR: _descriptor.FileDescriptor
 
@@ -57,20 +56,6 @@ class CSteamEngine_SetOverlayEscapeKeyHandling_Notification(_message.Message):
     gameid: int
     should_handle: bool
     def __init__(self, gameid: _Optional[int] = ..., should_handle: bool = ...) -> None: ...
-
-class CSteamEngine_SearchAppDataCacheByStoreKeywords_Request(_message.Message):
-    __slots__ = ("search_term", "max_results")
-    SEARCH_TERM_FIELD_NUMBER: _ClassVar[int]
-    MAX_RESULTS_FIELD_NUMBER: _ClassVar[int]
-    search_term: str
-    max_results: int
-    def __init__(self, search_term: _Optional[str] = ..., max_results: _Optional[int] = ...) -> None: ...
-
-class CSteamEngine_SearchAppDataCacheByStoreKeywords_Response(_message.Message):
-    __slots__ = ("appids",)
-    APPIDS_FIELD_NUMBER: _ClassVar[int]
-    appids: _containers.RepeatedScalarFieldContainer[int]
-    def __init__(self, appids: _Optional[_Iterable[int]] = ...) -> None: ...
 
 class SteamEngine(_service.service): ...
 

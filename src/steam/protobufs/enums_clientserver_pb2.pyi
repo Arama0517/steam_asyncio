@@ -89,6 +89,7 @@ class EMsg(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     k_EMsgGMQueueForFBS: _ClassVar[EMsg]
     k_EMsgGMSchemaConversionResults: _ClassVar[EMsg]
     k_EMsgGMWriteShellFailureToSQL: _ClassVar[EMsg]
+    k_EMsgGMWriteStatsToSOS: _ClassVar[EMsg]
     k_EMsgGMGetServiceMethodRouting: _ClassVar[EMsg]
     k_EMsgGMGetServiceMethodRoutingResponse: _ClassVar[EMsg]
     k_EMsgGMTestNextBuildSchemaConversion: _ClassVar[EMsg]
@@ -100,6 +101,7 @@ class EMsg(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     k_EMsgGMGetModifiedConVarsResponse: _ClassVar[EMsg]
     k_EMsgBaseAIS: _ClassVar[EMsg]
     k_EMsgAISRequestContentDescription: _ClassVar[EMsg]
+    k_EMsgAISUpdateAppInfo: _ClassVar[EMsg]
     k_EMsgAISGetPackageChangeNumber: _ClassVar[EMsg]
     k_EMsgAISGetPackageChangeNumberResponse: _ClassVar[EMsg]
     k_EMsgAIGetAppGCFlags: _ClassVar[EMsg]
@@ -937,7 +939,7 @@ class EMsg(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     k_EMsgClientIsLimitedAccount: _ClassVar[EMsg]
     k_EMsgClientRequestAuthList: _ClassVar[EMsg]
     k_EMsgClientAuthList: _ClassVar[EMsg]
-    k_EMsgClientStat_Deprecated: _ClassVar[EMsg]
+    k_EMsgClientStat: _ClassVar[EMsg]
     k_EMsgClientP2PConnectionInfo: _ClassVar[EMsg]
     k_EMsgClientP2PConnectionFailInfo: _ClassVar[EMsg]
     k_EMsgClientGetDepotDecryptionKey: _ClassVar[EMsg]
@@ -963,9 +965,9 @@ class EMsg(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     k_EMsgClientLogOnWithHash_Deprecated: _ClassVar[EMsg]
     k_EMsgClientStoreUserStats2: _ClassVar[EMsg]
     k_EMsgClientStatsUpdated: _ClassVar[EMsg]
-    k_EMsgClientRequestedClientStats_Deprecated: _ClassVar[EMsg]
-    k_EMsgClientStat2Int32_Deprecated: _ClassVar[EMsg]
-    k_EMsgClientStat2_Deprecated: _ClassVar[EMsg]
+    k_EMsgClientRequestedClientStats: _ClassVar[EMsg]
+    k_EMsgClientStat2Int32: _ClassVar[EMsg]
+    k_EMsgClientStat2: _ClassVar[EMsg]
     k_EMsgClientDRMDownloadRequest: _ClassVar[EMsg]
     k_EMsgClientDRMDownloadResponse: _ClassVar[EMsg]
     k_EMsgClientDRMFinalResult: _ClassVar[EMsg]
@@ -1016,9 +1018,14 @@ class EMsg(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     k_EMsgClientUpdateMachineAuthResponse: _ClassVar[EMsg]
     k_EMsgClientReadMachineAuth: _ClassVar[EMsg]
     k_EMsgClientReadMachineAuthResponse: _ClassVar[EMsg]
+    k_EMsgClientRequestMachineAuth: _ClassVar[EMsg]
+    k_EMsgClientRequestMachineAuthResponse: _ClassVar[EMsg]
     k_EMsgClientScreenshotsChanged: _ClassVar[EMsg]
     k_EMsgClientLaunchClientApp: _ClassVar[EMsg]
     k_EMsgClientLaunchClientAppResponse: _ClassVar[EMsg]
+    k_EMsgClientGetCDNAuthToken: _ClassVar[EMsg]
+    k_EMsgClientGetCDNAuthTokenResponse: _ClassVar[EMsg]
+    k_EMsgClientDownloadRateStatistics: _ClassVar[EMsg]
     k_EMsgClientRequestAccountData: _ClassVar[EMsg]
     k_EMsgClientRequestAccountDataResponse: _ClassVar[EMsg]
     k_EMsgClientResetForgottenPassword4: _ClassVar[EMsg]
@@ -1587,6 +1594,7 @@ k_EMsgGMLoadActivationCodes: EMsg
 k_EMsgGMQueueForFBS: EMsg
 k_EMsgGMSchemaConversionResults: EMsg
 k_EMsgGMWriteShellFailureToSQL: EMsg
+k_EMsgGMWriteStatsToSOS: EMsg
 k_EMsgGMGetServiceMethodRouting: EMsg
 k_EMsgGMGetServiceMethodRoutingResponse: EMsg
 k_EMsgGMTestNextBuildSchemaConversion: EMsg
@@ -1598,6 +1606,7 @@ k_EMsgGMGetModifiedConVars: EMsg
 k_EMsgGMGetModifiedConVarsResponse: EMsg
 k_EMsgBaseAIS: EMsg
 k_EMsgAISRequestContentDescription: EMsg
+k_EMsgAISUpdateAppInfo: EMsg
 k_EMsgAISGetPackageChangeNumber: EMsg
 k_EMsgAISGetPackageChangeNumberResponse: EMsg
 k_EMsgAIGetAppGCFlags: EMsg
@@ -2435,7 +2444,7 @@ k_EMsgClientTicketAuthComplete: EMsg
 k_EMsgClientIsLimitedAccount: EMsg
 k_EMsgClientRequestAuthList: EMsg
 k_EMsgClientAuthList: EMsg
-k_EMsgClientStat_Deprecated: EMsg
+k_EMsgClientStat: EMsg
 k_EMsgClientP2PConnectionInfo: EMsg
 k_EMsgClientP2PConnectionFailInfo: EMsg
 k_EMsgClientGetDepotDecryptionKey: EMsg
@@ -2461,9 +2470,9 @@ k_EMsgClientNewLoginKeyAccepted_Deprecated: EMsg
 k_EMsgClientLogOnWithHash_Deprecated: EMsg
 k_EMsgClientStoreUserStats2: EMsg
 k_EMsgClientStatsUpdated: EMsg
-k_EMsgClientRequestedClientStats_Deprecated: EMsg
-k_EMsgClientStat2Int32_Deprecated: EMsg
-k_EMsgClientStat2_Deprecated: EMsg
+k_EMsgClientRequestedClientStats: EMsg
+k_EMsgClientStat2Int32: EMsg
+k_EMsgClientStat2: EMsg
 k_EMsgClientDRMDownloadRequest: EMsg
 k_EMsgClientDRMDownloadResponse: EMsg
 k_EMsgClientDRMFinalResult: EMsg
@@ -2514,9 +2523,14 @@ k_EMsgClientUpdateMachineAuth: EMsg
 k_EMsgClientUpdateMachineAuthResponse: EMsg
 k_EMsgClientReadMachineAuth: EMsg
 k_EMsgClientReadMachineAuthResponse: EMsg
+k_EMsgClientRequestMachineAuth: EMsg
+k_EMsgClientRequestMachineAuthResponse: EMsg
 k_EMsgClientScreenshotsChanged: EMsg
 k_EMsgClientLaunchClientApp: EMsg
 k_EMsgClientLaunchClientAppResponse: EMsg
+k_EMsgClientGetCDNAuthToken: EMsg
+k_EMsgClientGetCDNAuthTokenResponse: EMsg
+k_EMsgClientDownloadRateStatistics: EMsg
 k_EMsgClientRequestAccountData: EMsg
 k_EMsgClientRequestAccountDataResponse: EMsg
 k_EMsgClientResetForgottenPassword4: EMsg

@@ -2,13 +2,11 @@
 Web related features
 """
 
-from aiohttp import ClientSession
-
 from steam import webapi
 from steam.core.crypto import generate_session_key, symmetric_encrypt
 from steam.core.msg import MsgProto
 from steam.enums.emsg import EMsg
-from steam.utils.web import AioHttpClientSessionWithUA, generate_session_id
+from steam.utils.web import generate_session_id, make_requests_session
 
 
 class Web:
@@ -64,8 +62,8 @@ class Web:
             'steamLoginSecure': resp['authenticateuser']['tokensecure'],
         }
 
-    async def get_web_session(self, language='english') -> ClientSession | None:
-        """Get a :class:`aiohtttp.ClientSession` that is ready for use
+    async def get_web_session(self, language='english'):
+        """Get a :class:`requests.Session` that is ready for use
 
         See :meth:`get_web_session_cookies`
 
@@ -78,13 +76,16 @@ class Web:
         :param language: localization language for steam pages
         :type language: :class:`str`
         :return: authenticated Session ready for use
+        :rtype: :class:`requests.Session`, :class:`None`
         """
+        if self._web_session:
+            return self._web_session
+
         cookies = await self.get_web_session_cookies()
         if cookies is None:
             return None
 
-        # self._web_session = session = make_requests_session()
-        session = AioHttpClientSessionWithUA()
+        self._web_session = session = make_requests_session()
         session_id = generate_session_id()
 
         for domain in [
@@ -92,25 +93,12 @@ class Web:
             'help.steampowered.com',
             'steamcommunity.com',
         ]:
-            result = {
-                'domain': domain,
-            }
             for name, val in cookies.items():
-                result[name] = val
+                secure = name == 'steamLoginSecure'
+                session.cookies.set(name, val, domain=domain, secure=secure)
 
-            # session.cookies.set('Steam_Language', language, domain=domain)
-            # session.cookies.set('birthtime', '-3333', domain=domain)
-            # session.cookies.set('sessionid', session_id, domain=domain)
-            # session.cookie_jar.update_cookies(
-            #     {
-            #         'Steam_Language': language,
-            #         'birthtime': '-3333',
-            #         'sessionid': session_id,
-            #     },
-            #     URL(f'https://{domain}'),
-            # )
-            result['Steam_Language'] = language
-            result['birthtime'] = '-3333'
-            result['sessionid'] = session_id
-            session.cookie_jar.update_cookies(result)
+            session.cookies.set('Steam_Language', language, domain=domain)
+            session.cookies.set('birthtime', '-3333', domain=domain)
+            session.cookies.set('sessionid', session_id, domain=domain)
+
         return session

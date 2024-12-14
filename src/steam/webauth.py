@@ -59,7 +59,8 @@ from base64 import b64encode
 from getpass import getpass
 from time import time
 
-from aiohttp import ClientError, ClientSession
+import requests
+from aiohttp import ClientSession
 from yarl import URL
 
 from steam.core.crypto import pkcs1v15_encrypt, rsa_publickey
@@ -508,7 +509,7 @@ class MobileWebAuth(WebAuth):
 
     oauth_token = None  #: holds oauth_token after successful login
 
-    async def _send_login(self, password='', captcha='', email_code='', twofactor_code=''):
+    def _send_login(self, password='', captcha='', email_code='', twofactor_code=''):
         data = {
             'username': self.username,
             'password': b64encode(pkcs1v15_encrypt(self.key, password.encode('ascii'))),
@@ -525,24 +526,25 @@ class MobileWebAuth(WebAuth):
             'oauth_scope': 'read_profile write_profile read_client write_client',
         }
 
-        self.cookie_jar.update_cookies({
-            'mobileClientVersion': '0 (2.1.3)',
-            'mobileClient': 'android',
-        })
+        self.session.cookies.set('mobileClientVersion', '0 (2.1.3)')
+        self.session.cookies.set('mobileClient', 'android')
 
         try:
-            return await (
-                await self.post('https://steamcommunity.com/login/dologin/', data=data, timeout=15)
+            return self.session.post(
+                'https://steamcommunity.com/login/dologin/', data=data, timeout=15
             ).json()
-        except ClientError as e:
+        except requests.exceptions.RequestException as e:
             raise HTTPError(str(e))
+        finally:
+            self.session.cookies.pop('mobileClientVersion', None)
+            self.session.cookies.pop('mobileClient', None)
 
     def _finalize_login(self, login_response):
         data = json.loads(login_response['oauth'])
         self.steam_id = SteamID(data['steamid'])
         self.oauth_token = data['oauth_token']
 
-    async def oauth_login(self, oauth_token='', steam_id='', language='english'):
+    def oauth_login(self, oauth_token='', steam_id='', language='english'):
         """Attempts a mobile authenticator login using an oauth token, which can be obtained from a previously logged-in
         `MobileWebAuth`
 
@@ -574,15 +576,15 @@ class MobileWebAuth(WebAuth):
         data = {'access_token': oauth_token}
 
         try:
-            resp = await self.post(
+            resp = self.session.post(
                 'https://api.steampowered.com/IMobileAuthService/GetWGToken/v0001',
                 data=data,
             )
-        except ClientError as e:
+        except requests.exceptions.RequestException as e:
             raise HTTPError(str(e))
 
         try:
-            resp_data = (await resp.json())['response']
+            resp_data = resp.json()['response']
         except json.decoder.JSONDecodeError as e:
             if 'Please verify your <pre>key=</pre> parameter.' in resp.text:
                 raise LoginIncorrect('invalid token')
@@ -596,38 +598,26 @@ class MobileWebAuth(WebAuth):
             'help.steampowered.com',
             'steamcommunity.com',
         ]:
-            # self.session.cookies.set('birthtime', '-3333', domain=domain)
-            # self.session.cookies.set('sessionid', self.session_id, domain=domain)
-            # self.session.cookies.set('mobileClientVersion', '0 (2.1.3)', domain=domain)
-            # self.session.cookies.set('mobileClient', 'android', domain=domain)
-            # self.session.cookies.set(
-            #     'steamLogin',
-            #     str(steam_id) + '%7C%7C' + resp_data['token'],
-            #     domain=domain,
-            # )
-            # self.session.cookies.set(
-            #     'steamLoginSecure',
-            #     str(steam_id) + '%7C%7C' + resp_data['token_secure'],
-            #     domain=domain,
-            #     secure=True,
-            # )
-            # self.session.cookies.set('Steam_Language', language, domain=domain)
-            self.cookie_jar.update_cookies(
-                {
-                    'domain': domain,
-                    'birthtime': '-3333',
-                    'sessionid': self.session_id,
-                    'mobileClientVersion': '0 (2.1.3)',
-                    'mobileClient': 'android',
-                    'steamLogin': str(steam_id) + '%7C%7C' + resp_data['token'],
-                    'steamLoginSecure': str(steam_id) + '%7C%7C' + resp_data['token_secure'],
-                    'Steam_Language': language,
-                },
+            self.session.cookies.set('birthtime', '-3333', domain=domain)
+            self.session.cookies.set('sessionid', self.session_id, domain=domain)
+            self.session.cookies.set('mobileClientVersion', '0 (2.1.3)', domain=domain)
+            self.session.cookies.set('mobileClient', 'android', domain=domain)
+            self.session.cookies.set(
+                'steamLogin',
+                str(steam_id) + '%7C%7C' + resp_data['token'],
+                domain=domain,
             )
+            self.session.cookies.set(
+                'steamLoginSecure',
+                str(steam_id) + '%7C%7C' + resp_data['token_secure'],
+                domain=domain,
+                secure=True,
+            )
+            self.session.cookies.set('Steam_Language', language, domain=domain)
 
         self.logged_on = True
 
-        return self
+        return self.session
 
 
 class WebAuthException(Exception):

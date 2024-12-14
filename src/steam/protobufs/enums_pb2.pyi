@@ -65,8 +65,6 @@ class EContentCheckProvider(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     k_EContentCheckProvider_Amazon: _ClassVar[EContentCheckProvider]
     k_EContentCheckProvider_Local: _ClassVar[EContentCheckProvider]
     k_EContentCheckProvider_GoogleVertexAI: _ClassVar[EContentCheckProvider]
-    k_EContentCheckProvider_GoogleGemini: _ClassVar[EContentCheckProvider]
-    k_EContentCheckProvider_SteamLearn: _ClassVar[EContentCheckProvider]
 
 class EProfileCustomizationType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
@@ -685,8 +683,6 @@ k_EContentCheckProvider_Google_DEPRECATED: EContentCheckProvider
 k_EContentCheckProvider_Amazon: EContentCheckProvider
 k_EContentCheckProvider_Local: EContentCheckProvider
 k_EContentCheckProvider_GoogleVertexAI: EContentCheckProvider
-k_EContentCheckProvider_GoogleGemini: EContentCheckProvider
-k_EContentCheckProvider_SteamLearn: EContentCheckProvider
 k_EProfileCustomizationTypeInvalid: EProfileCustomizationType
 k_EProfileCustomizationTypeRareAchievementShowcase: EProfileCustomizationType
 k_EProfileCustomizationTypeGameCollector: EProfileCustomizationType

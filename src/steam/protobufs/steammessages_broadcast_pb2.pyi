@@ -26,7 +26,6 @@ class EBroadcastWatchLocation(int, metaclass=_enum_type_wrapper.EnumTypeWrapper)
     k_EBroadcastWatchLocation_Chat_Friends: _ClassVar[EBroadcastWatchLocation]
     k_EBroadcastWatchLocation_SteamTV_Web: _ClassVar[EBroadcastWatchLocation]
     k_EBroadcastWatchLocation_DesktopUI_Overlay: _ClassVar[EBroadcastWatchLocation]
-    k_EBroadcastWatchLocation_TrailerCarousel: _ClassVar[EBroadcastWatchLocation]
 
 class EBroadcastChatPermission(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
@@ -47,7 +46,6 @@ k_EBroadcastWatchLocation_DeveloperPage: EBroadcastWatchLocation
 k_EBroadcastWatchLocation_Chat_Friends: EBroadcastWatchLocation
 k_EBroadcastWatchLocation_SteamTV_Web: EBroadcastWatchLocation
 k_EBroadcastWatchLocation_DesktopUI_Overlay: EBroadcastWatchLocation
-k_EBroadcastWatchLocation_TrailerCarousel: EBroadcastWatchLocation
 k_EBroadcastChatPermissionPublic: EBroadcastChatPermission
 k_EBroadcastChatPermissionOwnsApp: EBroadcastChatPermission
 

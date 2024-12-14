@@ -222,27 +222,6 @@ class CMsgProtoBufHeader(_message.Message):
     ip_v6: bytes
     def __init__(self, steamid: _Optional[int] = ..., client_sessionid: _Optional[int] = ..., routing_appid: _Optional[int] = ..., jobid_source: _Optional[int] = ..., jobid_target: _Optional[int] = ..., target_job_name: _Optional[str] = ..., seq_num: _Optional[int] = ..., eresult: _Optional[int] = ..., error_message: _Optional[str] = ..., auth_account_flags: _Optional[int] = ..., token_source: _Optional[int] = ..., admin_spoofing_user: bool = ..., transport_error: _Optional[int] = ..., messageid: _Optional[int] = ..., publisher_group_id: _Optional[int] = ..., sysid: _Optional[int] = ..., trace_tag: _Optional[int] = ..., webapi_key_id: _Optional[int] = ..., is_from_external_source: bool = ..., forward_to_sysid: _Optional[_Iterable[int]] = ..., cm_sysid: _Optional[int] = ..., launcher_type: _Optional[int] = ..., realm: _Optional[int] = ..., timeout_ms: _Optional[int] = ..., debug_source: _Optional[str] = ..., debug_source_string_index: _Optional[int] = ..., token_id: _Optional[int] = ..., routing_gc: _Optional[_Union[CMsgGCRoutingProtoBufHeader, _Mapping]] = ..., session_disposition: _Optional[_Union[CMsgProtoBufHeader.ESessionDisposition, str]] = ..., wg_token: _Optional[str] = ..., webui_auth_key: _Optional[str] = ..., exclude_client_sessionids: _Optional[_Iterable[int]] = ..., ip: _Optional[int] = ..., ip_v6: _Optional[bytes] = ...) -> None: ...
 
-class CMsgKubeRPCPacket(_message.Message):
-    __slots__ = ("hdr", "payload")
-    class Hdr(_message.Message):
-        __slots__ = ("sysid_source", "is_fbs_universe", "jobid_source", "eresult", "error_message")
-        SYSID_SOURCE_FIELD_NUMBER: _ClassVar[int]
-        IS_FBS_UNIVERSE_FIELD_NUMBER: _ClassVar[int]
-        JOBID_SOURCE_FIELD_NUMBER: _ClassVar[int]
-        ERESULT_FIELD_NUMBER: _ClassVar[int]
-        ERROR_MESSAGE_FIELD_NUMBER: _ClassVar[int]
-        sysid_source: int
-        is_fbs_universe: bool
-        jobid_source: int
-        eresult: int
-        error_message: str
-        def __init__(self, sysid_source: _Optional[int] = ..., is_fbs_universe: bool = ..., jobid_source: _Optional[int] = ..., eresult: _Optional[int] = ..., error_message: _Optional[str] = ...) -> None: ...
-    HDR_FIELD_NUMBER: _ClassVar[int]
-    PAYLOAD_FIELD_NUMBER: _ClassVar[int]
-    hdr: CMsgKubeRPCPacket.Hdr
-    payload: bytes
-    def __init__(self, hdr: _Optional[_Union[CMsgKubeRPCPacket.Hdr, _Mapping]] = ..., payload: _Optional[bytes] = ...) -> None: ...
-
 class CMsgMulti(_message.Message):
     __slots__ = ("size_unzipped", "message_body")
     SIZE_UNZIPPED_FIELD_NUMBER: _ClassVar[int]
@@ -466,7 +445,7 @@ class CCommunity_ClanAnnouncementInfo(_message.Message):
     def __init__(self, gid: _Optional[int] = ..., clanid: _Optional[int] = ..., posterid: _Optional[int] = ..., headline: _Optional[str] = ..., posttime: _Optional[int] = ..., updatetime: _Optional[int] = ..., body: _Optional[str] = ..., commentcount: _Optional[int] = ..., tags: _Optional[_Iterable[str]] = ..., language: _Optional[int] = ..., hidden: bool = ..., forum_topic_id: _Optional[int] = ..., event_gid: _Optional[int] = ..., voteupcount: _Optional[int] = ..., votedowncount: _Optional[int] = ..., ban_check_result: _Optional[_Union[EBanContentCheckResult, str]] = ..., banned: bool = ...) -> None: ...
 
 class CClanEventData(_message.Message):
-    __slots__ = ("gid", "clan_steamid", "event_name", "event_type", "appid", "server_address", "server_password", "rtime32_start_time", "rtime32_end_time", "comment_count", "creator_steamid", "last_update_steamid", "event_notes", "jsondata", "announcement_body", "published", "hidden", "rtime32_visibility_start", "rtime32_visibility_end", "broadcaster_accountid", "follower_count", "ignore_count", "forum_topic_id", "rtime32_last_modified", "news_post_gid", "rtime_mod_reviewed", "featured_app_tagid", "referenced_appids", "build_id", "build_branch", "unlisted")
+    __slots__ = ("gid", "clan_steamid", "event_name", "event_type", "appid", "server_address", "server_password", "rtime32_start_time", "rtime32_end_time", "comment_count", "creator_steamid", "last_update_steamid", "event_notes", "jsondata", "announcement_body", "published", "hidden", "rtime32_visibility_start", "rtime32_visibility_end", "broadcaster_accountid", "follower_count", "ignore_count", "forum_topic_id", "rtime32_last_modified", "news_post_gid", "rtime_mod_reviewed", "featured_app_tagid", "referenced_appids", "build_id", "build_branch")
     GID_FIELD_NUMBER: _ClassVar[int]
     CLAN_STEAMID_FIELD_NUMBER: _ClassVar[int]
     EVENT_NAME_FIELD_NUMBER: _ClassVar[int]
@@ -497,7 +476,6 @@ class CClanEventData(_message.Message):
     REFERENCED_APPIDS_FIELD_NUMBER: _ClassVar[int]
     BUILD_ID_FIELD_NUMBER: _ClassVar[int]
     BUILD_BRANCH_FIELD_NUMBER: _ClassVar[int]
-    UNLISTED_FIELD_NUMBER: _ClassVar[int]
     gid: int
     clan_steamid: int
     event_name: str
@@ -528,8 +506,7 @@ class CClanEventData(_message.Message):
     referenced_appids: _containers.RepeatedScalarFieldContainer[int]
     build_id: int
     build_branch: str
-    unlisted: bool
-    def __init__(self, gid: _Optional[int] = ..., clan_steamid: _Optional[int] = ..., event_name: _Optional[str] = ..., event_type: _Optional[_Union[EProtoClanEventType, str]] = ..., appid: _Optional[int] = ..., server_address: _Optional[str] = ..., server_password: _Optional[str] = ..., rtime32_start_time: _Optional[int] = ..., rtime32_end_time: _Optional[int] = ..., comment_count: _Optional[int] = ..., creator_steamid: _Optional[int] = ..., last_update_steamid: _Optional[int] = ..., event_notes: _Optional[str] = ..., jsondata: _Optional[str] = ..., announcement_body: _Optional[_Union[CCommunity_ClanAnnouncementInfo, _Mapping]] = ..., published: bool = ..., hidden: bool = ..., rtime32_visibility_start: _Optional[int] = ..., rtime32_visibility_end: _Optional[int] = ..., broadcaster_accountid: _Optional[int] = ..., follower_count: _Optional[int] = ..., ignore_count: _Optional[int] = ..., forum_topic_id: _Optional[int] = ..., rtime32_last_modified: _Optional[int] = ..., news_post_gid: _Optional[int] = ..., rtime_mod_reviewed: _Optional[int] = ..., featured_app_tagid: _Optional[int] = ..., referenced_appids: _Optional[_Iterable[int]] = ..., build_id: _Optional[int] = ..., build_branch: _Optional[str] = ..., unlisted: bool = ...) -> None: ...
+    def __init__(self, gid: _Optional[int] = ..., clan_steamid: _Optional[int] = ..., event_name: _Optional[str] = ..., event_type: _Optional[_Union[EProtoClanEventType, str]] = ..., appid: _Optional[int] = ..., server_address: _Optional[str] = ..., server_password: _Optional[str] = ..., rtime32_start_time: _Optional[int] = ..., rtime32_end_time: _Optional[int] = ..., comment_count: _Optional[int] = ..., creator_steamid: _Optional[int] = ..., last_update_steamid: _Optional[int] = ..., event_notes: _Optional[str] = ..., jsondata: _Optional[str] = ..., announcement_body: _Optional[_Union[CCommunity_ClanAnnouncementInfo, _Mapping]] = ..., published: bool = ..., hidden: bool = ..., rtime32_visibility_start: _Optional[int] = ..., rtime32_visibility_end: _Optional[int] = ..., broadcaster_accountid: _Optional[int] = ..., follower_count: _Optional[int] = ..., ignore_count: _Optional[int] = ..., forum_topic_id: _Optional[int] = ..., rtime32_last_modified: _Optional[int] = ..., news_post_gid: _Optional[int] = ..., rtime_mod_reviewed: _Optional[int] = ..., featured_app_tagid: _Optional[int] = ..., referenced_appids: _Optional[_Iterable[int]] = ..., build_id: _Optional[int] = ..., build_branch: _Optional[str] = ...) -> None: ...
 
 class CBilling_Address(_message.Message):
     __slots__ = ("first_name", "last_name", "address1", "address2", "city", "us_state", "country_code", "postcode", "zip_plus4", "phone")

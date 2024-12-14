@@ -84,10 +84,6 @@ class EStoreLinkType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     k_EStoreLinkType_LinkedIn: _ClassVar[EStoreLinkType]
     k_EStoreLinkType_WeChat: _ClassVar[EStoreLinkType]
     k_EStoreLinkType_QQLink: _ClassVar[EStoreLinkType]
-    k_EStoreLinkType_Douyin: _ClassVar[EStoreLinkType]
-    k_EStoreLinkType_Bluesky: _ClassVar[EStoreLinkType]
-    k_EStoreLinkType_Mastodon: _ClassVar[EStoreLinkType]
-    k_EStoreLinkType_Threads: _ClassVar[EStoreLinkType]
     k_EStoreLinkType_MAX: _ClassVar[EStoreLinkType]
 
 class EStoreCategoryType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
@@ -156,10 +152,6 @@ k_EStoreLinkType_Telegram: EStoreLinkType
 k_EStoreLinkType_LinkedIn: EStoreLinkType
 k_EStoreLinkType_WeChat: EStoreLinkType
 k_EStoreLinkType_QQLink: EStoreLinkType
-k_EStoreLinkType_Douyin: EStoreLinkType
-k_EStoreLinkType_Bluesky: EStoreLinkType
-k_EStoreLinkType_Mastodon: EStoreLinkType
-k_EStoreLinkType_Threads: EStoreLinkType
 k_EStoreLinkType_MAX: EStoreLinkType
 k_EStoreCategoryType_Category: EStoreCategoryType
 k_EStoreCategoryType_SupportedPlayers: EStoreCategoryType
@@ -245,7 +237,7 @@ class CStoreBrowse_GetItems_Request(_message.Message):
     def __init__(self, ids: _Optional[_Iterable[_Union[StoreItemID, _Mapping]]] = ..., context: _Optional[_Union[StoreBrowseContext, _Mapping]] = ..., data_request: _Optional[_Union[StoreBrowseItemDataRequest, _Mapping]] = ...) -> None: ...
 
 class StoreItem(_message.Message):
-    __slots__ = ("item_type", "id", "success", "visible", "unvailable_for_country_restriction", "name", "store_url_path", "appid", "type", "included_types", "included_appids", "is_free", "is_early_access", "related_items", "included_items", "content_descriptorids", "tagids", "categories", "reviews", "basic_info", "tags", "assets", "release", "platforms", "game_rating", "is_coming_soon", "best_purchase_option", "purchase_options", "accessories", "self_purchase_option", "screenshots", "trailers", "supported_languages", "store_url_path_override", "free_weekend", "unlisted", "game_count", "internal_name", "full_description", "is_free_temporarily", "assets_without_overrides", "user_filter_failure", "links")
+    __slots__ = ("item_type", "id", "success", "visible", "unvailable_for_country_restriction", "name", "store_url_path", "appid", "type", "included_types", "included_appids", "is_free", "is_early_access", "related_items", "included_items", "content_descriptorids", "tagids", "categories", "reviews", "basic_info", "tags", "assets", "release", "platforms", "game_rating", "best_purchase_option", "purchase_options", "accessories", "self_purchase_option", "screenshots", "trailers", "supported_languages", "store_url_path_override", "free_weekend", "unlisted", "game_count", "internal_name", "full_description", "is_free_temporarily", "assets_without_overrides", "user_filter_failure", "links")
     class RelatedItems(_message.Message):
         __slots__ = ("parent_appid", "demo_appid", "standalone_demo_appid")
         PARENT_APPID_FIELD_NUMBER: _ClassVar[int]
@@ -401,7 +393,7 @@ class StoreItem(_message.Message):
         steam_deck_compat_category: _enums_pb2.ESteamDeckCompatibilityCategory
         def __init__(self, windows: bool = ..., mac: bool = ..., steamos_linux: bool = ..., vr_support: _Optional[_Union[StoreItem.Platforms.VRSupport, _Mapping]] = ..., steam_deck_compat_category: _Optional[_Union[_enums_pb2.ESteamDeckCompatibilityCategory, str]] = ...) -> None: ...
     class PurchaseOption(_message.Message):
-        __slots__ = ("packageid", "bundleid", "purchase_option_name", "final_price_in_cents", "original_price_in_cents", "formatted_final_price", "formatted_original_price", "discount_pct", "bundle_discount_pct", "is_free_to_keep", "price_before_bundle_discount", "formatted_price_before_bundle_discount", "active_discounts", "user_can_purchase_as_gift", "is_commercial_license", "should_suppress_discount_pct", "hide_discount_pct_for_compliance", "included_game_count", "lowest_recent_price_in_cents", "requires_shipping", "recurrence_info", "free_to_keep_ends")
+        __slots__ = ("packageid", "bundleid", "purchase_option_name", "final_price_in_cents", "original_price_in_cents", "user_final_price_in_cents", "formatted_final_price", "formatted_original_price", "discount_pct", "user_discount_pct", "bundle_discount_pct", "active_discounts", "user_active_discounts", "inactive_discounts", "user_can_purchase", "user_can_purchase_as_gift", "is_commercial_license", "should_suppress_discount_pct", "hide_discount_pct_for_compliance", "included_game_count", "lowest_recent_price_in_cents", "requires_shipping", "recurrence_info")
         class Discount(_message.Message):
             __slots__ = ("discount_amount", "discount_description", "discount_end_date")
             DISCOUNT_AMOUNT_FIELD_NUMBER: _ClassVar[int]
@@ -431,14 +423,16 @@ class StoreItem(_message.Message):
         PURCHASE_OPTION_NAME_FIELD_NUMBER: _ClassVar[int]
         FINAL_PRICE_IN_CENTS_FIELD_NUMBER: _ClassVar[int]
         ORIGINAL_PRICE_IN_CENTS_FIELD_NUMBER: _ClassVar[int]
+        USER_FINAL_PRICE_IN_CENTS_FIELD_NUMBER: _ClassVar[int]
         FORMATTED_FINAL_PRICE_FIELD_NUMBER: _ClassVar[int]
         FORMATTED_ORIGINAL_PRICE_FIELD_NUMBER: _ClassVar[int]
         DISCOUNT_PCT_FIELD_NUMBER: _ClassVar[int]
+        USER_DISCOUNT_PCT_FIELD_NUMBER: _ClassVar[int]
         BUNDLE_DISCOUNT_PCT_FIELD_NUMBER: _ClassVar[int]
-        IS_FREE_TO_KEEP_FIELD_NUMBER: _ClassVar[int]
-        PRICE_BEFORE_BUNDLE_DISCOUNT_FIELD_NUMBER: _ClassVar[int]
-        FORMATTED_PRICE_BEFORE_BUNDLE_DISCOUNT_FIELD_NUMBER: _ClassVar[int]
         ACTIVE_DISCOUNTS_FIELD_NUMBER: _ClassVar[int]
+        USER_ACTIVE_DISCOUNTS_FIELD_NUMBER: _ClassVar[int]
+        INACTIVE_DISCOUNTS_FIELD_NUMBER: _ClassVar[int]
+        USER_CAN_PURCHASE_FIELD_NUMBER: _ClassVar[int]
         USER_CAN_PURCHASE_AS_GIFT_FIELD_NUMBER: _ClassVar[int]
         IS_COMMERCIAL_LICENSE_FIELD_NUMBER: _ClassVar[int]
         SHOULD_SUPPRESS_DISCOUNT_PCT_FIELD_NUMBER: _ClassVar[int]
@@ -447,20 +441,21 @@ class StoreItem(_message.Message):
         LOWEST_RECENT_PRICE_IN_CENTS_FIELD_NUMBER: _ClassVar[int]
         REQUIRES_SHIPPING_FIELD_NUMBER: _ClassVar[int]
         RECURRENCE_INFO_FIELD_NUMBER: _ClassVar[int]
-        FREE_TO_KEEP_ENDS_FIELD_NUMBER: _ClassVar[int]
         packageid: int
         bundleid: int
         purchase_option_name: str
         final_price_in_cents: int
         original_price_in_cents: int
+        user_final_price_in_cents: int
         formatted_final_price: str
         formatted_original_price: str
         discount_pct: int
+        user_discount_pct: int
         bundle_discount_pct: int
-        is_free_to_keep: bool
-        price_before_bundle_discount: int
-        formatted_price_before_bundle_discount: str
         active_discounts: _containers.RepeatedCompositeFieldContainer[StoreItem.PurchaseOption.Discount]
+        user_active_discounts: _containers.RepeatedCompositeFieldContainer[StoreItem.PurchaseOption.Discount]
+        inactive_discounts: _containers.RepeatedCompositeFieldContainer[StoreItem.PurchaseOption.Discount]
+        user_can_purchase: bool
         user_can_purchase_as_gift: bool
         is_commercial_license: bool
         should_suppress_discount_pct: bool
@@ -469,8 +464,7 @@ class StoreItem(_message.Message):
         lowest_recent_price_in_cents: int
         requires_shipping: bool
         recurrence_info: StoreItem.PurchaseOption.RecurrenceInfo
-        free_to_keep_ends: int
-        def __init__(self, packageid: _Optional[int] = ..., bundleid: _Optional[int] = ..., purchase_option_name: _Optional[str] = ..., final_price_in_cents: _Optional[int] = ..., original_price_in_cents: _Optional[int] = ..., formatted_final_price: _Optional[str] = ..., formatted_original_price: _Optional[str] = ..., discount_pct: _Optional[int] = ..., bundle_discount_pct: _Optional[int] = ..., is_free_to_keep: bool = ..., price_before_bundle_discount: _Optional[int] = ..., formatted_price_before_bundle_discount: _Optional[str] = ..., active_discounts: _Optional[_Iterable[_Union[StoreItem.PurchaseOption.Discount, _Mapping]]] = ..., user_can_purchase_as_gift: bool = ..., is_commercial_license: bool = ..., should_suppress_discount_pct: bool = ..., hide_discount_pct_for_compliance: bool = ..., included_game_count: _Optional[int] = ..., lowest_recent_price_in_cents: _Optional[int] = ..., requires_shipping: bool = ..., recurrence_info: _Optional[_Union[StoreItem.PurchaseOption.RecurrenceInfo, _Mapping]] = ..., free_to_keep_ends: _Optional[int] = ...) -> None: ...
+        def __init__(self, packageid: _Optional[int] = ..., bundleid: _Optional[int] = ..., purchase_option_name: _Optional[str] = ..., final_price_in_cents: _Optional[int] = ..., original_price_in_cents: _Optional[int] = ..., user_final_price_in_cents: _Optional[int] = ..., formatted_final_price: _Optional[str] = ..., formatted_original_price: _Optional[str] = ..., discount_pct: _Optional[int] = ..., user_discount_pct: _Optional[int] = ..., bundle_discount_pct: _Optional[int] = ..., active_discounts: _Optional[_Iterable[_Union[StoreItem.PurchaseOption.Discount, _Mapping]]] = ..., user_active_discounts: _Optional[_Iterable[_Union[StoreItem.PurchaseOption.Discount, _Mapping]]] = ..., inactive_discounts: _Optional[_Iterable[_Union[StoreItem.PurchaseOption.Discount, _Mapping]]] = ..., user_can_purchase: bool = ..., user_can_purchase_as_gift: bool = ..., is_commercial_license: bool = ..., should_suppress_discount_pct: bool = ..., hide_discount_pct_for_compliance: bool = ..., included_game_count: _Optional[int] = ..., lowest_recent_price_in_cents: _Optional[int] = ..., requires_shipping: bool = ..., recurrence_info: _Optional[_Union[StoreItem.PurchaseOption.RecurrenceInfo, _Mapping]] = ...) -> None: ...
     class Screenshots(_message.Message):
         __slots__ = ("all_ages_screenshots", "mature_content_screenshots")
         class Screenshot(_message.Message):
@@ -574,7 +568,6 @@ class StoreItem(_message.Message):
     RELEASE_FIELD_NUMBER: _ClassVar[int]
     PLATFORMS_FIELD_NUMBER: _ClassVar[int]
     GAME_RATING_FIELD_NUMBER: _ClassVar[int]
-    IS_COMING_SOON_FIELD_NUMBER: _ClassVar[int]
     BEST_PURCHASE_OPTION_FIELD_NUMBER: _ClassVar[int]
     PURCHASE_OPTIONS_FIELD_NUMBER: _ClassVar[int]
     ACCESSORIES_FIELD_NUMBER: _ClassVar[int]
@@ -617,7 +610,6 @@ class StoreItem(_message.Message):
     release: StoreItem.ReleaseInfo
     platforms: StoreItem.Platforms
     game_rating: StoreGameRating
-    is_coming_soon: bool
     best_purchase_option: StoreItem.PurchaseOption
     purchase_options: _containers.RepeatedCompositeFieldContainer[StoreItem.PurchaseOption]
     accessories: _containers.RepeatedCompositeFieldContainer[StoreItem.PurchaseOption]
@@ -635,7 +627,7 @@ class StoreItem(_message.Message):
     assets_without_overrides: StoreItem.Assets
     user_filter_failure: StoreBrowseFilterFailure
     links: _containers.RepeatedCompositeFieldContainer[StoreItem.Link]
-    def __init__(self, item_type: _Optional[_Union[EStoreItemType, str]] = ..., id: _Optional[int] = ..., success: _Optional[int] = ..., visible: bool = ..., unvailable_for_country_restriction: bool = ..., name: _Optional[str] = ..., store_url_path: _Optional[str] = ..., appid: _Optional[int] = ..., type: _Optional[_Union[EStoreAppType, str]] = ..., included_types: _Optional[_Iterable[_Union[EStoreAppType, str]]] = ..., included_appids: _Optional[_Iterable[int]] = ..., is_free: bool = ..., is_early_access: bool = ..., related_items: _Optional[_Union[StoreItem.RelatedItems, _Mapping]] = ..., included_items: _Optional[_Union[StoreItem.IncludedItems, _Mapping]] = ..., content_descriptorids: _Optional[_Iterable[_Union[_enums_productinfo_pb2.EContentDescriptorID, str]]] = ..., tagids: _Optional[_Iterable[int]] = ..., categories: _Optional[_Union[StoreItem.Categories, _Mapping]] = ..., reviews: _Optional[_Union[StoreItem.Reviews, _Mapping]] = ..., basic_info: _Optional[_Union[StoreItem.BasicInfo, _Mapping]] = ..., tags: _Optional[_Iterable[_Union[StoreItem.Tag, _Mapping]]] = ..., assets: _Optional[_Union[StoreItem.Assets, _Mapping]] = ..., release: _Optional[_Union[StoreItem.ReleaseInfo, _Mapping]] = ..., platforms: _Optional[_Union[StoreItem.Platforms, _Mapping]] = ..., game_rating: _Optional[_Union[StoreGameRating, _Mapping]] = ..., is_coming_soon: bool = ..., best_purchase_option: _Optional[_Union[StoreItem.PurchaseOption, _Mapping]] = ..., purchase_options: _Optional[_Iterable[_Union[StoreItem.PurchaseOption, _Mapping]]] = ..., accessories: _Optional[_Iterable[_Union[StoreItem.PurchaseOption, _Mapping]]] = ..., self_purchase_option: _Optional[_Union[StoreItem.PurchaseOption, _Mapping]] = ..., screenshots: _Optional[_Union[StoreItem.Screenshots, _Mapping]] = ..., trailers: _Optional[_Union[StoreItem.Trailers, _Mapping]] = ..., supported_languages: _Optional[_Iterable[_Union[StoreItem.SupportedLanguage, _Mapping]]] = ..., store_url_path_override: _Optional[str] = ..., free_weekend: _Optional[_Union[StoreItem.FreeWeekend, _Mapping]] = ..., unlisted: bool = ..., game_count: _Optional[int] = ..., internal_name: _Optional[str] = ..., full_description: _Optional[str] = ..., is_free_temporarily: bool = ..., assets_without_overrides: _Optional[_Union[StoreItem.Assets, _Mapping]] = ..., user_filter_failure: _Optional[_Union[StoreBrowseFilterFailure, _Mapping]] = ..., links: _Optional[_Iterable[_Union[StoreItem.Link, _Mapping]]] = ...) -> None: ...
+    def __init__(self, item_type: _Optional[_Union[EStoreItemType, str]] = ..., id: _Optional[int] = ..., success: _Optional[int] = ..., visible: bool = ..., unvailable_for_country_restriction: bool = ..., name: _Optional[str] = ..., store_url_path: _Optional[str] = ..., appid: _Optional[int] = ..., type: _Optional[_Union[EStoreAppType, str]] = ..., included_types: _Optional[_Iterable[_Union[EStoreAppType, str]]] = ..., included_appids: _Optional[_Iterable[int]] = ..., is_free: bool = ..., is_early_access: bool = ..., related_items: _Optional[_Union[StoreItem.RelatedItems, _Mapping]] = ..., included_items: _Optional[_Union[StoreItem.IncludedItems, _Mapping]] = ..., content_descriptorids: _Optional[_Iterable[_Union[_enums_productinfo_pb2.EContentDescriptorID, str]]] = ..., tagids: _Optional[_Iterable[int]] = ..., categories: _Optional[_Union[StoreItem.Categories, _Mapping]] = ..., reviews: _Optional[_Union[StoreItem.Reviews, _Mapping]] = ..., basic_info: _Optional[_Union[StoreItem.BasicInfo, _Mapping]] = ..., tags: _Optional[_Iterable[_Union[StoreItem.Tag, _Mapping]]] = ..., assets: _Optional[_Union[StoreItem.Assets, _Mapping]] = ..., release: _Optional[_Union[StoreItem.ReleaseInfo, _Mapping]] = ..., platforms: _Optional[_Union[StoreItem.Platforms, _Mapping]] = ..., game_rating: _Optional[_Union[StoreGameRating, _Mapping]] = ..., best_purchase_option: _Optional[_Union[StoreItem.PurchaseOption, _Mapping]] = ..., purchase_options: _Optional[_Iterable[_Union[StoreItem.PurchaseOption, _Mapping]]] = ..., accessories: _Optional[_Iterable[_Union[StoreItem.PurchaseOption, _Mapping]]] = ..., self_purchase_option: _Optional[_Union[StoreItem.PurchaseOption, _Mapping]] = ..., screenshots: _Optional[_Union[StoreItem.Screenshots, _Mapping]] = ..., trailers: _Optional[_Union[StoreItem.Trailers, _Mapping]] = ..., supported_languages: _Optional[_Iterable[_Union[StoreItem.SupportedLanguage, _Mapping]]] = ..., store_url_path_override: _Optional[str] = ..., free_weekend: _Optional[_Union[StoreItem.FreeWeekend, _Mapping]] = ..., unlisted: bool = ..., game_count: _Optional[int] = ..., internal_name: _Optional[str] = ..., full_description: _Optional[str] = ..., is_free_temporarily: bool = ..., assets_without_overrides: _Optional[_Union[StoreItem.Assets, _Mapping]] = ..., user_filter_failure: _Optional[_Union[StoreBrowseFilterFailure, _Mapping]] = ..., links: _Optional[_Iterable[_Union[StoreItem.Link, _Mapping]]] = ...) -> None: ...
 
 class StoreGameRating(_message.Message):
     __slots__ = ("type", "rating", "descriptors", "interactive_elements", "required_age", "use_age_gate", "image_url", "image_target")
@@ -700,7 +692,7 @@ class CStoreBrowse_GetStoreCategories_Request(_message.Message):
 class CStoreBrowse_GetStoreCategories_Response(_message.Message):
     __slots__ = ("categories",)
     class Category(_message.Message):
-        __slots__ = ("categoryid", "type", "internal_name", "display_name", "image_url", "show_in_search", "computed", "edit_url", "edit_sort_order")
+        __slots__ = ("categoryid", "type", "internal_name", "display_name", "image_url", "show_in_search", "computed")
         CATEGORYID_FIELD_NUMBER: _ClassVar[int]
         TYPE_FIELD_NUMBER: _ClassVar[int]
         INTERNAL_NAME_FIELD_NUMBER: _ClassVar[int]
@@ -708,8 +700,6 @@ class CStoreBrowse_GetStoreCategories_Response(_message.Message):
         IMAGE_URL_FIELD_NUMBER: _ClassVar[int]
         SHOW_IN_SEARCH_FIELD_NUMBER: _ClassVar[int]
         COMPUTED_FIELD_NUMBER: _ClassVar[int]
-        EDIT_URL_FIELD_NUMBER: _ClassVar[int]
-        EDIT_SORT_ORDER_FIELD_NUMBER: _ClassVar[int]
         categoryid: int
         type: EStoreCategoryType
         internal_name: str
@@ -717,9 +707,7 @@ class CStoreBrowse_GetStoreCategories_Response(_message.Message):
         image_url: str
         show_in_search: bool
         computed: bool
-        edit_url: str
-        edit_sort_order: int
-        def __init__(self, categoryid: _Optional[int] = ..., type: _Optional[_Union[EStoreCategoryType, str]] = ..., internal_name: _Optional[str] = ..., display_name: _Optional[str] = ..., image_url: _Optional[str] = ..., show_in_search: bool = ..., computed: bool = ..., edit_url: _Optional[str] = ..., edit_sort_order: _Optional[int] = ...) -> None: ...
+        def __init__(self, categoryid: _Optional[int] = ..., type: _Optional[_Union[EStoreCategoryType, str]] = ..., internal_name: _Optional[str] = ..., display_name: _Optional[str] = ..., image_url: _Optional[str] = ..., show_in_search: bool = ..., computed: bool = ...) -> None: ...
     CATEGORIES_FIELD_NUMBER: _ClassVar[int]
     categories: _containers.RepeatedCompositeFieldContainer[CStoreBrowse_GetStoreCategories_Response.Category]
     def __init__(self, categories: _Optional[_Iterable[_Union[CStoreBrowse_GetStoreCategories_Response.Category, _Mapping]]] = ...) -> None: ...

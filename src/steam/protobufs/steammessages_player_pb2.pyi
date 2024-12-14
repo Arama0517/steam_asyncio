@@ -347,7 +347,7 @@ class CPlayer_GetProfileBackground_Request(_message.Message):
     def __init__(self, steamid: _Optional[int] = ..., language: _Optional[str] = ...) -> None: ...
 
 class ProfileItem(_message.Message):
-    __slots__ = ("communityitemid", "image_small", "image_large", "name", "item_title", "item_description", "appid", "item_type", "item_class", "movie_webm", "movie_mp4", "movie_webm_small", "movie_mp4_small", "equipped_flags", "profile_colors", "tiled")
+    __slots__ = ("communityitemid", "image_small", "image_large", "name", "item_title", "item_description", "appid", "item_type", "item_class", "movie_webm", "movie_mp4", "movie_webm_small", "movie_mp4_small", "equipped_flags", "profile_colors")
     class ProfileColor(_message.Message):
         __slots__ = ("style_name", "color")
         STYLE_NAME_FIELD_NUMBER: _ClassVar[int]
@@ -370,7 +370,6 @@ class ProfileItem(_message.Message):
     MOVIE_MP4_SMALL_FIELD_NUMBER: _ClassVar[int]
     EQUIPPED_FLAGS_FIELD_NUMBER: _ClassVar[int]
     PROFILE_COLORS_FIELD_NUMBER: _ClassVar[int]
-    TILED_FIELD_NUMBER: _ClassVar[int]
     communityitemid: int
     image_small: str
     image_large: str
@@ -386,8 +385,7 @@ class ProfileItem(_message.Message):
     movie_mp4_small: str
     equipped_flags: int
     profile_colors: _containers.RepeatedCompositeFieldContainer[ProfileItem.ProfileColor]
-    tiled: bool
-    def __init__(self, communityitemid: _Optional[int] = ..., image_small: _Optional[str] = ..., image_large: _Optional[str] = ..., name: _Optional[str] = ..., item_title: _Optional[str] = ..., item_description: _Optional[str] = ..., appid: _Optional[int] = ..., item_type: _Optional[int] = ..., item_class: _Optional[int] = ..., movie_webm: _Optional[str] = ..., movie_mp4: _Optional[str] = ..., movie_webm_small: _Optional[str] = ..., movie_mp4_small: _Optional[str] = ..., equipped_flags: _Optional[int] = ..., profile_colors: _Optional[_Iterable[_Union[ProfileItem.ProfileColor, _Mapping]]] = ..., tiled: bool = ...) -> None: ...
+    def __init__(self, communityitemid: _Optional[int] = ..., image_small: _Optional[str] = ..., image_large: _Optional[str] = ..., name: _Optional[str] = ..., item_title: _Optional[str] = ..., item_description: _Optional[str] = ..., appid: _Optional[int] = ..., item_type: _Optional[int] = ..., item_class: _Optional[int] = ..., movie_webm: _Optional[str] = ..., movie_mp4: _Optional[str] = ..., movie_webm_small: _Optional[str] = ..., movie_mp4_small: _Optional[str] = ..., equipped_flags: _Optional[int] = ..., profile_colors: _Optional[_Iterable[_Union[ProfileItem.ProfileColor, _Mapping]]] = ...) -> None: ...
 
 class CPlayer_GetProfileBackground_Response(_message.Message):
     __slots__ = ("profile_background",)

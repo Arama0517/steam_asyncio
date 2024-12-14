@@ -532,14 +532,12 @@ class CStore_UpdatePackageReservations_Response(_message.Message):
     def __init__(self, reservation_status: _Optional[_Iterable[_Union[_steammessages_base_pb2.CPackageReservationStatus, _Mapping]]] = ...) -> None: ...
 
 class CStore_GetWishlistDemoEmailStatus_Request(_message.Message):
-    __slots__ = ("appid", "demo_appid", "allow_late_firing")
+    __slots__ = ("appid", "demo_appid")
     APPID_FIELD_NUMBER: _ClassVar[int]
     DEMO_APPID_FIELD_NUMBER: _ClassVar[int]
-    ALLOW_LATE_FIRING_FIELD_NUMBER: _ClassVar[int]
     appid: int
     demo_appid: int
-    allow_late_firing: bool
-    def __init__(self, appid: _Optional[int] = ..., demo_appid: _Optional[int] = ..., allow_late_firing: bool = ...) -> None: ...
+    def __init__(self, appid: _Optional[int] = ..., demo_appid: _Optional[int] = ...) -> None: ...
 
 class CStore_GetWishlistDemoEmailStatus_Response(_message.Message):
     __slots__ = ("can_fire", "time_staged", "demo_release_date")
@@ -552,14 +550,12 @@ class CStore_GetWishlistDemoEmailStatus_Response(_message.Message):
     def __init__(self, can_fire: bool = ..., time_staged: _Optional[int] = ..., demo_release_date: _Optional[int] = ...) -> None: ...
 
 class CStore_QueueWishlistDemoEmailToFire_Request(_message.Message):
-    __slots__ = ("appid", "demo_appid", "allow_late_firing")
+    __slots__ = ("appid", "demo_appid")
     APPID_FIELD_NUMBER: _ClassVar[int]
     DEMO_APPID_FIELD_NUMBER: _ClassVar[int]
-    ALLOW_LATE_FIRING_FIELD_NUMBER: _ClassVar[int]
     appid: int
     demo_appid: int
-    allow_late_firing: bool
-    def __init__(self, appid: _Optional[int] = ..., demo_appid: _Optional[int] = ..., allow_late_firing: bool = ...) -> None: ...
+    def __init__(self, appid: _Optional[int] = ..., demo_appid: _Optional[int] = ...) -> None: ...
 
 class CStore_QueueWishlistDemoEmailToFire_Response(_message.Message):
     __slots__ = ()

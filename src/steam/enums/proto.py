@@ -109,12 +109,6 @@ class EAuthSessionSecurityHistory(SteamIntEnum):
     NoPriorHistory = 2
 
 
-class EAuthTokenAppType(SteamIntEnum):
-    Unknown = 0
-    Mobile_SteamApp = 1
-    Mobile_ChatApp = 2
-
-
 class EAuthTokenPlatformType(SteamIntEnum):
     Unknown = 0
     SteamClient = 1
@@ -335,8 +329,6 @@ class EContentCheckProvider(SteamIntEnum):
     Amazon = 2
     Local = 3
     GoogleVertexAI = 4
-    GoogleGemini = 5
-    SteamLearn = 6
 
 
 class ECPUGovernor(SteamIntEnum):
@@ -1007,11 +999,7 @@ EStoreLinkType = SteamIntEnum(
         'LinkedIn': 16,
         'WeChat': 17,
         'QQLink': 18,
-        'Douyin': 19,
-        'Bluesky': 20,
-        'Mastodon': 21,
-        'Threads': 22,
-        'MAX': 23,
+        'MAX': 19,
     },
 )
 
@@ -1214,7 +1202,6 @@ __all__ = [
     'EAuthenticationType',
     'EAuthSessionGuardType',
     'EAuthSessionSecurityHistory',
-    'EAuthTokenAppType',
     'EAuthTokenPlatformType',
     'EAuthTokenRevokeAction',
     'EAuthTokenState',

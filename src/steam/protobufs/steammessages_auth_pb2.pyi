@@ -17,12 +17,6 @@ class EAuthTokenPlatformType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     k_EAuthTokenPlatformType_WebBrowser: _ClassVar[EAuthTokenPlatformType]
     k_EAuthTokenPlatformType_MobileApp: _ClassVar[EAuthTokenPlatformType]
 
-class EAuthTokenAppType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-    __slots__ = ()
-    k_EAuthTokenAppType_Unknown: _ClassVar[EAuthTokenAppType]
-    k_EAuthTokenAppType_Mobile_SteamApp: _ClassVar[EAuthTokenAppType]
-    k_EAuthTokenAppType_Mobile_ChatApp: _ClassVar[EAuthTokenAppType]
-
 class EAuthSessionGuardType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
     k_EAuthSessionGuardType_Unknown: _ClassVar[EAuthSessionGuardType]
@@ -78,9 +72,6 @@ k_EAuthTokenPlatformType_Unknown: EAuthTokenPlatformType
 k_EAuthTokenPlatformType_SteamClient: EAuthTokenPlatformType
 k_EAuthTokenPlatformType_WebBrowser: EAuthTokenPlatformType
 k_EAuthTokenPlatformType_MobileApp: EAuthTokenPlatformType
-k_EAuthTokenAppType_Unknown: EAuthTokenAppType
-k_EAuthTokenAppType_Mobile_SteamApp: EAuthTokenAppType
-k_EAuthTokenAppType_Mobile_ChatApp: EAuthTokenAppType
 k_EAuthSessionGuardType_Unknown: EAuthSessionGuardType
 k_EAuthSessionGuardType_None: EAuthSessionGuardType
 k_EAuthSessionGuardType_EmailCode: EAuthSessionGuardType
@@ -133,22 +124,20 @@ class CAuthentication_GetPasswordRSAPublicKey_Response(_message.Message):
     def __init__(self, publickey_mod: _Optional[str] = ..., publickey_exp: _Optional[str] = ..., timestamp: _Optional[int] = ...) -> None: ...
 
 class CAuthentication_DeviceDetails(_message.Message):
-    __slots__ = ("device_friendly_name", "platform_type", "os_type", "gaming_device_type", "client_count", "machine_id", "app_type")
+    __slots__ = ("device_friendly_name", "platform_type", "os_type", "gaming_device_type", "client_count", "machine_id")
     DEVICE_FRIENDLY_NAME_FIELD_NUMBER: _ClassVar[int]
     PLATFORM_TYPE_FIELD_NUMBER: _ClassVar[int]
     OS_TYPE_FIELD_NUMBER: _ClassVar[int]
     GAMING_DEVICE_TYPE_FIELD_NUMBER: _ClassVar[int]
     CLIENT_COUNT_FIELD_NUMBER: _ClassVar[int]
     MACHINE_ID_FIELD_NUMBER: _ClassVar[int]
-    APP_TYPE_FIELD_NUMBER: _ClassVar[int]
     device_friendly_name: str
     platform_type: EAuthTokenPlatformType
     os_type: int
     gaming_device_type: int
     client_count: int
     machine_id: bytes
-    app_type: EAuthTokenAppType
-    def __init__(self, device_friendly_name: _Optional[str] = ..., platform_type: _Optional[_Union[EAuthTokenPlatformType, str]] = ..., os_type: _Optional[int] = ..., gaming_device_type: _Optional[int] = ..., client_count: _Optional[int] = ..., machine_id: _Optional[bytes] = ..., app_type: _Optional[_Union[EAuthTokenAppType, str]] = ...) -> None: ...
+    def __init__(self, device_friendly_name: _Optional[str] = ..., platform_type: _Optional[_Union[EAuthTokenPlatformType, str]] = ..., os_type: _Optional[int] = ..., gaming_device_type: _Optional[int] = ..., client_count: _Optional[int] = ..., machine_id: _Optional[bytes] = ...) -> None: ...
 
 class CAuthentication_BeginAuthSessionViaQR_Request(_message.Message):
     __slots__ = ("device_friendly_name", "platform_type", "device_details", "website_id")
@@ -271,7 +260,7 @@ class CAuthentication_GetAuthSessionInfo_Request(_message.Message):
     def __init__(self, client_id: _Optional[int] = ...) -> None: ...
 
 class CAuthentication_GetAuthSessionInfo_Response(_message.Message):
-    __slots__ = ("ip", "geoloc", "city", "state", "country", "platform_type", "device_friendly_name", "version", "login_history", "requestor_location_mismatch", "high_usage_login", "requested_persistence", "device_trust", "app_type")
+    __slots__ = ("ip", "geoloc", "city", "state", "country", "platform_type", "device_friendly_name", "version", "login_history", "requestor_location_mismatch", "high_usage_login", "requested_persistence", "device_trust")
     IP_FIELD_NUMBER: _ClassVar[int]
     GEOLOC_FIELD_NUMBER: _ClassVar[int]
     CITY_FIELD_NUMBER: _ClassVar[int]
@@ -285,7 +274,6 @@ class CAuthentication_GetAuthSessionInfo_Response(_message.Message):
     HIGH_USAGE_LOGIN_FIELD_NUMBER: _ClassVar[int]
     REQUESTED_PERSISTENCE_FIELD_NUMBER: _ClassVar[int]
     DEVICE_TRUST_FIELD_NUMBER: _ClassVar[int]
-    APP_TYPE_FIELD_NUMBER: _ClassVar[int]
     ip: str
     geoloc: str
     city: str
@@ -299,8 +287,7 @@ class CAuthentication_GetAuthSessionInfo_Response(_message.Message):
     high_usage_login: bool
     requested_persistence: _enums_pb2.ESessionPersistence
     device_trust: int
-    app_type: EAuthTokenAppType
-    def __init__(self, ip: _Optional[str] = ..., geoloc: _Optional[str] = ..., city: _Optional[str] = ..., state: _Optional[str] = ..., country: _Optional[str] = ..., platform_type: _Optional[_Union[EAuthTokenPlatformType, str]] = ..., device_friendly_name: _Optional[str] = ..., version: _Optional[int] = ..., login_history: _Optional[_Union[EAuthSessionSecurityHistory, str]] = ..., requestor_location_mismatch: bool = ..., high_usage_login: bool = ..., requested_persistence: _Optional[_Union[_enums_pb2.ESessionPersistence, str]] = ..., device_trust: _Optional[int] = ..., app_type: _Optional[_Union[EAuthTokenAppType, str]] = ...) -> None: ...
+    def __init__(self, ip: _Optional[str] = ..., geoloc: _Optional[str] = ..., city: _Optional[str] = ..., state: _Optional[str] = ..., country: _Optional[str] = ..., platform_type: _Optional[_Union[EAuthTokenPlatformType, str]] = ..., device_friendly_name: _Optional[str] = ..., version: _Optional[int] = ..., login_history: _Optional[_Union[EAuthSessionSecurityHistory, str]] = ..., requestor_location_mismatch: bool = ..., high_usage_login: bool = ..., requested_persistence: _Optional[_Union[_enums_pb2.ESessionPersistence, str]] = ..., device_trust: _Optional[int] = ...) -> None: ...
 
 class CAuthentication_GetAuthSessionRiskInfo_Request(_message.Message):
     __slots__ = ("client_id", "language")
@@ -321,27 +308,6 @@ class CAuthentication_GetAuthSessionRiskInfo_Response(_message.Message):
     location_other: str
     platform_type: EAuthTokenPlatformType
     def __init__(self, location_confirmer: _Optional[str] = ..., location_requestor: _Optional[str] = ..., location_other: _Optional[str] = ..., platform_type: _Optional[_Union[EAuthTokenPlatformType, str]] = ...) -> None: ...
-
-class CAuthentication_NotifyRiskQuizResults_Notification(_message.Message):
-    __slots__ = ("client_id", "results", "selected_action", "did_confirm_login")
-    class RiskQuizResults(_message.Message):
-        __slots__ = ("platform", "location", "action")
-        PLATFORM_FIELD_NUMBER: _ClassVar[int]
-        LOCATION_FIELD_NUMBER: _ClassVar[int]
-        ACTION_FIELD_NUMBER: _ClassVar[int]
-        platform: bool
-        location: bool
-        action: bool
-        def __init__(self, platform: bool = ..., location: bool = ..., action: bool = ...) -> None: ...
-    CLIENT_ID_FIELD_NUMBER: _ClassVar[int]
-    RESULTS_FIELD_NUMBER: _ClassVar[int]
-    SELECTED_ACTION_FIELD_NUMBER: _ClassVar[int]
-    DID_CONFIRM_LOGIN_FIELD_NUMBER: _ClassVar[int]
-    client_id: int
-    results: CAuthentication_NotifyRiskQuizResults_Notification.RiskQuizResults
-    selected_action: str
-    did_confirm_login: bool
-    def __init__(self, client_id: _Optional[int] = ..., results: _Optional[_Union[CAuthentication_NotifyRiskQuizResults_Notification.RiskQuizResults, _Mapping]] = ..., selected_action: _Optional[str] = ..., did_confirm_login: bool = ...) -> None: ...
 
 class CAuthentication_UpdateAuthSessionWithMobileConfirmation_Request(_message.Message):
     __slots__ = ("version", "client_id", "steamid", "signature", "confirm", "persistence")

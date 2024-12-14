@@ -32,14 +32,11 @@ All globals params (``key``, ``https``, ``format``, ``raw``) can be specified on
 """
 
 import asyncio
-import json
-from typing import Any, Literal, Optional
+import json as _json
+from typing import Literal, Optional
 from xml.etree.ElementTree import Element
 
 import requests
-import vdf
-from aiohttp import ClientSession
-from lxml import etree
 
 from steam.utils.web import AioHttpClientSessionWithUA
 
@@ -402,8 +399,7 @@ class WebAPIMethod:
 async def webapi_request(
     url: str,
     method: Literal['GET', 'POST'] = 'GET',
-    session: Optional[ClientSession] = None,
-    caller: Optional[Any] = None,
+    caller: Optional[WebAPIMethod] = None,
     params: Optional[dict] = None,
 ) -> dict | Element | str:
     """Low level function for calling Steam's WebAPI
@@ -412,7 +408,6 @@ async def webapi_request(
 
     :param url: request url (e.g. ``https://api.steampowered.com/A/B/v001/``)
     :param method: HTTP method (GET or POST)
-    :param session: an instance requests session, or one is created per call
     :param caller: caller reference, caller.last_response is set to the last response
     :param params: dict of WebAPI and endpoint specific params
     :return: response based on paramers
@@ -435,7 +430,7 @@ async def webapi_request(
         if isinstance(v, bool):
             params[k] = 1 if v else 0
         elif isinstance(v, dict):
-            params[k] = json.dumps(v)
+            params[k] = _json.dumps(v)
         elif isinstance(v, list):
             del params[k]
             for i, lvalue in enumerate(v):
@@ -443,30 +438,26 @@ async def webapi_request(
 
     kwargs = {'params': params} if method == 'GET' else {'data': params}  # params to data for POST
 
-    session_need_exit = False
-    if session is None:
-        session = AioHttpClientSessionWithUA()
-        session_need_exit = True
+    async with AioHttpClientSessionWithUA() as session:
+        async with session.request(method, url, timeout=onetime['http_timeout'], **kwargs) as resp:
+            # we keep a reference of the last response instance on the caller
+            if caller is not None:
+                caller.last_response = resp
+            # 4XX and 5XX will cause this to raise
+            resp.raise_for_status()
 
-    try:
-        resp = await session.request(method, url, timeout=onetime['http_timeout'], **kwargs)
-        # we keep a reference of the last response instance on the caller
-        if caller is not None:
-            caller.last_response = resp
-        # 4XX and 5XX will cause this to raise
-        resp.raise_for_status()
+            if onetime['raw']:
+                return await resp.text()
+            elif onetime['format'] == 'json':
+                return await resp.json()
+            elif onetime['format'] == 'xml':
+                from lxml import etree as _etree
 
-        if onetime['raw']:
-            return await resp.text()
-        elif onetime['format'] == 'json':
-            return await resp.json()
-        elif onetime['format'] == 'xml':
-            return etree.fromstring(await resp.read())
-        elif onetime['format'] == 'vdf':
-            return vdf.loads(await resp.text())
-    finally:
-        if session_need_exit:
-            await session.__aexit__(None, None, None)
+                return _etree.fromstring(resp.content)
+            elif onetime['format'] == 'vdf':
+                import vdf as _vdf
+
+                return _vdf.loads(await resp.text())
 
 
 async def get(
@@ -475,7 +466,6 @@ async def get(
     version: int = 1,
     apihost: str = DEFAULT_PARAMS['apihost'],
     https: bool = DEFAULT_PARAMS['https'],
-    session: Optional[ClientSession] = None,
     caller: Optional[WebAPIMethod] = None,
     params: Optional[dict] = None,
 ) -> dict | Element | str:
@@ -504,7 +494,6 @@ async def get(
     return await webapi_request(
         f'{"https" if https else "http"}://{apihost}/{interface}/{method}/v{version}',
         'GET',
-        session=session,
         caller=caller,
         params=params,
     )
@@ -516,7 +505,6 @@ async def post(
     version: int = 1,
     apihost: str = DEFAULT_PARAMS['apihost'],
     https: bool = DEFAULT_PARAMS['https'],
-    session: Optional[ClientSession] = None,
     caller: Optional[WebAPIMethod] = None,
     params: Optional[dict] = None,
 ) -> dict | Element | str:
@@ -545,7 +533,6 @@ async def post(
     return await webapi_request(
         f'{"https" if https else "http"}://{apihost}/{interface}/{method}/v{version}',
         'POST',
-        session=session,
         caller=caller,
         params=params,
     )
