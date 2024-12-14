@@ -269,14 +269,20 @@ class PublishedFileDetails(_message.Message):
         value: str
         def __init__(self, key: _Optional[str] = ..., value: _Optional[str] = ...) -> None: ...
     class VoteData(_message.Message):
-        __slots__ = ("score", "votes_up", "votes_down")
+        __slots__ = ("score", "votes_up", "votes_down", "trusted_score", "trusted_votes_up", "trusted_votes_down")
         SCORE_FIELD_NUMBER: _ClassVar[int]
         VOTES_UP_FIELD_NUMBER: _ClassVar[int]
         VOTES_DOWN_FIELD_NUMBER: _ClassVar[int]
+        TRUSTED_SCORE_FIELD_NUMBER: _ClassVar[int]
+        TRUSTED_VOTES_UP_FIELD_NUMBER: _ClassVar[int]
+        TRUSTED_VOTES_DOWN_FIELD_NUMBER: _ClassVar[int]
         score: float
         votes_up: int
         votes_down: int
-        def __init__(self, score: _Optional[float] = ..., votes_up: _Optional[int] = ..., votes_down: _Optional[int] = ...) -> None: ...
+        trusted_score: float
+        trusted_votes_up: int
+        trusted_votes_down: int
+        def __init__(self, score: _Optional[float] = ..., votes_up: _Optional[int] = ..., votes_down: _Optional[int] = ..., trusted_score: _Optional[float] = ..., trusted_votes_up: _Optional[int] = ..., trusted_votes_down: _Optional[int] = ...) -> None: ...
     class ForSaleData(_message.Message):
         __slots__ = ("is_for_sale", "price_category", "estatus", "price_category_floor", "price_is_pay_what_you_want", "discount_percentage")
         IS_FOR_SALE_FIELD_NUMBER: _ClassVar[int]

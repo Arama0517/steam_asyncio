@@ -112,7 +112,7 @@ class CContentBuilder_FinishDepotUpload_Response(_message.Message):
     def __init__(self, manifestid: _Optional[int] = ..., prev_reused: bool = ...) -> None: ...
 
 class CContentBuilder_CommitAppBuild_Request(_message.Message):
-    __slots__ = ("appid", "depot_manifests", "build_notes", "live_branch")
+    __slots__ = ("appid", "depot_manifests", "build_notes", "live_branch", "for_local_cs")
     class Depots(_message.Message):
         __slots__ = ("depotid", "manifestid")
         DEPOTID_FIELD_NUMBER: _ClassVar[int]
@@ -124,11 +124,13 @@ class CContentBuilder_CommitAppBuild_Request(_message.Message):
     DEPOT_MANIFESTS_FIELD_NUMBER: _ClassVar[int]
     BUILD_NOTES_FIELD_NUMBER: _ClassVar[int]
     LIVE_BRANCH_FIELD_NUMBER: _ClassVar[int]
+    FOR_LOCAL_CS_FIELD_NUMBER: _ClassVar[int]
     appid: int
     depot_manifests: _containers.RepeatedCompositeFieldContainer[CContentBuilder_CommitAppBuild_Request.Depots]
     build_notes: str
     live_branch: str
-    def __init__(self, appid: _Optional[int] = ..., depot_manifests: _Optional[_Iterable[_Union[CContentBuilder_CommitAppBuild_Request.Depots, _Mapping]]] = ..., build_notes: _Optional[str] = ..., live_branch: _Optional[str] = ...) -> None: ...
+    for_local_cs: bool
+    def __init__(self, appid: _Optional[int] = ..., depot_manifests: _Optional[_Iterable[_Union[CContentBuilder_CommitAppBuild_Request.Depots, _Mapping]]] = ..., build_notes: _Optional[str] = ..., live_branch: _Optional[str] = ..., for_local_cs: bool = ...) -> None: ...
 
 class CContentBuilder_CommitAppBuild_Response(_message.Message):
     __slots__ = ("buildid",)

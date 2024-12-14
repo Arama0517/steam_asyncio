@@ -351,6 +351,52 @@ class CCommunity_GetAvatarHistory_Response(_message.Message):
     avatars: _containers.RepeatedCompositeFieldContainer[CCommunity_GetAvatarHistory_Response.AvatarData]
     def __init__(self, avatars: _Optional[_Iterable[_Union[CCommunity_GetAvatarHistory_Response.AvatarData, _Mapping]]] = ...) -> None: ...
 
+class CCommunity_GetClanEventCrowdInMetadata_Request(_message.Message):
+    __slots__ = ("steamid", "itemid")
+    STEAMID_FIELD_NUMBER: _ClassVar[int]
+    ITEMID_FIELD_NUMBER: _ClassVar[int]
+    steamid: int
+    itemid: int
+    def __init__(self, steamid: _Optional[int] = ..., itemid: _Optional[int] = ...) -> None: ...
+
+class CCommunity_GetClanEventCrowdInMetadata_Response(_message.Message):
+    __slots__ = ("crowdin_project_id", "crowdin_file_id")
+    CROWDIN_PROJECT_ID_FIELD_NUMBER: _ClassVar[int]
+    CROWDIN_FILE_ID_FIELD_NUMBER: _ClassVar[int]
+    crowdin_project_id: int
+    crowdin_file_id: int
+    def __init__(self, crowdin_project_id: _Optional[int] = ..., crowdin_file_id: _Optional[int] = ...) -> None: ...
+
+class CCommunity_GetClanCrowdInMetadata_Request(_message.Message):
+    __slots__ = ("steamid",)
+    STEAMID_FIELD_NUMBER: _ClassVar[int]
+    steamid: int
+    def __init__(self, steamid: _Optional[int] = ...) -> None: ...
+
+class CCommunity_GetClanCrowdInMetadata_Response(_message.Message):
+    __slots__ = ("crowdin_project_id", "crowdin_directory_id", "push_by_default")
+    CROWDIN_PROJECT_ID_FIELD_NUMBER: _ClassVar[int]
+    CROWDIN_DIRECTORY_ID_FIELD_NUMBER: _ClassVar[int]
+    PUSH_BY_DEFAULT_FIELD_NUMBER: _ClassVar[int]
+    crowdin_project_id: int
+    crowdin_directory_id: int
+    push_by_default: bool
+    def __init__(self, crowdin_project_id: _Optional[int] = ..., crowdin_directory_id: _Optional[int] = ..., push_by_default: bool = ...) -> None: ...
+
+class CCommunity_FetchTranslationFromCrowdIn_Request(_message.Message):
+    __slots__ = ("steamid", "itemid", "language")
+    STEAMID_FIELD_NUMBER: _ClassVar[int]
+    ITEMID_FIELD_NUMBER: _ClassVar[int]
+    LANGUAGE_FIELD_NUMBER: _ClassVar[int]
+    steamid: int
+    itemid: int
+    language: int
+    def __init__(self, steamid: _Optional[int] = ..., itemid: _Optional[int] = ..., language: _Optional[int] = ...) -> None: ...
+
+class CCommunity_FetchTranslationFromCrowdIn_Response(_message.Message):
+    __slots__ = ()
+    def __init__(self) -> None: ...
+
 class CAppPriority(_message.Message):
     __slots__ = ("priority", "appid")
     PRIORITY_FIELD_NUMBER: _ClassVar[int]

@@ -64,16 +64,18 @@ class CEcon_Asset(_message.Message):
     def __init__(self, appid: _Optional[int] = ..., contextid: _Optional[int] = ..., assetid: _Optional[int] = ..., classid: _Optional[int] = ..., instanceid: _Optional[int] = ..., currencyid: _Optional[int] = ..., amount: _Optional[int] = ..., missing: bool = ..., est_usd: _Optional[int] = ...) -> None: ...
 
 class CEconItem_DescriptionLine(_message.Message):
-    __slots__ = ("type", "value", "color", "label")
+    __slots__ = ("type", "value", "color", "label", "name")
     TYPE_FIELD_NUMBER: _ClassVar[int]
     VALUE_FIELD_NUMBER: _ClassVar[int]
     COLOR_FIELD_NUMBER: _ClassVar[int]
     LABEL_FIELD_NUMBER: _ClassVar[int]
+    NAME_FIELD_NUMBER: _ClassVar[int]
     type: str
     value: str
     color: str
     label: str
-    def __init__(self, type: _Optional[str] = ..., value: _Optional[str] = ..., color: _Optional[str] = ..., label: _Optional[str] = ...) -> None: ...
+    name: str
+    def __init__(self, type: _Optional[str] = ..., value: _Optional[str] = ..., color: _Optional[str] = ..., label: _Optional[str] = ..., name: _Optional[str] = ...) -> None: ...
 
 class CEconItem_Action(_message.Message):
     __slots__ = ("link", "name")
@@ -84,7 +86,7 @@ class CEconItem_Action(_message.Message):
     def __init__(self, link: _Optional[str] = ..., name: _Optional[str] = ...) -> None: ...
 
 class CEconItem_Description(_message.Message):
-    __slots__ = ("appid", "classid", "instanceid", "currency", "background_color", "icon_url", "icon_url_large", "descriptions", "tradable", "actions", "owner_descriptions", "owner_actions", "fraudwarnings", "name", "name_color", "type", "market_name", "market_hash_name", "market_fee", "market_fee_app", "contained_item", "market_actions", "commodity", "market_tradable_restriction", "market_marketable_restriction", "marketable", "tags", "item_expiration", "market_buy_country_restriction", "market_sell_country_restriction")
+    __slots__ = ("appid", "classid", "instanceid", "currency", "background_color", "icon_url", "icon_url_large", "descriptions", "tradable", "actions", "owner_descriptions", "owner_actions", "fraudwarnings", "name", "name_color", "type", "market_name", "market_hash_name", "market_fee", "market_fee_app", "contained_item", "market_actions", "commodity", "market_tradable_restriction", "market_marketable_restriction", "marketable", "tags", "item_expiration", "market_buy_country_restriction", "market_sell_country_restriction", "sealed")
     APPID_FIELD_NUMBER: _ClassVar[int]
     CLASSID_FIELD_NUMBER: _ClassVar[int]
     INSTANCEID_FIELD_NUMBER: _ClassVar[int]
@@ -115,6 +117,7 @@ class CEconItem_Description(_message.Message):
     ITEM_EXPIRATION_FIELD_NUMBER: _ClassVar[int]
     MARKET_BUY_COUNTRY_RESTRICTION_FIELD_NUMBER: _ClassVar[int]
     MARKET_SELL_COUNTRY_RESTRICTION_FIELD_NUMBER: _ClassVar[int]
+    SEALED_FIELD_NUMBER: _ClassVar[int]
     appid: int
     classid: int
     instanceid: int
@@ -145,7 +148,8 @@ class CEconItem_Description(_message.Message):
     item_expiration: str
     market_buy_country_restriction: str
     market_sell_country_restriction: str
-    def __init__(self, appid: _Optional[int] = ..., classid: _Optional[int] = ..., instanceid: _Optional[int] = ..., currency: bool = ..., background_color: _Optional[str] = ..., icon_url: _Optional[str] = ..., icon_url_large: _Optional[str] = ..., descriptions: _Optional[_Iterable[_Union[CEconItem_DescriptionLine, _Mapping]]] = ..., tradable: bool = ..., actions: _Optional[_Iterable[_Union[CEconItem_Action, _Mapping]]] = ..., owner_descriptions: _Optional[_Iterable[_Union[CEconItem_DescriptionLine, _Mapping]]] = ..., owner_actions: _Optional[_Iterable[_Union[CEconItem_Action, _Mapping]]] = ..., fraudwarnings: _Optional[_Iterable[str]] = ..., name: _Optional[str] = ..., name_color: _Optional[str] = ..., type: _Optional[str] = ..., market_name: _Optional[str] = ..., market_hash_name: _Optional[str] = ..., market_fee: _Optional[str] = ..., market_fee_app: _Optional[int] = ..., contained_item: _Optional[_Union[CEconItem_Description, _Mapping]] = ..., market_actions: _Optional[_Iterable[_Union[CEconItem_Action, _Mapping]]] = ..., commodity: bool = ..., market_tradable_restriction: _Optional[int] = ..., market_marketable_restriction: _Optional[int] = ..., marketable: bool = ..., tags: _Optional[_Iterable[_Union[CEconItem_Tag, _Mapping]]] = ..., item_expiration: _Optional[str] = ..., market_buy_country_restriction: _Optional[str] = ..., market_sell_country_restriction: _Optional[str] = ...) -> None: ...
+    sealed: bool
+    def __init__(self, appid: _Optional[int] = ..., classid: _Optional[int] = ..., instanceid: _Optional[int] = ..., currency: bool = ..., background_color: _Optional[str] = ..., icon_url: _Optional[str] = ..., icon_url_large: _Optional[str] = ..., descriptions: _Optional[_Iterable[_Union[CEconItem_DescriptionLine, _Mapping]]] = ..., tradable: bool = ..., actions: _Optional[_Iterable[_Union[CEconItem_Action, _Mapping]]] = ..., owner_descriptions: _Optional[_Iterable[_Union[CEconItem_DescriptionLine, _Mapping]]] = ..., owner_actions: _Optional[_Iterable[_Union[CEconItem_Action, _Mapping]]] = ..., fraudwarnings: _Optional[_Iterable[str]] = ..., name: _Optional[str] = ..., name_color: _Optional[str] = ..., type: _Optional[str] = ..., market_name: _Optional[str] = ..., market_hash_name: _Optional[str] = ..., market_fee: _Optional[str] = ..., market_fee_app: _Optional[int] = ..., contained_item: _Optional[_Union[CEconItem_Description, _Mapping]] = ..., market_actions: _Optional[_Iterable[_Union[CEconItem_Action, _Mapping]]] = ..., commodity: bool = ..., market_tradable_restriction: _Optional[int] = ..., market_marketable_restriction: _Optional[int] = ..., marketable: bool = ..., tags: _Optional[_Iterable[_Union[CEconItem_Tag, _Mapping]]] = ..., item_expiration: _Optional[str] = ..., market_buy_country_restriction: _Optional[str] = ..., market_sell_country_restriction: _Optional[str] = ..., sealed: bool = ...) -> None: ...
 
 class CEconItem_Tag(_message.Message):
     __slots__ = ("appid", "category", "internal_name", "localized_category_name", "localized_tag_name", "color")
