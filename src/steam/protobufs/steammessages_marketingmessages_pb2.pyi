@@ -171,6 +171,20 @@ class CMarketingMessages_GetActiveMarketingMessages_Response(_message.Message):
     time_next_message_age: int
     def __init__(self, messages: _Optional[_Iterable[_Union[CMarketingMessageProto, _Mapping]]] = ..., time_next_message_age: _Optional[int] = ...) -> None: ...
 
+class CMarketingMessages_GetPastMarketingMessages_Request(_message.Message):
+    __slots__ = ("start_past_days", "upto_past_days")
+    START_PAST_DAYS_FIELD_NUMBER: _ClassVar[int]
+    UPTO_PAST_DAYS_FIELD_NUMBER: _ClassVar[int]
+    start_past_days: int
+    upto_past_days: int
+    def __init__(self, start_past_days: _Optional[int] = ..., upto_past_days: _Optional[int] = ...) -> None: ...
+
+class CMarketingMessages_GetPastMarketingMessages_Response(_message.Message):
+    __slots__ = ("messages",)
+    MESSAGES_FIELD_NUMBER: _ClassVar[int]
+    messages: _containers.RepeatedCompositeFieldContainer[CMarketingMessageProto]
+    def __init__(self, messages: _Optional[_Iterable[_Union[CMarketingMessageProto, _Mapping]]] = ...) -> None: ...
+
 class CMarketingMessages_GetMarketingMessagesForUser_Request(_message.Message):
     __slots__ = ("include_seen_messages", "country_code", "elanguage", "operating_system", "client_package_version", "context", "data_request")
     INCLUDE_SEEN_MESSAGES_FIELD_NUMBER: _ClassVar[int]

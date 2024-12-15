@@ -8,7 +8,6 @@ from steam.enums import EResult
 from steam.enums.emsg import EMsg
 from steam.protobufs.encrypted_app_ticket_pb2 import EncryptedAppTicket
 from steam.protobufs.steammessages_clientserver_2_pb2 import (
-    CMsgClientGetCDNAuthTokenResponse,
     CMsgClientGetDepotDecryptionKeyResponse,
 )
 from steam.protobufs.steammessages_clientserver_appinfo_pb2 import (
@@ -16,6 +15,9 @@ from steam.protobufs.steammessages_clientserver_appinfo_pb2 import (
 )
 from steam.protobufs.steammessages_clientserver_pb2 import (
     CMsgClientGetAppOwnershipTicketResponse,
+)
+from steam.protobufs.steammessages_contentsystem_pb2 import (
+    CContentServerDirectory_GetCDNAuthToken_Response,
 )
 from steam.utils.proto import proto_fill_from_dict
 
@@ -272,7 +274,7 @@ class Apps:
 
     async def get_cdn_auth_token(
         self, depot_id: int, hostname: str
-    ) -> CMsgClientGetCDNAuthTokenResponse:
+    ) -> CContentServerDirectory_GetCDNAuthToken_Response:
         """Get CDN authentication token
 
         .. note::

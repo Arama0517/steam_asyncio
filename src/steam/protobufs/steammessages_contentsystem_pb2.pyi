@@ -1,12 +1,22 @@
 import steammessages_base_pb2 as _steammessages_base_pb2
 import steammessages_unified_base_pb2 as _steammessages_unified_base_pb2
 from google.protobuf.internal import containers as _containers
+from google.protobuf.internal import enum_type_wrapper as _enum_type_wrapper
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
 from google.protobuf import service as _service
 from typing import ClassVar as _ClassVar, Iterable as _Iterable, Mapping as _Mapping, Optional as _Optional, Union as _Union
 
 DESCRIPTOR: _descriptor.FileDescriptor
+
+class EAppContentDetectionType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+    __slots__ = ()
+    k_EAppContentDetectionType_None: _ClassVar[EAppContentDetectionType]
+    k_EAppContentDetectionType_AntiCheat: _ClassVar[EAppContentDetectionType]
+    k_EAppContentDetectionType_GameEngine: _ClassVar[EAppContentDetectionType]
+k_EAppContentDetectionType_None: EAppContentDetectionType
+k_EAppContentDetectionType_AntiCheat: EAppContentDetectionType
+k_EAppContentDetectionType_GameEngine: EAppContentDetectionType
 
 class CContentServerDirectory_ConnectedSteamPipeServerInfo(_message.Message):
     __slots__ = ("type", "source_id", "hostname")
@@ -194,6 +204,32 @@ class CContentServerDirectory_GetPeerContentInfo_Response(_message.Message):
     ip_public: str
     def __init__(self, appids: _Optional[_Iterable[int]] = ..., ip_public: _Optional[str] = ...) -> None: ...
 
+class CDepotContentDetection_GetAllDetectedAppContent_Request(_message.Message):
+    __slots__ = ("detection_type",)
+    DETECTION_TYPE_FIELD_NUMBER: _ClassVar[int]
+    detection_type: EAppContentDetectionType
+    def __init__(self, detection_type: _Optional[_Union[EAppContentDetectionType, str]] = ...) -> None: ...
+
+class DetectedAppContent(_message.Message):
+    __slots__ = ("app_id", "depot_id", "detected_content")
+    APP_ID_FIELD_NUMBER: _ClassVar[int]
+    DEPOT_ID_FIELD_NUMBER: _ClassVar[int]
+    DETECTED_CONTENT_FIELD_NUMBER: _ClassVar[int]
+    app_id: int
+    depot_id: int
+    detected_content: int
+    def __init__(self, app_id: _Optional[int] = ..., depot_id: _Optional[int] = ..., detected_content: _Optional[int] = ...) -> None: ...
+
+class CDepotContentDetection_GetAllDetectedAppContent_Response(_message.Message):
+    __slots__ = ("detected_app_content",)
+    DETECTED_APP_CONTENT_FIELD_NUMBER: _ClassVar[int]
+    detected_app_content: _containers.RepeatedCompositeFieldContainer[DetectedAppContent]
+    def __init__(self, detected_app_content: _Optional[_Iterable[_Union[DetectedAppContent, _Mapping]]] = ...) -> None: ...
+
 class ContentServerDirectory(_service.service): ...
 
 class ContentServerDirectory_Stub(ContentServerDirectory): ...
+
+class DepotContentDetection(_service.service): ...
+
+class DepotContentDetection_Stub(DepotContentDetection): ...

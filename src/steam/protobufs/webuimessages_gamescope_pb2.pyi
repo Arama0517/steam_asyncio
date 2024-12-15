@@ -30,7 +30,7 @@ class CMsgDisplayInfo(_message.Message):
     def __init__(self, make: _Optional[str] = ..., model: _Optional[str] = ..., connector_name: _Optional[str] = ..., supported_refresh_rates: _Optional[_Iterable[int]] = ..., supported_frame_rates: _Optional[_Iterable[int]] = ..., is_external: bool = ..., is_hdr_capable: bool = ..., is_vrr_capable: bool = ...) -> None: ...
 
 class CMsgGamescopeState(_message.Message):
-    __slots__ = ("is_service_available", "is_reshade_supported", "is_app_hdr_enabled", "is_app_refresh_rate_supported", "active_display_info", "is_app_refresh_rate_capable", "is_refresh_rate_switching_supported", "is_refresh_rate_switching_restricted", "is_hdr_visualization_supported", "is_mura_correction_supported")
+    __slots__ = ("is_service_available", "is_reshade_supported", "is_app_hdr_enabled", "is_app_refresh_rate_supported", "active_display_info", "is_app_refresh_rate_capable", "is_refresh_rate_switching_supported", "is_refresh_rate_switching_restricted", "is_hdr_visualization_supported", "is_mura_correction_supported", "is_global_action_binding_supported")
     IS_SERVICE_AVAILABLE_FIELD_NUMBER: _ClassVar[int]
     IS_RESHADE_SUPPORTED_FIELD_NUMBER: _ClassVar[int]
     IS_APP_HDR_ENABLED_FIELD_NUMBER: _ClassVar[int]
@@ -41,6 +41,7 @@ class CMsgGamescopeState(_message.Message):
     IS_REFRESH_RATE_SWITCHING_RESTRICTED_FIELD_NUMBER: _ClassVar[int]
     IS_HDR_VISUALIZATION_SUPPORTED_FIELD_NUMBER: _ClassVar[int]
     IS_MURA_CORRECTION_SUPPORTED_FIELD_NUMBER: _ClassVar[int]
+    IS_GLOBAL_ACTION_BINDING_SUPPORTED_FIELD_NUMBER: _ClassVar[int]
     is_service_available: bool
     is_reshade_supported: bool
     is_app_hdr_enabled: bool
@@ -51,7 +52,8 @@ class CMsgGamescopeState(_message.Message):
     is_refresh_rate_switching_restricted: bool
     is_hdr_visualization_supported: bool
     is_mura_correction_supported: bool
-    def __init__(self, is_service_available: bool = ..., is_reshade_supported: bool = ..., is_app_hdr_enabled: bool = ..., is_app_refresh_rate_supported: bool = ..., active_display_info: _Optional[_Union[CMsgDisplayInfo, _Mapping]] = ..., is_app_refresh_rate_capable: bool = ..., is_refresh_rate_switching_supported: bool = ..., is_refresh_rate_switching_restricted: bool = ..., is_hdr_visualization_supported: bool = ..., is_mura_correction_supported: bool = ...) -> None: ...
+    is_global_action_binding_supported: bool
+    def __init__(self, is_service_available: bool = ..., is_reshade_supported: bool = ..., is_app_hdr_enabled: bool = ..., is_app_refresh_rate_supported: bool = ..., active_display_info: _Optional[_Union[CMsgDisplayInfo, _Mapping]] = ..., is_app_refresh_rate_capable: bool = ..., is_refresh_rate_switching_supported: bool = ..., is_refresh_rate_switching_restricted: bool = ..., is_hdr_visualization_supported: bool = ..., is_mura_correction_supported: bool = ..., is_global_action_binding_supported: bool = ...) -> None: ...
 
 class CGamescope_GetState_Request(_message.Message):
     __slots__ = ()

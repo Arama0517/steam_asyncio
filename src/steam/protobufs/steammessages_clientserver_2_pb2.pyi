@@ -153,38 +153,6 @@ class CMsgClientUpdateMachineAuthResponse(_message.Message):
     otp_identifier: str
     def __init__(self, filename: _Optional[str] = ..., eresult: _Optional[int] = ..., filesize: _Optional[int] = ..., sha_file: _Optional[bytes] = ..., getlasterror: _Optional[int] = ..., offset: _Optional[int] = ..., cubwrote: _Optional[int] = ..., otp_type: _Optional[int] = ..., otp_value: _Optional[int] = ..., otp_identifier: _Optional[str] = ...) -> None: ...
 
-class CMsgClientRequestMachineAuth(_message.Message):
-    __slots__ = ("filename", "eresult_sentryfile", "filesize", "sha_sentryfile", "lock_account_action", "otp_type", "otp_identifier", "otp_sharedsecret", "otp_value", "machine_name", "machine_name_userchosen")
-    FILENAME_FIELD_NUMBER: _ClassVar[int]
-    ERESULT_SENTRYFILE_FIELD_NUMBER: _ClassVar[int]
-    FILESIZE_FIELD_NUMBER: _ClassVar[int]
-    SHA_SENTRYFILE_FIELD_NUMBER: _ClassVar[int]
-    LOCK_ACCOUNT_ACTION_FIELD_NUMBER: _ClassVar[int]
-    OTP_TYPE_FIELD_NUMBER: _ClassVar[int]
-    OTP_IDENTIFIER_FIELD_NUMBER: _ClassVar[int]
-    OTP_SHAREDSECRET_FIELD_NUMBER: _ClassVar[int]
-    OTP_VALUE_FIELD_NUMBER: _ClassVar[int]
-    MACHINE_NAME_FIELD_NUMBER: _ClassVar[int]
-    MACHINE_NAME_USERCHOSEN_FIELD_NUMBER: _ClassVar[int]
-    filename: str
-    eresult_sentryfile: int
-    filesize: int
-    sha_sentryfile: bytes
-    lock_account_action: int
-    otp_type: int
-    otp_identifier: str
-    otp_sharedsecret: bytes
-    otp_value: int
-    machine_name: str
-    machine_name_userchosen: str
-    def __init__(self, filename: _Optional[str] = ..., eresult_sentryfile: _Optional[int] = ..., filesize: _Optional[int] = ..., sha_sentryfile: _Optional[bytes] = ..., lock_account_action: _Optional[int] = ..., otp_type: _Optional[int] = ..., otp_identifier: _Optional[str] = ..., otp_sharedsecret: _Optional[bytes] = ..., otp_value: _Optional[int] = ..., machine_name: _Optional[str] = ..., machine_name_userchosen: _Optional[str] = ...) -> None: ...
-
-class CMsgClientRequestMachineAuthResponse(_message.Message):
-    __slots__ = ("eresult",)
-    ERESULT_FIELD_NUMBER: _ClassVar[int]
-    eresult: int
-    def __init__(self, eresult: _Optional[int] = ...) -> None: ...
-
 class CMsgClientRegisterKey(_message.Message):
     __slots__ = ("key",)
     KEY_FIELD_NUMBER: _ClassVar[int]
@@ -281,16 +249,6 @@ class CMsgTrading_StartSession(_message.Message):
     other_steamid: int
     def __init__(self, other_steamid: _Optional[int] = ...) -> None: ...
 
-class CMsgClientGetCDNAuthToken(_message.Message):
-    __slots__ = ("depot_id", "host_name", "app_id")
-    DEPOT_ID_FIELD_NUMBER: _ClassVar[int]
-    HOST_NAME_FIELD_NUMBER: _ClassVar[int]
-    APP_ID_FIELD_NUMBER: _ClassVar[int]
-    depot_id: int
-    host_name: str
-    app_id: int
-    def __init__(self, depot_id: _Optional[int] = ..., host_name: _Optional[str] = ..., app_id: _Optional[int] = ...) -> None: ...
-
 class CMsgClientGetDepotDecryptionKey(_message.Message):
     __slots__ = ("depot_id", "app_id")
     DEPOT_ID_FIELD_NUMBER: _ClassVar[int]
@@ -335,73 +293,6 @@ class CMsgClientCheckAppBetaPasswordResponse(_message.Message):
     eresult: int
     betapasswords: _containers.RepeatedCompositeFieldContainer[CMsgClientCheckAppBetaPasswordResponse.BetaPassword]
     def __init__(self, eresult: _Optional[int] = ..., betapasswords: _Optional[_Iterable[_Union[CMsgClientCheckAppBetaPasswordResponse.BetaPassword, _Mapping]]] = ...) -> None: ...
-
-class CMsgClientGetCDNAuthTokenResponse(_message.Message):
-    __slots__ = ("eresult", "token", "expiration_time")
-    ERESULT_FIELD_NUMBER: _ClassVar[int]
-    TOKEN_FIELD_NUMBER: _ClassVar[int]
-    EXPIRATION_TIME_FIELD_NUMBER: _ClassVar[int]
-    eresult: int
-    token: str
-    expiration_time: int
-    def __init__(self, eresult: _Optional[int] = ..., token: _Optional[str] = ..., expiration_time: _Optional[int] = ...) -> None: ...
-
-class CMsgDownloadRateStatistics(_message.Message):
-    __slots__ = ("cell_id", "stats", "throttling_kbps", "steam_realm")
-    class StatsInfo(_message.Message):
-        __slots__ = ("source_type", "source_id", "seconds", "bytes", "host_name", "microseconds", "used_ipv6", "proxied")
-        SOURCE_TYPE_FIELD_NUMBER: _ClassVar[int]
-        SOURCE_ID_FIELD_NUMBER: _ClassVar[int]
-        SECONDS_FIELD_NUMBER: _ClassVar[int]
-        BYTES_FIELD_NUMBER: _ClassVar[int]
-        HOST_NAME_FIELD_NUMBER: _ClassVar[int]
-        MICROSECONDS_FIELD_NUMBER: _ClassVar[int]
-        USED_IPV6_FIELD_NUMBER: _ClassVar[int]
-        PROXIED_FIELD_NUMBER: _ClassVar[int]
-        source_type: int
-        source_id: int
-        seconds: int
-        bytes: int
-        host_name: str
-        microseconds: int
-        used_ipv6: bool
-        proxied: bool
-        def __init__(self, source_type: _Optional[int] = ..., source_id: _Optional[int] = ..., seconds: _Optional[int] = ..., bytes: _Optional[int] = ..., host_name: _Optional[str] = ..., microseconds: _Optional[int] = ..., used_ipv6: bool = ..., proxied: bool = ...) -> None: ...
-    CELL_ID_FIELD_NUMBER: _ClassVar[int]
-    STATS_FIELD_NUMBER: _ClassVar[int]
-    THROTTLING_KBPS_FIELD_NUMBER: _ClassVar[int]
-    STEAM_REALM_FIELD_NUMBER: _ClassVar[int]
-    cell_id: int
-    stats: _containers.RepeatedCompositeFieldContainer[CMsgDownloadRateStatistics.StatsInfo]
-    throttling_kbps: int
-    steam_realm: int
-    def __init__(self, cell_id: _Optional[int] = ..., stats: _Optional[_Iterable[_Union[CMsgDownloadRateStatistics.StatsInfo, _Mapping]]] = ..., throttling_kbps: _Optional[int] = ..., steam_realm: _Optional[int] = ...) -> None: ...
-
-class CMsgClientRequestAccountData(_message.Message):
-    __slots__ = ("account_or_email", "action")
-    ACCOUNT_OR_EMAIL_FIELD_NUMBER: _ClassVar[int]
-    ACTION_FIELD_NUMBER: _ClassVar[int]
-    account_or_email: str
-    action: int
-    def __init__(self, account_or_email: _Optional[str] = ..., action: _Optional[int] = ...) -> None: ...
-
-class CMsgClientRequestAccountDataResponse(_message.Message):
-    __slots__ = ("action", "eresult", "account_name", "ct_matches", "account_name_suggestion1", "account_name_suggestion2", "account_name_suggestion3")
-    ACTION_FIELD_NUMBER: _ClassVar[int]
-    ERESULT_FIELD_NUMBER: _ClassVar[int]
-    ACCOUNT_NAME_FIELD_NUMBER: _ClassVar[int]
-    CT_MATCHES_FIELD_NUMBER: _ClassVar[int]
-    ACCOUNT_NAME_SUGGESTION1_FIELD_NUMBER: _ClassVar[int]
-    ACCOUNT_NAME_SUGGESTION2_FIELD_NUMBER: _ClassVar[int]
-    ACCOUNT_NAME_SUGGESTION3_FIELD_NUMBER: _ClassVar[int]
-    action: int
-    eresult: int
-    account_name: str
-    ct_matches: int
-    account_name_suggestion1: str
-    account_name_suggestion2: str
-    account_name_suggestion3: str
-    def __init__(self, action: _Optional[int] = ..., eresult: _Optional[int] = ..., account_name: _Optional[str] = ..., ct_matches: _Optional[int] = ..., account_name_suggestion1: _Optional[str] = ..., account_name_suggestion2: _Optional[str] = ..., account_name_suggestion3: _Optional[str] = ...) -> None: ...
 
 class CMsgClientUGSGetGlobalStats(_message.Message):
     __slots__ = ("gameid", "history_days_requested", "time_last_requested", "first_day_cached", "days_cached")

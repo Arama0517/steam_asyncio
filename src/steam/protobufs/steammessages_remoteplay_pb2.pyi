@@ -986,20 +986,28 @@ class CInputMouseUpMsg(_message.Message):
     def __init__(self, input_mark: _Optional[int] = ..., button: _Optional[_Union[EStreamMouseButton, str]] = ...) -> None: ...
 
 class CInputKeyDownMsg(_message.Message):
-    __slots__ = ("input_mark", "scancode")
+    __slots__ = ("input_mark", "scancode", "modifiers", "keycode")
     INPUT_MARK_FIELD_NUMBER: _ClassVar[int]
     SCANCODE_FIELD_NUMBER: _ClassVar[int]
+    MODIFIERS_FIELD_NUMBER: _ClassVar[int]
+    KEYCODE_FIELD_NUMBER: _ClassVar[int]
     input_mark: int
     scancode: int
-    def __init__(self, input_mark: _Optional[int] = ..., scancode: _Optional[int] = ...) -> None: ...
+    modifiers: int
+    keycode: int
+    def __init__(self, input_mark: _Optional[int] = ..., scancode: _Optional[int] = ..., modifiers: _Optional[int] = ..., keycode: _Optional[int] = ...) -> None: ...
 
 class CInputKeyUpMsg(_message.Message):
-    __slots__ = ("input_mark", "scancode")
+    __slots__ = ("input_mark", "scancode", "modifiers", "keycode")
     INPUT_MARK_FIELD_NUMBER: _ClassVar[int]
     SCANCODE_FIELD_NUMBER: _ClassVar[int]
+    MODIFIERS_FIELD_NUMBER: _ClassVar[int]
+    KEYCODE_FIELD_NUMBER: _ClassVar[int]
     input_mark: int
     scancode: int
-    def __init__(self, input_mark: _Optional[int] = ..., scancode: _Optional[int] = ...) -> None: ...
+    modifiers: int
+    keycode: int
+    def __init__(self, input_mark: _Optional[int] = ..., scancode: _Optional[int] = ..., modifiers: _Optional[int] = ..., keycode: _Optional[int] = ...) -> None: ...
 
 class CInputTextMsg(_message.Message):
     __slots__ = ("input_mark", "text_utf8")
@@ -1364,7 +1372,7 @@ class CSetTouchIconDataMsg(_message.Message):
     def __init__(self, appid: _Optional[int] = ..., icon: _Optional[str] = ..., data: _Optional[bytes] = ...) -> None: ...
 
 class CRemotePlayTogetherGroupUpdateMsg(_message.Message):
-    __slots__ = ("players", "player_index", "miniprofile_location", "game_name", "avatar_location")
+    __slots__ = ("players", "player_index", "miniprofile_location", "game_name", "avatar_location", "direct_input")
     class Player(_message.Message):
         __slots__ = ("accountid", "guestid", "keyboard_enabled", "mouse_enabled", "controller_enabled", "controller_slots", "avatar_hash")
         ACCOUNTID_FIELD_NUMBER: _ClassVar[int]
@@ -1387,12 +1395,14 @@ class CRemotePlayTogetherGroupUpdateMsg(_message.Message):
     MINIPROFILE_LOCATION_FIELD_NUMBER: _ClassVar[int]
     GAME_NAME_FIELD_NUMBER: _ClassVar[int]
     AVATAR_LOCATION_FIELD_NUMBER: _ClassVar[int]
+    DIRECT_INPUT_FIELD_NUMBER: _ClassVar[int]
     players: _containers.RepeatedCompositeFieldContainer[CRemotePlayTogetherGroupUpdateMsg.Player]
     player_index: int
     miniprofile_location: str
     game_name: str
     avatar_location: str
-    def __init__(self, players: _Optional[_Iterable[_Union[CRemotePlayTogetherGroupUpdateMsg.Player, _Mapping]]] = ..., player_index: _Optional[int] = ..., miniprofile_location: _Optional[str] = ..., game_name: _Optional[str] = ..., avatar_location: _Optional[str] = ...) -> None: ...
+    direct_input: bool
+    def __init__(self, players: _Optional[_Iterable[_Union[CRemotePlayTogetherGroupUpdateMsg.Player, _Mapping]]] = ..., player_index: _Optional[int] = ..., miniprofile_location: _Optional[str] = ..., game_name: _Optional[str] = ..., avatar_location: _Optional[str] = ..., direct_input: bool = ...) -> None: ...
 
 class CSetInputTemporarilyDisabledMsg(_message.Message):
     __slots__ = ("disabled",)

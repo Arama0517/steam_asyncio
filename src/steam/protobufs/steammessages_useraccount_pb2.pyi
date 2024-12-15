@@ -1,43 +1,12 @@
 import steammessages_base_pb2 as _steammessages_base_pb2
 import steammessages_unified_base_pb2 as _steammessages_unified_base_pb2
 from google.protobuf.internal import containers as _containers
-from google.protobuf.internal import enum_type_wrapper as _enum_type_wrapper
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
 from google.protobuf import service as _service
 from typing import ClassVar as _ClassVar, Iterable as _Iterable, Mapping as _Mapping, Optional as _Optional, Union as _Union
 
 DESCRIPTOR: _descriptor.FileDescriptor
-
-class EInternalAccountType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-    __slots__ = ()
-    k_EInternalSteamAccountType: _ClassVar[EInternalAccountType]
-    k_EInternalClanType: _ClassVar[EInternalAccountType]
-    k_EInternalAppType: _ClassVar[EInternalAccountType]
-    k_EInternalBroadcastChannelType: _ClassVar[EInternalAccountType]
-
-class EExternalAccountType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-    __slots__ = ()
-    k_EExternalNone: _ClassVar[EExternalAccountType]
-    k_EExternalSteamAccount: _ClassVar[EExternalAccountType]
-    k_EExternalGoogleAccount: _ClassVar[EExternalAccountType]
-    k_EExternalFacebookAccount: _ClassVar[EExternalAccountType]
-    k_EExternalTwitterAccount: _ClassVar[EExternalAccountType]
-    k_EExternalTwitchAccount: _ClassVar[EExternalAccountType]
-    k_EExternalYouTubeChannelAccount: _ClassVar[EExternalAccountType]
-    k_EExternalFacebookPage: _ClassVar[EExternalAccountType]
-k_EInternalSteamAccountType: EInternalAccountType
-k_EInternalClanType: EInternalAccountType
-k_EInternalAppType: EInternalAccountType
-k_EInternalBroadcastChannelType: EInternalAccountType
-k_EExternalNone: EExternalAccountType
-k_EExternalSteamAccount: EExternalAccountType
-k_EExternalGoogleAccount: EExternalAccountType
-k_EExternalFacebookAccount: EExternalAccountType
-k_EExternalTwitterAccount: EExternalAccountType
-k_EExternalTwitchAccount: EExternalAccountType
-k_EExternalYouTubeChannelAccount: EExternalAccountType
-k_EExternalFacebookPage: EExternalAccountType
 
 class CUserAccount_GetAvailableValveDiscountPromotions_Request(_message.Message):
     __slots__ = ("country_code",)
@@ -246,41 +215,6 @@ class CUserAccount_RegisterCompatTool_Response(_message.Message):
     __slots__ = ()
     def __init__(self) -> None: ...
 
-class CAccountLinking_GetLinkedAccountInfo_Request(_message.Message):
-    __slots__ = ("account_type", "account_id", "filter", "return_access_token")
-    ACCOUNT_TYPE_FIELD_NUMBER: _ClassVar[int]
-    ACCOUNT_ID_FIELD_NUMBER: _ClassVar[int]
-    FILTER_FIELD_NUMBER: _ClassVar[int]
-    RETURN_ACCESS_TOKEN_FIELD_NUMBER: _ClassVar[int]
-    account_type: EInternalAccountType
-    account_id: int
-    filter: EExternalAccountType
-    return_access_token: bool
-    def __init__(self, account_type: _Optional[_Union[EInternalAccountType, str]] = ..., account_id: _Optional[int] = ..., filter: _Optional[_Union[EExternalAccountType, str]] = ..., return_access_token: bool = ...) -> None: ...
-
-class CAccountLinking_GetLinkedAccountInfo_Response(_message.Message):
-    __slots__ = ("external_accounts",)
-    class CExternalAccountTuple_Response(_message.Message):
-        __slots__ = ("external_type", "external_id", "external_user_name", "external_url", "access_token", "access_token_secret", "is_valid")
-        EXTERNAL_TYPE_FIELD_NUMBER: _ClassVar[int]
-        EXTERNAL_ID_FIELD_NUMBER: _ClassVar[int]
-        EXTERNAL_USER_NAME_FIELD_NUMBER: _ClassVar[int]
-        EXTERNAL_URL_FIELD_NUMBER: _ClassVar[int]
-        ACCESS_TOKEN_FIELD_NUMBER: _ClassVar[int]
-        ACCESS_TOKEN_SECRET_FIELD_NUMBER: _ClassVar[int]
-        IS_VALID_FIELD_NUMBER: _ClassVar[int]
-        external_type: EExternalAccountType
-        external_id: str
-        external_user_name: str
-        external_url: str
-        access_token: str
-        access_token_secret: str
-        is_valid: bool
-        def __init__(self, external_type: _Optional[_Union[EExternalAccountType, str]] = ..., external_id: _Optional[str] = ..., external_user_name: _Optional[str] = ..., external_url: _Optional[str] = ..., access_token: _Optional[str] = ..., access_token_secret: _Optional[str] = ..., is_valid: bool = ...) -> None: ...
-    EXTERNAL_ACCOUNTS_FIELD_NUMBER: _ClassVar[int]
-    external_accounts: _containers.RepeatedCompositeFieldContainer[CAccountLinking_GetLinkedAccountInfo_Response.CExternalAccountTuple_Response]
-    def __init__(self, external_accounts: _Optional[_Iterable[_Union[CAccountLinking_GetLinkedAccountInfo_Response.CExternalAccountTuple_Response, _Mapping]]] = ...) -> None: ...
-
 class CEmbeddedClient_AuthorizeCurrentDevice_Request(_message.Message):
     __slots__ = ("steamid", "appid", "device_info", "deviceid")
     STEAMID_FIELD_NUMBER: _ClassVar[int]
@@ -316,10 +250,6 @@ class CEmbeddedClient_AuthorizeDevice_Response(_message.Message):
 class UserAccount(_service.service): ...
 
 class UserAccount_Stub(UserAccount): ...
-
-class AccountLinking(_service.service): ...
-
-class AccountLinking_Stub(AccountLinking): ...
 
 class EmbeddedClient(_service.service): ...
 
