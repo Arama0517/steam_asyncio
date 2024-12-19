@@ -36,7 +36,6 @@ import json
 from typing import Any, Literal, Optional
 from xml.etree.ElementTree import Element
 
-import requests
 import vdf
 from aiohttp import ClientSession
 from lxml import etree
@@ -100,7 +99,6 @@ class WebAPI:
     http_timeout = DEFAULT_PARAMS['http_timeout']
     apihost = DEFAULT_PARAMS['apihost']
     interfaces = []
-    session: requests.Session
 
     def __init__(
         self,
@@ -498,9 +496,6 @@ async def get(
     :return: endpoint response
     :rtype: :class:`dict`, :class:`lxml.etree.Element`, :class:`str`
     """
-    # url = '{}://{}/{}/{}/v{}/'.format(
-    #     'https' if https else 'http', apihost, interface, method, version
-    # )
     return await webapi_request(
         f'{"https" if https else "http"}://{apihost}/{interface}/{method}/v{version}',
         'GET',
@@ -539,9 +534,6 @@ async def post(
     :return: endpoint response
     :rtype: :class:`dict`, :class:`lxml.etree.Element`, :class:`str`
     """
-    # url = '{}://{}/{}/{}/v{}/'.format(
-    #     'https' if https else 'http', apihost, interface, method, version
-    # )
     return await webapi_request(
         f'{"https" if https else "http"}://{apihost}/{interface}/{method}/v{version}',
         'POST',

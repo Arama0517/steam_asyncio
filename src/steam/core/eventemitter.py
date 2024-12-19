@@ -9,7 +9,7 @@ class EventEmitter:
     Every callback is executed via an async task.
     """
 
-    __worker = None
+    __worker: asyncio.Task = None
 
     def __init__(self):
         self.__callbacks = defaultdict(OrderedDict)
@@ -39,9 +39,10 @@ class EventEmitter:
                         self.remove_listener(event, callback)
                     if isinstance(callback, asyncio.Future):
                         callback.set_result(args)
-                    else:
-                        # Run the callback as a coroutine
+                    elif asyncio.iscoroutinefunction(callback):
                         asyncio.create_task(callback(*args))
+                    else:
+                        asyncio.create_task(asyncio.to_thread(callback, *args))
 
             await asyncio.sleep(0)
 

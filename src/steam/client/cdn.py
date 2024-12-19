@@ -110,7 +110,6 @@ from struct import pack
 from typing import Callable, Generator, Optional
 from zipfile import ZIP_DEFLATED, BadZipFile, ZipFile
 
-import requests
 import vdf
 from aiohttp import ClientResponse
 from cachetools import LRUCache
@@ -149,7 +148,6 @@ async def get_content_servers_from_cs(
     host: str = 'cs.steamcontent.com',
     port: int = 80,
     num_servers: int = 20,
-    session: requests.Session = None,
 ) -> list['ContentServer']:
     """Get a list of CS servers from a single CS server
 
@@ -157,7 +155,6 @@ async def get_content_servers_from_cs(
     :param host: CS server host
     :param port: server port number
     :param num_servers: number of servers to return
-    :param session: requests Session instance
     :return: list of CS servers
     """
     proto = 'https' if port == 443 else 'http'

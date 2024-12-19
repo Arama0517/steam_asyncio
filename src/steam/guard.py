@@ -70,7 +70,8 @@ from base64 import b64decode, b64encode
 from binascii import hexlify
 from time import time
 
-import requests
+from aiohttp import ClientError, ClientSession
+from yarl import URL
 
 from steam import webapi
 from steam.core.crypto import hmac_sha1, sha1_hash
@@ -94,8 +95,8 @@ class SteamAuthenticator:
 
     def __init__(self, secrets=None, backend=None):
         """
-        :param secret: a dict of authenticator secrets
-        :type  secret: dict
+        :param secrets: a dict of authenticator secrets
+        :type  secrets: dict
         :param backend: logged on session for steam user
         :type  backend: :class:`.MobileWebAuth`, :class:`.SteamClient`
         """
@@ -107,7 +108,7 @@ class SteamAuthenticator:
             raise AttributeError('No %s attribute' % repr(key))
         return self.secrets[key]
 
-    def get_time(self):
+    async def get_time(self):
         """
         :return: Steam aligned timestamp
         :rtype: int
@@ -115,14 +116,14 @@ class SteamAuthenticator:
         if self.steam_time_offset is None or (
             self.align_time_every and (time() - self._offset_last_check) > self.align_time_every
         ):
-            self.steam_time_offset = get_time_offset()
+            self.steam_time_offset = await get_time_offset()
 
             if self.steam_time_offset is not None:
                 self._offset_last_check = time()
 
         return int(time() + (self.steam_time_offset or 0))
 
-    def get_code(self, timestamp=None):
+    async def get_code(self, timestamp=None):
         """
         :param timestamp: time to use for code generation
         :type timestamp: int
@@ -131,10 +132,10 @@ class SteamAuthenticator:
         """
         return generate_twofactor_code_for_time(
             b64decode(self.shared_secret),
-            self.get_time() if timestamp is None else timestamp,
+            await self.get_time() if timestamp is None else timestamp,
         )
 
-    def get_confirmation_key(self, tag='', timestamp=None):
+    async def get_confirmation_key(self, tag='', timestamp=None):
         """
         :param tag: see :func:`generate_confirmation_key` for this value
         :type tag: str
@@ -146,10 +147,10 @@ class SteamAuthenticator:
         return generate_confirmation_key(
             b64decode(self.identity_secret),
             tag,
-            self.get_time() if timestamp is None else timestamp,
+            await self.get_time() if timestamp is None else timestamp,
         )
 
-    def _send_request(self, action, params):
+    async def _send_request(self, action, params):
         backend = self.backend
 
         if isinstance(backend, MobileWebAuth):
@@ -160,8 +161,8 @@ class SteamAuthenticator:
             params['http_timeout'] = 10
 
             try:
-                resp = webapi.post('ITwoFactorService', action, 1, params=params)
-            except requests.exceptions.RequestException as exp:
+                resp = await webapi.post('ITwoFactorService', action, 1, params=params)
+            except ClientError as exp:
                 raise SteamAuthenticatorError('Error adding via WebAPI: %s' % str(exp))
 
             resp = resp['response']
@@ -169,7 +170,7 @@ class SteamAuthenticator:
             if not backend.logged_on:
                 raise SteamAuthenticatorError('SteamClient instance not logged in')
 
-            resp = backend.send_um_and_wait('TwoFactor.%s#1' % action, params, timeout=10)
+            resp = await backend.send_um_and_wait('TwoFactor.%s#1' % action, params, timeout=10)
 
             if resp is None:
                 raise SteamAuthenticatorError('Failed. Request timeout')
@@ -186,7 +187,7 @@ class SteamAuthenticator:
 
         return resp
 
-    def add(self):
+    async def add(self):
         """Add authenticator to an account.
         The account's phone number will receive a SMS code required for :meth:`finalize`.
 
@@ -195,7 +196,7 @@ class SteamAuthenticator:
         if not self.has_phone_number():
             raise SteamAuthenticatorError("Account doesn't have a verified phone number")
 
-        resp = self._send_request(
+        resp = await self._send_request(
             'AddAuthenticator',
             {
                 'steamid': self.backend.steam_id,
@@ -214,14 +215,14 @@ class SteamAuthenticator:
         self.secrets = resp
         self.steam_time_offset = int(resp['server_time']) - time()
 
-    def finalize(self, activation_code):
+    async def finalize(self, activation_code):
         """Finalize authenticator with received SMS code
 
         :param activation_code: SMS code
         :type activation_code: str
         :raises: :class:`SteamAuthenticatorError`
         """
-        resp = self._send_request(
+        resp = await self._send_request(
             'FinalizeAddAuthenticator',
             {
                 'steamid': self.backend.steam_id,
@@ -238,7 +239,7 @@ class SteamAuthenticator:
         ):
             self.steam_time_offset += 30
             self._finalize_attempts -= 1
-            self.finalize(activation_code)
+            await self.finalize(activation_code)
             return
         elif not resp['success']:
             self._finalize_attempts = 5
@@ -248,7 +249,7 @@ class SteamAuthenticator:
 
         self.steam_time_offset = int(resp['server_time']) - time()
 
-    def remove(self, revocation_code=None):
+    async def remove(self, revocation_code=None):
         """Remove authenticator
 
         :param revocation_code: revocation code for account (e.g. R12345)
@@ -267,7 +268,7 @@ class SteamAuthenticator:
         if not isinstance(self.backend, MobileWebAuth):
             raise SteamAuthenticatorError('Only available via MobileWebAuth')
 
-        resp = self._send_request(
+        resp = await self._send_request(
             'RemoveAuthenticator',
             {
                 'steamid': self.backend.steam_id,
@@ -285,16 +286,16 @@ class SteamAuthenticator:
 
         self.secrets.clear()
 
-    def status(self):
+    async def status(self):
         """Fetch authenticator status for the account
 
         :raises: :class:`SteamAuthenticatorError`
         :return: dict with status parameters
         :rtype: dict
         """
-        return self._send_request('QueryStatus', {'steamid': self.backend.steam_id})
+        return await self._send_request('QueryStatus', {'steamid': self.backend.steam_id})
 
-    def create_emergency_codes(self, code=None):
+    async def create_emergency_codes(self, code=None):
         """Generate emergency codes
 
         :param code: SMS code
@@ -313,29 +314,30 @@ class SteamAuthenticator:
             sa.create_emergency_codes(code='12345')  # creates emergency codes
         """
         if code:
-            return self._send_request('createemergencycodes', {'code': code}).get('codes', [])
+            return (await self._send_request('createemergencycodes', {'code': code})).get(
+                'codes', []
+            )
         else:
-            self._send_request('createemergencycodes', {})
+            await self._send_request('createemergencycodes', {})
             return None
 
-    def destroy_emergency_codes(self):
+    async def destroy_emergency_codes(self):
         """Destroy all emergency codes
 
         :raises: :class:`SteamAuthenticatorError`
         """
-        self._send_request('DestroyEmergencyCodes', {'steamid': self.backend.steam_id})
+        await self._send_request('DestroyEmergencyCodes', {'steamid': self.backend.steam_id})
 
-    def _get_web_session(self):
+    async def _get_web_session(self) -> ClientSession:
         """
         :return: authenticated web session
-        :rtype: :class:`requests.Session`
         :raises: :class:`RuntimeError` when session is unavailable
         """
         if isinstance(self.backend, MobileWebAuth):
-            return self.backend.session
+            return self.backend
         else:
             if self.backend.logged_on:
-                sess = self.backend.get_web_session()
+                sess = await self.backend.get_web_session()
 
                 if sess is None:
                     raise RuntimeError('Failed to get a web session. Try again in a few minutes')
@@ -344,7 +346,7 @@ class SteamAuthenticator:
             else:
                 raise RuntimeError('SteamClient instance is not connected')
 
-    def add_phone_number(self, phone_number):
+    async def add_phone_number(self, phone_number):
         """Add phone number to account
 
         Steps:
@@ -369,26 +371,29 @@ class SteamAuthenticator:
              'error_text': '',
              'fatal': False}
         """
-        sess = self._get_web_session()
+        async with await self._get_web_session() as sess:
+            try:
+                resp = await (
+                    await sess.post(
+                        'https://steamcommunity.com/steamguard/phoneajax',
+                        data={
+                            'op': 'add_phone_number',
+                            'arg': phone_number,
+                            'checkfortos': 0,
+                            'skipvoip': 0,
+                            'sessionid': sess.cookie_jar.filter_cookies(
+                                URL.build(scheme='https', host='steamcommunity.com')
+                            )['sessionid'],
+                        },
+                        timeout=15,
+                    )
+                ).json()
+            except:
+                return {'success': False}
 
-        try:
-            resp = sess.post(
-                'https://steamcommunity.com/steamguard/phoneajax',
-                data={
-                    'op': 'add_phone_number',
-                    'arg': phone_number,
-                    'checkfortos': 0,
-                    'skipvoip': 0,
-                    'sessionid': sess.cookies.get('sessionid', domain='steamcommunity.com'),
-                },
-                timeout=15,
-            ).json()
-        except:
-            return {'success': False}
+            return resp
 
-        return resp
-
-    def confirm_email(self):
+    async def confirm_email(self):
         """Confirm email confirmation. See :meth:`add_phone_number()`
 
         .. note::
@@ -404,26 +409,29 @@ class SteamAuthenticator:
              'error_text': '',
              'fatal': False}
         """
-        sess = self._get_web_session()
-
-        try:
-            resp = sess.post(
-                'https://steamcommunity.com/steamguard/phoneajax',
-                data={
-                    'op': 'email_confirmation',
-                    'arg': '',
-                    'checkfortos': 1,
-                    'skipvoip': 1,
-                    'sessionid': sess.cookies.get('sessionid', domain='steamcommunity.com'),
-                },
-                timeout=15,
-            ).json()
-        except:
-            return {'fatal': True, 'success': False}
+        async with await self._get_web_session() as sess:
+            try:
+                resp = await (
+                    await sess.post(
+                        'https://steamcommunity.com/steamguard/phoneajax',
+                        data={
+                            'op': 'email_confirmation',
+                            'arg': '',
+                            'checkfortos': 1,
+                            'skipvoip': 1,
+                            'sessionid': sess.cookie_jar.filter_cookies(
+                                URL.build(scheme='https', host='steamcommunity.com')
+                            )['sessionid'],
+                        },
+                        timeout=15,
+                    )
+                ).json()
+            except:
+                return {'fatal': True, 'success': False}
 
         return resp
 
-    def confirm_phone_number(self, sms_code):
+    async def confirm_phone_number(self, sms_code):
         """Confirm phone number with the recieved SMS code. See :meth:`add_phone_number()`
 
         :param sms_code: sms code
@@ -437,26 +445,29 @@ class SteamAuthenticator:
              'error_text': '',
              'fatal': False}
         """
-        sess = self._get_web_session()
+        async with await self._get_web_session() as sess:
+            try:
+                resp = await (
+                    await sess.post(
+                        'https://steamcommunity.com/steamguard/phoneajax',
+                        data={
+                            'op': 'check_sms_code',
+                            'arg': sms_code,
+                            'checkfortos': 1,
+                            'skipvoip': 1,
+                            'sessionid': sess.cookie_jar.filter_cookies(
+                                URL.build(scheme='https', host='steamcommunity.com')
+                            )['sessionid'],
+                        },
+                        timeout=15,
+                    )
+                ).json()
+            except:
+                return {'success': False}
 
-        try:
-            resp = sess.post(
-                'https://steamcommunity.com/steamguard/phoneajax',
-                data={
-                    'op': 'check_sms_code',
-                    'arg': sms_code,
-                    'checkfortos': 1,
-                    'skipvoip': 1,
-                    'sessionid': sess.cookies.get('sessionid', domain='steamcommunity.com'),
-                },
-                timeout=15,
-            ).json()
-        except:
-            return {'success': False}
+            return resp
 
-        return resp
-
-    def has_phone_number(self):
+    async def has_phone_number(self):
         """Check whether the account has a verified phone number
 
         :return: see example below
@@ -469,26 +480,29 @@ class SteamAuthenticator:
              'error_text': '',
              'fatal': False}
         """
-        sess = self._get_web_session()
+        async with await self._get_web_session() as sess:
+            try:
+                resp = await (
+                    await sess.post(
+                        'https://steamcommunity.com/steamguard/phoneajax',
+                        data={
+                            'op': 'has_phone',
+                            'arg': '0',
+                            'checkfortos': 0,
+                            'skipvoip': 1,
+                            'sessionid': sess.cookie_jar.filter_cookies(
+                                URL.build(scheme='https', host='steamcommunity.com')
+                            )['sessionid'],
+                        },
+                        timeout=15,
+                    )
+                ).json()
+            except:
+                return {'success': False}
 
-        try:
-            resp = sess.post(
-                'https://steamcommunity.com/steamguard/phoneajax',
-                data={
-                    'op': 'has_phone',
-                    'arg': '0',
-                    'checkfortos': 0,
-                    'skipvoip': 1,
-                    'sessionid': sess.cookies.get('sessionid', domain='steamcommunity.com'),
-                },
-                timeout=15,
-            ).json()
-        except:
-            return {'success': False}
+            return resp
 
-        return resp
-
-    def validate_phone_number(self, phone_number):
+    async def validate_phone_number(self, phone_number):
         """Test whether phone number is valid for Steam
 
         :param phone_number: phone number with country code
@@ -504,29 +518,32 @@ class SteamAuthenticator:
              'number': '+1 123-555-1111',
              'success': True}
         """
-        sess = self._get_web_session()
+        async with await self._get_web_session() as sess:
+            try:
+                resp = await (
+                    await sess.post(
+                        'https://store.steampowered.com/phone/validate',
+                        data={
+                            'phoneNumber': phone_number,
+                            'sessionID': sess.cookie_jar.filter_cookies(
+                                URL.build(scheme='https', host='store.steampowered.com')
+                            )['sessionid'],
+                        },
+                        allow_redirects=False,
+                        timeout=15,
+                    )
+                ).json()
+            except:
+                resp = {'success': False}
 
-        try:
-            resp = sess.post(
-                'https://store.steampowered.com/phone/validate',
-                data={
-                    'phoneNumber': phone_number,
-                    'sessionID': sess.cookies.get('sessionid', domain='store.steampowered.com'),
-                },
-                allow_redirects=False,
-                timeout=15,
-            ).json()
-        except:
-            resp = {'success': False}
-
-        return resp
+            return resp
 
 
 class SteamAuthenticatorError(Exception):
     pass
 
 
-def generate_twofactor_code(shared_secret):
+async def generate_twofactor_code(shared_secret):
     """Generate Steam 2FA code for login with current time
 
     :param shared_secret: authenticator shared shared_secret
@@ -534,7 +551,9 @@ def generate_twofactor_code(shared_secret):
     :return: steam two factor code
     :rtype: str
     """
-    return generate_twofactor_code_for_time(shared_secret, time() + (get_time_offset() or 0))
+    return generate_twofactor_code_for_time(
+        shared_secret, time() + ((await get_time_offset()) or 0)
+    )
 
 
 def generate_twofactor_code_for_time(shared_secret, timestamp):
@@ -590,14 +609,14 @@ def generate_confirmation_key(identity_secret, tag, timestamp):
     return hmac_sha1(bytes(identity_secret), data)
 
 
-def get_time_offset():
+async def get_time_offset():
     """Get time offset from steam server time via WebAPI
 
     :return: time offset (``None`` when Steam WebAPI fails to respond)
     :rtype: :class:`int`, :class:`None`
     """
     try:
-        resp = webapi.post('ITwoFactorService', 'QueryTime', 1, params={'http_timeout': 10})
+        resp = await webapi.post('ITwoFactorService', 'QueryTime', 1, params={'http_timeout': 10})
     except:
         return None
 

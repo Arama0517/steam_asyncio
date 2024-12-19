@@ -1,6 +1,5 @@
 import re
 from keyword import kwlist
-from pathlib import Path
 
 from google.protobuf.internal.enum_type_wrapper import EnumTypeWrapper
 
@@ -13,7 +12,6 @@ kwlist = set(kwlist)
 _proto_modules = ['enums_pb2']
 
 for file in protobufs_dir.rglob('*.proto'):
-    file: Path
     with file.open('r', encoding='utf-8') as f:
         data = f.read()
     if 'import "enums.proto"' in data:

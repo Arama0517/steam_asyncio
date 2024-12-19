@@ -13,12 +13,10 @@ def versions_report():
     for dep in [
         'cachetools',
         'pycryptodomex',
-        'requests',
         'vdf',
         'protobuf',
         'websockets',
         'aiohttp',
-        'dnspython',
         'lxml',
     ]:
         text += f'\n- {dep}: `{distribution(dep).version}`'
