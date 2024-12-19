@@ -27,7 +27,7 @@ class Connection:
 
     @property
     def local_address(self):
-        return self._stream_writer.get_extra_info('sockname')[0]
+        raise NotImplementedError
 
     async def connect(self, server_addr):
         raise NotImplementedError
@@ -48,7 +48,7 @@ class Connection:
         self._readbuf = b''
         self.send_queue._queue.clear()
         self.recv_queue._queue.clear()
-        await self.recv_queue.put(StopIteration)
+        await self.recv_queue.put(StopAsyncIteration)
 
         if self._stream_writer:
             logger.debug('wait close')
@@ -57,12 +57,14 @@ class Connection:
 
         logger.debug('Disconnected.')
 
-    async def __aiter__(self):
-        while True:
-            result = await self.recv_queue.get()
-            if result is StopIteration:
-                raise StopAsyncIteration
-            yield result
+    def __aiter__(self):
+        return self
+
+    async def __anext__(self):
+        result = await self.recv_queue.get()
+        if result is StopAsyncIteration:
+            raise result
+        return result
 
     async def put_message(self, message):
         await self.send_queue.put(message)
@@ -80,6 +82,10 @@ class TCPConnection(Connection):
     MAGIC = b'VT01'
     FMT = '<I4s'
     FMT_SIZE = struct.calcsize(FMT)
+
+    @property
+    def local_address(self):
+        return self._stream_writer.get_extra_info('sockname')[0]
 
     async def connect(self, server_addr):
         host, port = server_addr
@@ -108,9 +114,6 @@ class TCPConnection(Connection):
             try:
                 self._stream_writer.write(packet)
                 await self._stream_writer.drain()
-            except asyncio.CancelledError:
-                logger.debug('Writer loop was cancelled.')
-                break
             except Exception as e:
                 logger.debug(f'Writer error: {e}')
                 await self.disconnect()
@@ -128,9 +131,6 @@ class TCPConnection(Connection):
                 logger.debug(f'Received data: {data}')
                 self._readbuf += data
                 await self._read_packets()
-            except asyncio.CancelledError:
-                logger.debug('Reader loop was cancelled.')
-                break
             except Exception as e:
                 logger.debug(f'Reader error: {e}')
                 await self.disconnect()
@@ -195,6 +195,13 @@ class WebsocketConnection(Connection):
             logger.error(f'WebSocket connection failed: {e}')
             return False
 
+    async def disconnect(self):
+        if self.ws is not None:
+            logger.debug('Disconnecting WebSocket...')
+            await self.ws.close()
+
+        await super().disconnect()
+
     async def _writer_loop_func(self):
         while True:
             message = await self.send_queue.get()
@@ -221,10 +228,3 @@ class WebsocketConnection(Connection):
                 logger.debug(f'Reader error: {e}')
                 await self.disconnect()
                 return
-
-    async def disconnect(self):
-        if self.ws is not None:
-            logger.debug('Disconnecting WebSocket...')
-            await self.ws.close()
-
-        await super().disconnect()
