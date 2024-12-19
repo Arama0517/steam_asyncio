@@ -83,6 +83,7 @@ class TCPConnection(Connection):
 
     async def connect(self, server_addr):
         host, port = server_addr
+
         try:
             # Open a TCP connection
             self._stream_reader, self._stream_writer = await asyncio.open_connection(host, port)
@@ -176,11 +177,10 @@ class WebsocketConnection(Connection):
 
     async def connect(self, server_addr: tuple[str, int]):
         host, port = server_addr
-        uri = f'wss://{host}:{port}/cmsocket/'
 
         try:
             # Create websocket connection
-            self.ws = await websockets.connect(uri)
+            self.ws = await websockets.connect(f'wss://{host}:{port}/cmsocket/')
             logger.debug('Connected to WebSocket.')
 
             self.event_connected.set()

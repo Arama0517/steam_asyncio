@@ -507,7 +507,7 @@ class CMServerList:
 
         from steam import webapi
 
-        resp: dict = await webapi.get(
+        resp = await webapi.get(
             'ISteamDirectory',
             'GetCMListForConnect',
             1,
