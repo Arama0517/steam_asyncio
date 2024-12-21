@@ -227,7 +227,7 @@ class CMClient(EventEmitter):
 
         if self.channel_key:
             if self.channel_hmac:
-                data = crypto.symmetric_encrypt_hmac(data, self.channel_key, self.channel_hmac)
+                data = crypto.symmetric_encrypt_HMAC(data, self.channel_key, self.channel_hmac)
             else:
                 data = crypto.symmetric_encrypt(data, self.channel_key)
 
