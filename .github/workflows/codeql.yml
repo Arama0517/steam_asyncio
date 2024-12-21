@@ -1,0 +1,30 @@
+name: CodeQL
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '37 23 * * 5'
+
+permissions:
+  security-events: write
+  packages: read
+  actions: read
+
+jobs:
+  codeql:
+    name: CodeQL
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Init CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: python
+
+      - name: Run CodeQL
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:python"
+

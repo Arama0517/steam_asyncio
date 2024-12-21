@@ -15,8 +15,6 @@ on:
       - 'Taskfile.yml'
       - '.github/workflows/*.yml'
       - '.github/dependabot.yml'
-  schedule:
-    - cron: '37 23 * * 5'
 
 permissions:
   contents: read
@@ -66,23 +64,3 @@ jobs:
 
       - name: Run Ruff
         run: task check -- --no-fix --output-format=github
-
-  codeql:
-    name: CodeQL
-    runs-on: ubuntu-latest
-    permissions:
-      security-events: write
-      packages: read
-      actions: read
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: python
-
-      - name: Run CodeQL
-        uses: github/codeql-action/analyze@v3
-        with:
-          category: '/language:python'
