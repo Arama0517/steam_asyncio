@@ -258,7 +258,7 @@ class CMClient(EventEmitter):
             if await self.wait_event('disconnected', timeout=5) is not None:
                 return
 
-        asyncio.create_task(self.disconnect())
+        await self.disconnect()
 
     async def _parse_message(self, message):
         (emsg_id,) = struct.unpack_from('<I', message)
@@ -266,9 +266,7 @@ class CMClient(EventEmitter):
 
         if not self.connected and emsg != EMsg.ClientLogOnResponse:
             self._LOG.debug(
-                'Dropped unexpected message: %s (is_proto: %s)',
-                repr(emsg),
-                is_proto(emsg_id),
+                f'Dropped unexpected message: {repr(emsg)} (is_proto: {is_proto(emsg_id)})'
             )
             return
 
@@ -314,7 +312,7 @@ class CMClient(EventEmitter):
                 raise RuntimeError('Unsupported universe')
         except RuntimeError as e:
             self._LOG.exception(e)
-            asyncio.create_task(self.disconnect())
+            await self.disconnect()
             return
 
         resp = Msg(EMsg.ChannelEncryptResponse)
@@ -329,14 +327,14 @@ class CMClient(EventEmitter):
 
         if result is None:
             self.cm_servers.mark_bad(self.current_server_addr)
-            asyncio.create_task(self.disconnect())
+            await self.disconnect()
             return
 
         eresult = result[0].body.eresult
 
         if eresult != EResult.OK:
             self._LOG.error('Failed to secure channel: %s' % eresult)
-            asyncio.create_task(self.disconnect())
+            await self.disconnect()
             return
 
         self.channel_key = key
@@ -367,7 +365,7 @@ class CMClient(EventEmitter):
 
             if len(data) != msg.body.size_unzipped:
                 self._LOG.fatal('Unzipped size mismatch')
-                asyncio.create_task(self.disconnect())
+                await self.disconnect()
                 return
         else:
             data = msg.body.message_body

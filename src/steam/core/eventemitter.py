@@ -1,6 +1,8 @@
 import asyncio
 from collections import OrderedDict, defaultdict
-from typing import Any, Awaitable, Callable, Optional
+from typing import Any, Awaitable, Callable, Optional, TypeAlias
+
+Callback: TypeAlias = Callable[..., Awaitable[None] | None]
 
 
 class EventEmitter:
@@ -37,9 +39,7 @@ class EventEmitter:
                 for callback, once in list(self.__callbacks[event].items()):
                     if once:
                         self.remove_listener(event, callback)
-                    if isinstance(callback, asyncio.Future):
-                        callback.set_result(args)
-                    elif asyncio.iscoroutinefunction(callback):
+                    if asyncio.iscoroutinefunction(callback):
                         asyncio.create_task(callback(*args))
                     else:
                         asyncio.create_task(asyncio.to_thread(callback, *args))
@@ -48,15 +48,16 @@ class EventEmitter:
 
     def on(
         self,
-        event,
-        callback: Optional[Callable[..., Awaitable[None]] | asyncio.Future] = None,
-        once=False,
+        event: Any,
+        callback: Optional[Callback] = None,
+        once: bool = False,
     ):
         """
         Registers a callback for the specified event
 
         :param event: event name
         :param callback: callback function
+        :param once: whether to execute only once
 
         Can be as function decorator if only ``event`` param is specified.
         """
@@ -66,19 +67,11 @@ class EventEmitter:
             return
 
         # as decorator
-        def wrapper(callback: Callable[..., Awaitable[None]]):
+        def wrapper(callback: Callback):
             self.__callbacks[event][callback] = once
             return callback
 
         return wrapper
-
-    def once(
-        self, event: Any, callback: Optional[Callable[..., Awaitable[None]] | asyncio.Future] = None
-    ):
-        """
-        Register a callback, but call it exactly one time
-        """
-        return self.on(event, callback, once=True)
 
     async def wait_event(
         self, event: Any, timeout: Optional[int] = None, raises: Optional[bool] = False
@@ -92,20 +85,22 @@ class EventEmitter:
         :return: returns event arguments in tuple
         """
         future = asyncio.Future()
-        self.once(event, future)
+
+        async def result(*args: Any):
+            future.set_result(args)
+
+        self.on(event, result, once=True)
 
         try:
             return await asyncio.wait_for(future, timeout)
         except asyncio.TimeoutError:
-            self.remove_listener(event, future)
+            self.remove_listener(event, result)
             if raises:
                 raise
             else:
                 return None
 
-    def remove_listener(
-        self, event: Any, callback: Callable[..., Awaitable[None]] | asyncio.Future
-    ):
+    def remove_listener(self, event: Any, callback: Callback):
         """
         Removes callback for the specified event
         """
@@ -130,7 +125,4 @@ class EventEmitter:
         """
         Returns a count of how many listeners are registered for a specific event
         """
-        if event in self.__callbacks:
-            return len(self.__callbacks[event])
-
-        return 0
+        return len(self.__callbacks[event]) if event in self.__callbacks else 0
