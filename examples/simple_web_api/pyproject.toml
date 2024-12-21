@@ -1,0 +1,15 @@
+[project]
+name = "simple_web_api"
+version = "1.0.0"
+description = "examples"
+readme = "README.rst"
+requires-python = ">=3.11"
+dependencies = [
+    "hypercorn>=0.17.3",
+    "quart>=0.19.9",
+    "rich>=13.9.4",
+    "steam",
+]
+
+[tool.uv.sources]
+steam = { path = "../.." }

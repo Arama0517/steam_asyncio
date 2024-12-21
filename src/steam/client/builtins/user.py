@@ -18,7 +18,7 @@ class User:
     """
 
     persona_state = EPersonaState.Online  #: current persona state
-    user = None  #: :class:`.SteamUser` instance once logged on
+    user: SteamUser = None  #: :class:`.SteamUser` instance once logged on
     current_games_played = []  #: :class:`list` of app ids currently being played
 
     def __init__(self, *args, **kwargs):

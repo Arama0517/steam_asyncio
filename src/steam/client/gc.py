@@ -78,7 +78,7 @@ class GameCoordinator(EventEmitter):
     async def emit(self, event, *args):
         if event is not None:
             self._LOG.debug('Emit event: %s' % repr(event))
-        await EventEmitter.emit(self, event, *args)
+        await super().emit(event, *args)
 
     async def send(self, header, body):
         """

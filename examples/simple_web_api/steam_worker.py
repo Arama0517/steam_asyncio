@@ -27,47 +27,47 @@ class SteamWorker:
             LOG.info('Connected to %s', client.current_server_addr)
 
         @client.on('channel_secured')
-        def send_login():
-            client.login(self.username, access_token=self.access_token)
+        async def send_login():
+            await client.login(self.username, access_token=self.access_token)
 
         @client.on('logged_on')
-        def handle_after_logon():
+        async def handle_after_logon():
             self.logged_on_once = True
 
             LOG.info('-' * 30)
-            LOG.info('Logged on as: %s', client.user.name)
+            LOG.info('Logged on as: %s', await client.user.name)
             LOG.info('Community profile: %s', client.steam_id.community_url)
-            LOG.info('Last logon: %s', client.user.last_logon)
-            LOG.info('Last logoff: %s', client.user.last_logoff)
+            LOG.info('Last logon: %s', await client.user.last_logon)
+            LOG.info('Last logoff: %s', await client.user.last_logoff)
             LOG.info('-' * 30)
 
         @client.on('disconnected')
-        def handle_disconnect():
+        async def handle_disconnect():
             LOG.info('Disconnected.')
             LOG.info('Reconnecting...')
-            client.reconnect(maxdelay=30)
+            await client.reconnect(maxdelay=30)
 
         @client.on('reconnect')
         def handle_reconnect(delay):
             LOG.info('Reconnect in %ds...', delay)
 
-    def prompt_login(self):
-        webauth = WebAuth()
-        webauth.cli_login(input('Steam user: '))
-        self.username = webauth.username
-        self.access_token = webauth.refresh_token
-        self.steam.connect()
+    async def prompt_login(self):
+        async with WebAuth() as webauth:
+            await webauth.cli_login(input('Steam user: '), input('Password: '))
+            self.username = webauth.username
+            self.access_token = webauth.refresh_token
+            await self.steam.connect()
 
-    def close(self):
+    async def close(self):
         if self.steam.logged_on:
             self.logged_on_once = False
             LOG.info('Logout')
-            self.steam.logout()
+            await self.steam.logout()
         if self.steam.connected:
-            self.steam.disconnect()
+            await self.steam.disconnect()
 
-    def get_product_info(self, appids=[], packageids=[]):
-        resp = self.steam.send_job_and_wait(
+    async def get_product_info(self, appids=[], packageids=[]):
+        resp = await self.steam.send_job_and_wait(
             MsgProto(EMsg.ClientPICSProductInfoRequest),
             {
                 'apps': map(lambda x: {'appid': x}, appids),
@@ -90,8 +90,8 @@ class SteamWorker:
 
         return resp
 
-    def get_product_changes(self, since_change_number):
-        resp = self.steam.send_job_and_wait(
+    async def get_product_changes(self, since_change_number):
+        resp = await self.steam.send_job_and_wait(
             MsgProto(EMsg.ClientPICSChangesSinceRequest),
             {
                 'since_change_number': since_change_number,
@@ -102,8 +102,8 @@ class SteamWorker:
         )
         return proto_to_dict(resp) or {}
 
-    def get_player_count(self, appid):
-        resp = self.steam.send_job_and_wait(
+    async def get_player_count(self, appid):
+        resp = await self.steam.send_job_and_wait(
             MsgProto(EMsg.ClientGetNumberOfCurrentPlayersDP),
             {'appid': appid},
             timeout=10,

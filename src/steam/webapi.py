@@ -447,21 +447,21 @@ async def webapi_request(
         session_need_exit = True
 
     try:
-        resp = await session.request(method, url, timeout=onetime['http_timeout'], **kwargs)
-        # we keep a reference of the last response instance on the caller
-        if caller is not None:
-            caller.last_response = resp
-        # 4XX and 5XX will cause this to raise
-        resp.raise_for_status()
+        async with session.request(method, url, timeout=onetime['http_timeout'], **kwargs) as resp:
+            # we keep a reference of the last response instance on the caller
+            if caller is not None:
+                caller.last_response = resp
+            # 4XX and 5XX will cause this to raise
+            resp.raise_for_status()
 
-        if onetime['raw']:
-            return await resp.text()
-        elif onetime['format'] == 'json':
-            return await resp.json()
-        elif onetime['format'] == 'xml':
-            return etree.fromstring(await resp.read())
-        elif onetime['format'] == 'vdf':
-            return vdf.loads(await resp.text())
+            if onetime['raw']:
+                return await resp.text()
+            elif onetime['format'] == 'json':
+                return await resp.json()
+            elif onetime['format'] == 'xml':
+                return etree.fromstring(await resp.read())
+            elif onetime['format'] == 'vdf':
+                return vdf.loads(await resp.text())
     finally:
         if session_need_exit:
             await session.__aexit__(None, None, None)

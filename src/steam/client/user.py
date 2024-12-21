@@ -62,41 +62,41 @@ class SteamUser:
             return None
 
     @property
-    def last_logon(self):
+    async def last_logon(self):
         """:rtype: :class:`datetime`, :class:`None`"""
-        ts = asyncio.run(self.get_ps('last_logon'))
+        ts = await self.get_ps('last_logon')
         return datetime.fromtimestamp(ts, UTC) if ts else None
 
     @property
-    def last_logoff(self):
+    async def last_logoff(self):
         """:rtype: :class:`datetime`, :class:`None`"""
-        ts = asyncio.run(self.get_ps('last_logoff'))
+        ts = await self.get_ps('last_logoff')
         return datetime.fromtimestamp(ts, UTC) if ts else None
 
     @property
-    def name(self):
+    async def name(self):
         """Name of the steam user, or ``None`` if it's not available
 
         :rtype: :class:`str`, :class:`None`
         """
-        return asyncio.run(self.get_ps('player_name'))
+        return await self.get_ps('player_name')
 
     @property
-    def state(self):
+    async def state(self):
         """Personsa state (e.g. Online, Offline, Away, Busy, etc)
 
         :rtype: :class:`.EPersonaState`
         """
-        state = asyncio.run(self.get_ps('persona_state', False))
+        state = await self.get_ps('persona_state', False)
         return EPersonaState(state) if state else EPersonaState.Offline
 
     @property
-    def rich_presence(self):
+    async def rich_presence(self):
         """Contains Rich Presence key-values
 
         :rtype: dict
         """
-        kvs = asyncio.run(self.get_ps('rich_presence'))
+        kvs = await self.get_ps('rich_presence')
         data = {}
 
         if kvs:
