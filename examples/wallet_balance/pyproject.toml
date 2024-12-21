@@ -9,4 +9,4 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-steam = { workspace = true }
+steam = { path = "../.." }
