@@ -67,14 +67,14 @@ class crypto_testcase(unittest.TestCase):
         key = b'9' * 32
         hmac = b'3' * 16
 
-        cyphertext = crypto.symmetric_encrypt_HMAC(message, key, hmac)
-        dmessage = crypto.symmetric_decrypt_HMAC(cyphertext, key, hmac)
+        cyphertext = crypto.symmetric_encrypt_hmac(message, key, hmac)
+        dmessage = crypto.symmetric_decrypt_hmac(cyphertext, key, hmac)
 
         self.assertEqual(message, dmessage)
 
         # failing HMAC check
         with self.assertRaises(RuntimeError):
-            crypto.symmetric_decrypt_HMAC(cyphertext, key, b'4' * 16)
+            crypto.symmetric_decrypt_hmac(cyphertext, key, b'4' * 16)
 
     def test_sha1_hash(self):
         self.assertEqual(

@@ -208,8 +208,8 @@ class WebsocketConnection(Connection):
             try:
                 logger.debug(f'Sending WebSocket message of length {len(message)}')
                 await self.ws.send(message)
-            except Exception:
-                logger.debug('Connection error (writer).')
+            except Exception as e:
+                logger.debug(f'Writer error: {e}')
                 await self.disconnect()
                 return
 

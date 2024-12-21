@@ -1,8 +1,9 @@
 from binascii import hexlify
+from os import urandom
 
 from aiohttp import ClientSession
 
-from steam.core.crypto import random_bytes, sha1_hash
+from steam.core.crypto import sha1_hash
 
 # def make_requests_session():
 #     """
@@ -30,4 +31,4 @@ def generate_session_id():
     :returns: session id
     :rtype: :class:`str`
     """
-    return hexlify(sha1_hash(random_bytes(32)))[:32].decode('ascii')
+    return hexlify(sha1_hash(urandom(32)))[:32].decode('ascii')

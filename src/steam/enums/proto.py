@@ -1136,6 +1136,16 @@ class ETouchGesture(SteamIntEnum):
     ETouchGestureFlingCancelled = 13
 
 
+class ETrailerCategory(SteamIntEnum):
+    Invalid = 0
+    Gameplay = 1
+    Teaser = 2
+    Cinematic = 3
+    Update = 4
+    Accolades = 5
+    Interview = 6
+
+
 class EUpdaterState(SteamIntEnum):
     Invalid = 0
     UpToDate = 2
@@ -1310,6 +1320,7 @@ __all__ = [
     'ETimelineEntryType',
     'ETokenRenewalType',
     'ETouchGesture',
+    'ETrailerCategory',
     'EUpdaterState',
     'EUpdaterType',
     'EUserReviewScore',

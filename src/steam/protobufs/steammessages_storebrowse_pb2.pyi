@@ -54,6 +54,16 @@ class EUserReviewScore(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     k_EUserReviewScore_VeryPositive: _ClassVar[EUserReviewScore]
     k_EUserReviewScore_OverwhelminglyPositive: _ClassVar[EUserReviewScore]
 
+class ETrailerCategory(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+    __slots__ = ()
+    k_ETrailerCategory_Invalid: _ClassVar[ETrailerCategory]
+    k_ETrailerCategory_Gameplay: _ClassVar[ETrailerCategory]
+    k_ETrailerCategory_Teaser: _ClassVar[ETrailerCategory]
+    k_ETrailerCategory_Cinematic: _ClassVar[ETrailerCategory]
+    k_ETrailerCategory_Update: _ClassVar[ETrailerCategory]
+    k_ETrailerCategory_Accolades: _ClassVar[ETrailerCategory]
+    k_ETrailerCategory_Interview: _ClassVar[ETrailerCategory]
+
 class EStoreBrowseFilterFailure(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
     k_EStoreBrowseFilterFailure_None: _ClassVar[EStoreBrowseFilterFailure]
@@ -131,6 +141,13 @@ k_EUserReviewScore_MostlyPositive: EUserReviewScore
 k_EUserReviewScore_Positive: EUserReviewScore
 k_EUserReviewScore_VeryPositive: EUserReviewScore
 k_EUserReviewScore_OverwhelminglyPositive: EUserReviewScore
+k_ETrailerCategory_Invalid: ETrailerCategory
+k_ETrailerCategory_Gameplay: ETrailerCategory
+k_ETrailerCategory_Teaser: ETrailerCategory
+k_ETrailerCategory_Cinematic: ETrailerCategory
+k_ETrailerCategory_Update: ETrailerCategory
+k_ETrailerCategory_Accolades: ETrailerCategory
+k_ETrailerCategory_Interview: ETrailerCategory
 k_EStoreBrowseFilterFailure_None: EStoreBrowseFilterFailure
 k_EStoreBrowseFilterFailure_Redundant: EStoreBrowseFilterFailure
 k_EStoreBrowseFilterFailure_NotPreferred: EStoreBrowseFilterFailure
@@ -495,9 +512,10 @@ class StoreItem(_message.Message):
             type: str
             def __init__(self, filename: _Optional[str] = ..., type: _Optional[str] = ...) -> None: ...
         class Trailer(_message.Message):
-            __slots__ = ("trailer_name", "trailer_url_format", "trailer_480p", "trailer_max", "microtrailer", "screenshot_medium", "screenshot_full", "trailer_base_id")
+            __slots__ = ("trailer_name", "trailer_url_format", "trailer_category", "trailer_480p", "trailer_max", "microtrailer", "screenshot_medium", "screenshot_full", "trailer_base_id")
             TRAILER_NAME_FIELD_NUMBER: _ClassVar[int]
             TRAILER_URL_FORMAT_FIELD_NUMBER: _ClassVar[int]
+            TRAILER_CATEGORY_FIELD_NUMBER: _ClassVar[int]
             TRAILER_480P_FIELD_NUMBER: _ClassVar[int]
             TRAILER_MAX_FIELD_NUMBER: _ClassVar[int]
             MICROTRAILER_FIELD_NUMBER: _ClassVar[int]
@@ -506,13 +524,14 @@ class StoreItem(_message.Message):
             TRAILER_BASE_ID_FIELD_NUMBER: _ClassVar[int]
             trailer_name: str
             trailer_url_format: str
+            trailer_category: ETrailerCategory
             trailer_480p: _containers.RepeatedCompositeFieldContainer[StoreItem.Trailers.VideoSource]
             trailer_max: _containers.RepeatedCompositeFieldContainer[StoreItem.Trailers.VideoSource]
             microtrailer: _containers.RepeatedCompositeFieldContainer[StoreItem.Trailers.VideoSource]
             screenshot_medium: str
             screenshot_full: str
             trailer_base_id: int
-            def __init__(self, trailer_name: _Optional[str] = ..., trailer_url_format: _Optional[str] = ..., trailer_480p: _Optional[_Iterable[_Union[StoreItem.Trailers.VideoSource, _Mapping]]] = ..., trailer_max: _Optional[_Iterable[_Union[StoreItem.Trailers.VideoSource, _Mapping]]] = ..., microtrailer: _Optional[_Iterable[_Union[StoreItem.Trailers.VideoSource, _Mapping]]] = ..., screenshot_medium: _Optional[str] = ..., screenshot_full: _Optional[str] = ..., trailer_base_id: _Optional[int] = ...) -> None: ...
+            def __init__(self, trailer_name: _Optional[str] = ..., trailer_url_format: _Optional[str] = ..., trailer_category: _Optional[_Union[ETrailerCategory, str]] = ..., trailer_480p: _Optional[_Iterable[_Union[StoreItem.Trailers.VideoSource, _Mapping]]] = ..., trailer_max: _Optional[_Iterable[_Union[StoreItem.Trailers.VideoSource, _Mapping]]] = ..., microtrailer: _Optional[_Iterable[_Union[StoreItem.Trailers.VideoSource, _Mapping]]] = ..., screenshot_medium: _Optional[str] = ..., screenshot_full: _Optional[str] = ..., trailer_base_id: _Optional[int] = ...) -> None: ...
         HIGHLIGHTS_FIELD_NUMBER: _ClassVar[int]
         OTHER_TRAILERS_FIELD_NUMBER: _ClassVar[int]
         highlights: _containers.RepeatedCompositeFieldContainer[StoreItem.Trailers.Trailer]

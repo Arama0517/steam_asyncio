@@ -344,6 +344,22 @@ class CClientMetrics_ReportClientArgs_Notification(_message.Message):
     gr_mode: int
     def __init__(self, client_args: _Optional[_Iterable[str]] = ..., gpu_webview_regkey_disabled: bool = ..., suppress_gpu_chrome: bool = ..., browser_not_supported: bool = ..., hw_accel_video_regkey_disabled: bool = ..., mini_mode_enabled: bool = ..., fps_counter_enabled: bool = ..., library_low_bandwidth_mode_enabled: bool = ..., library_low_perf_mode_enabled: bool = ..., gr_mode: _Optional[int] = ...) -> None: ...
 
+class CClientMetrics_ReportLinuxStats_Notification(_message.Message):
+    __slots__ = ("glibc_version_major", "glibc_version_minor", "account_type", "launcher_type", "game_server_appid", "process_name")
+    GLIBC_VERSION_MAJOR_FIELD_NUMBER: _ClassVar[int]
+    GLIBC_VERSION_MINOR_FIELD_NUMBER: _ClassVar[int]
+    ACCOUNT_TYPE_FIELD_NUMBER: _ClassVar[int]
+    LAUNCHER_TYPE_FIELD_NUMBER: _ClassVar[int]
+    GAME_SERVER_APPID_FIELD_NUMBER: _ClassVar[int]
+    PROCESS_NAME_FIELD_NUMBER: _ClassVar[int]
+    glibc_version_major: int
+    glibc_version_minor: int
+    account_type: int
+    launcher_type: int
+    game_server_appid: int
+    process_name: str
+    def __init__(self, glibc_version_major: _Optional[int] = ..., glibc_version_minor: _Optional[int] = ..., account_type: _Optional[int] = ..., launcher_type: _Optional[int] = ..., game_server_appid: _Optional[int] = ..., process_name: _Optional[str] = ...) -> None: ...
+
 class CClientMetrics_ClipShare_Notification(_message.Message):
     __slots__ = ("eresult", "share_method", "seconds", "bytes", "gameid")
     ERESULT_FIELD_NUMBER: _ClassVar[int]
