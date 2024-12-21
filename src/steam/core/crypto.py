@@ -50,7 +50,7 @@ def generate_session_key(hmac_secret=b''):
         session_key + hmac_secret
     )
 
-    return (session_key, encrypted_session_key)
+    return session_key, encrypted_session_key
 
 
 def symmetric_encrypt(message, key):
@@ -58,11 +58,7 @@ def symmetric_encrypt(message, key):
     return symmetric_encrypt_with_iv(message, key, iv)
 
 
-def symmetric_encrypt_ecb(message, key):
-    return AES.new(key, AES.MODE_ECB).encrypt(pad(message))
-
-
-def symmetric_encrypt_HMAC(message, key, hmac_secret):
+def symmetric_encrypt_hmac(message, key, hmac_secret):
     prefix = random_bytes(3)
     hmac = hmac_sha1(hmac_secret, prefix + message)
     iv = hmac[:13] + prefix
@@ -70,7 +66,7 @@ def symmetric_encrypt_HMAC(message, key, hmac_secret):
 
 
 def symmetric_encrypt_iv(iv, key):
-    return AES.new(key, AES.MODE_ECB).encrypt(iv)
+    return AES.new(key, AES.MODE_CBC).encrypt(iv)
 
 
 def symmetric_encrypt_with_iv(message, key, iv):
@@ -85,7 +81,7 @@ def symmetric_decrypt(cyphertext, key):
 
 
 def symmetric_decrypt_ecb(cyphertext, key):
-    return unpad(AES.new(key, AES.MODE_ECB).decrypt(cyphertext))
+    return unpad(AES.new(key, AES.MODE_CBC).decrypt(cyphertext))
 
 
 def symmetric_decrypt_HMAC(cyphertext, key, hmac_secret):
@@ -102,7 +98,7 @@ def symmetric_decrypt_HMAC(cyphertext, key, hmac_secret):
 
 
 def symmetric_decrypt_iv(cyphertext, key):
-    return AES.new(key, AES.MODE_ECB).decrypt(cyphertext[:BS])
+    return AES.new(key, AES.MODE_CBC).decrypt(cyphertext[:BS])
 
 
 def symmetric_decrypt_with_iv(cyphertext, key, iv):

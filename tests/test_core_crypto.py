@@ -67,7 +67,7 @@ class crypto_testcase(unittest.TestCase):
         key = b'9' * 32
         hmac = b'3' * 16
 
-        cyphertext = crypto.symmetric_encrypt_HMAC(message, key, hmac)
+        cyphertext = crypto.symmetric_encrypt_hmac(message, key, hmac)
         dmessage = crypto.symmetric_decrypt_HMAC(cyphertext, key, hmac)
 
         self.assertEqual(message, dmessage)
