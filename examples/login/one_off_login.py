@@ -9,10 +9,10 @@ async def main():
     print('One-off login recipe')
     print('-' * 20)
 
-    webauth = WebAuth()
-    await webauth.cli_login(input('Steam user: '))
-    client = SteamClient()
-    result = await client.login(webauth.username, access_token=webauth.refresh_token)
+    async with WebAuth() as webauth:
+        await webauth.cli_login(input('Steam user: '))
+        client = SteamClient()
+        result = await client.login(webauth.username, access_token=webauth.refresh_token)
 
     if result != EResult.OK:
         print('Failed to login: %s' % repr(result))

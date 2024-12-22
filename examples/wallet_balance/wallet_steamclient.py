@@ -7,7 +7,6 @@ from steam.webauth import WebAuth
 
 async def main():
     client = SteamClient()
-    webauth = WebAuth()
 
     @client.on(EMsg.ClientWalletInfoUpdate)
     def print_balance(msg):
@@ -18,9 +17,10 @@ async def main():
             )
         )
 
-    await webauth.cli_login(input('Steam user: '))
-    await client.login(webauth.username, access_token=webauth.refresh_token)
-    await client.disconnect()
+    async with WebAuth() as webauth:
+        await webauth.cli_login(input('Steam user: '))
+        await client.login(webauth.username, access_token=webauth.refresh_token)
+        await client.disconnect()
 
 
 if __name__ == '__main__':

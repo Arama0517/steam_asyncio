@@ -53,7 +53,7 @@ class SteamWorker:
 
     async def prompt_login(self):
         async with WebAuth() as webauth:
-            await webauth.cli_login(input('Steam user: '), input('Password: '))
+            await webauth.cli_login(input('Steam user: '))
             self.username = webauth.username
             self.access_token = webauth.refresh_token
             await self.steam.connect()

@@ -19,14 +19,14 @@ async def main():
         with CREDENTIALS.open('r', encoding='utf-8') as f:
             credentials = json.load(f)
     else:
-        webauth = WebAuth()
-        await webauth.cli_login(input('Steam user: '))
-        credentials = {
-            'username': webauth.username,
-            'refresh_token': webauth.refresh_token,
-        }
-        with CREDENTIALS.open('w', encoding='utf-8') as f:
-            json.dump(credentials, f, indent=4)
+        async with WebAuth() as webauth:
+            await webauth.cli_login(input('Steam user: '))
+            credentials = {
+                'username': webauth.username,
+                'refresh_token': webauth.refresh_token,
+            }
+            with CREDENTIALS.open('w', encoding='utf-8') as f:
+                json.dump(credentials, f, indent=4)
 
     client = SteamClient()
 
