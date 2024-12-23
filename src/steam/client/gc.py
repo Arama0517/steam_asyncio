@@ -64,11 +64,8 @@ class GameCoordinator(EventEmitter):
     :type body: :class:`bytes`
     """
 
-    def __init__(self, steam_client, app_id):
-        if not isinstance(steam_client, SteamClient):
-            raise ValueError('Expected an instance of SteamClient as first argument')
-
-        self.steam: SteamClient = steam_client
+    def __init__(self, steam_client: SteamClient, app_id: int):
+        self.steam = steam_client
         self.app_id = app_id
         self._LOG = logging.getLogger('GC(appid:%d)' % app_id)
 

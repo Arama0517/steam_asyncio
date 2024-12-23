@@ -9,10 +9,10 @@ from steam.enums.emsg import EMsg
 from steam.utils.proto import proto_to_dict
 from steam.webauth import WebAuth
 
-LOG = logging.getLogger('Steam Worker')
-
 
 class SteamWorker:
+    LOG = logging.getLogger('Steam Worker')
+
     def __init__(self):
         self.logged_on_once = False
 
@@ -20,11 +20,11 @@ class SteamWorker:
 
         @client.on('error')
         def handle_error(result):
-            LOG.info('Logon result: %s', repr(result))
+            self.LOG.info('Logon result: %s', repr(result))
 
         @client.on('connected')
         def handle_connected():
-            LOG.info('Connected to %s', client.current_server_addr)
+            self.LOG.info('Connected to %s', client.current_server_addr)
 
         @client.on('channel_secured')
         async def send_login():
@@ -34,22 +34,22 @@ class SteamWorker:
         async def handle_after_logon():
             self.logged_on_once = True
 
-            LOG.info('-' * 30)
-            LOG.info('Logged on as: %s', await client.user.name)
-            LOG.info('Community profile: %s', client.steam_id.community_url)
-            LOG.info('Last logon: %s', await client.user.last_logon)
-            LOG.info('Last logoff: %s', await client.user.last_logoff)
-            LOG.info('-' * 30)
+            self.LOG.info('-' * 30)
+            self.LOG.info('Logged on as: %s', await client.user.name)
+            self.LOG.info('Community profile: %s', client.steam_id.community_url)
+            self.LOG.info('Last logon: %s', await client.user.last_logon)
+            self.LOG.info('Last logoff: %s', await client.user.last_logoff)
+            self.LOG.info('-' * 30)
 
         @client.on('disconnected')
         async def handle_disconnect():
-            LOG.info('Disconnected.')
-            LOG.info('Reconnecting...')
+            self.LOG.info('Disconnected.')
+            self.LOG.info('Reconnecting...')
             await client.reconnect(maxdelay=30)
 
         @client.on('reconnect')
         def handle_reconnect(delay):
-            LOG.info('Reconnect in %ds...', delay)
+            self.LOG.info('Reconnect in %ds...', delay)
 
     async def prompt_login(self):
         async with WebAuth() as webauth:
@@ -61,7 +61,7 @@ class SteamWorker:
     async def close(self):
         if self.steam.logged_on:
             self.logged_on_once = False
-            LOG.info('Logout')
+            self.LOG.info('Logout')
             await self.steam.logout()
         if self.steam.connected:
             await self.steam.disconnect()

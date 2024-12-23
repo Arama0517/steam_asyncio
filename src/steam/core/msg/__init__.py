@@ -11,9 +11,7 @@ from steam.core.msg.headers import (
 )
 from steam.core.msg.structs import StructMessage as _StructMessage, get_struct
 from steam.core.msg.unified import get_um
-from steam.enums import EResult as EResult
 from steam.enums.emsg import EMsg
-from steam.exceptions import SteamError as SteamError
 from steam.protobufs import (
     steammessages_base_pb2,
     steammessages_clientserver_2_pb2,
@@ -29,6 +27,7 @@ from steam.protobufs import (
     steammessages_clientserver_ufs_pb2,
     steammessages_clientserver_userstats_pb2,
 )
+from steam.protobufs.steammessages_base_pb2 import CMsgProtoBufHeader
 
 cmsg_lookup_predefined = {
     EMsg.Multi: steammessages_base_pb2.CMsgMulti,
@@ -38,8 +37,6 @@ cmsg_lookup_predefined = {
     EMsg.ClientServiceMethodLegacyResponse: steammessages_clientserver_2_pb2.CMsgClientServiceMethodLegacyResponse,
     EMsg.ClientGetNumberOfCurrentPlayersDP: steammessages_clientserver_2_pb2.CMsgDPGetNumberOfCurrentPlayers,
     EMsg.ClientGetNumberOfCurrentPlayersDPResponse: steammessages_clientserver_2_pb2.CMsgDPGetNumberOfCurrentPlayersResponse,
-    #   EMsg.ClientEmailChange4: steammessages_clientserver_2_pb2.CMsgClientEmailChange,
-    #   EMsg.ClientEmailChangeResponse4: steammessages_clientserver_2_pb2.CMsgClientEmailChangeResponse,
     EMsg.ClientLogonGameServer: steammessages_clientserver_login_pb2.CMsgClientLogon,
     EMsg.ClientCurrentUIMode: steammessages_clientserver_2_pb2.CMsgClientUIMode,
     EMsg.ClientChatOfflineMessageNotification: steammessages_clientserver_2_pb2.CMsgClientOfflineMessageNotification,
@@ -164,15 +161,15 @@ class Msg:
         rows = [repr(self)]
 
         header = str(self.header)
-        rows.append('-------------- header --')
+        rows.append('--- header ---')
         rows.append(header if header else '(empty)')
 
         body = str(self.body)
-        rows.append('---------------- body --')
+        rows.append('--- body ---')
         rows.append(body if body else '(empty)')
 
         if self.payload:
-            rows.append('------------- payload --')
+            rows.append('--- payload ---')
             rows.append(repr(self.payload))
 
         return '\n'.join(rows)
@@ -181,6 +178,7 @@ class Msg:
 class MsgProto:
     proto = True
     body = None  #: protobuf message instance
+    header: CMsgProtoBufHeader = None
     payload = None  #: Will contain body payload, if we fail to find correct proto message
 
     def __init__(self, msg, data=None, parse=True):
@@ -256,15 +254,15 @@ class MsgProto:
         rows = [repr(self)]
 
         header = str(self.header).rstrip()
-        rows.append('-------------- header --')
+        rows.append('--- header ---')
         rows.append(header if header else '(empty)')
 
         body = str(self.body).rstrip()
-        rows.append('---------------- body --')
+        rows.append('--- body ---')
         rows.append(body if body else '(empty)')
 
         if self.payload:
-            rows.append('------------- payload --')
+            rows.append('--- payload ---')
             rows.append(repr(self.payload))
 
         return '\n'.join(rows)

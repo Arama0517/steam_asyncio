@@ -54,7 +54,7 @@ build-backend = "setuptools.build_meta"
 vdf = { git = "https://github.com/solsticegamestudios/vdf.git", rev = "v4.0" }
 
 [tool.uv.workspace]
-members = ["examples/wallet_balance", "examples/simple_web_api", "examples/login"]
+members = ["examples/login", "examples/simple_web_api", "examples/wallet_balance"]
 
 [tool.coverage.run]
 branch = false
