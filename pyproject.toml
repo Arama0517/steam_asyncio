@@ -35,6 +35,9 @@ build-backend = "setuptools.build_meta"
 [tool.uv.sources]
 vdf = { git = "https://github.com/solsticegamestudios/vdf.git", rev = "v4.0" }
 
+[tool.uv.workspace]
+members = ["examples/wallet_balance", "examples/simple_web_api", "examples/login"]
+
 [tool.coverage.run]
 branch = false
 omit = ["src/steam/protobufs/*", "src/steam/enums/*"]

@@ -1,5 +1,5 @@
 [project]
-name = "wallet_balance"
+name = "wallet-balance"
 version = "1.0.0"
 description = "examples"
 readme = "README.rst"
@@ -9,4 +9,4 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-steam = { path = "../.." }
+steam = { workspace = true }

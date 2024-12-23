@@ -1,5 +1,5 @@
 [project]
-name = "simple_web_api"
+name = "simple-web-api"
 version = "1.0.0"
 description = "examples"
 readme = "README.rst"
@@ -12,4 +12,4 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-steam = { path = "../.." }
+steam = { workspace = true }
