@@ -696,25 +696,24 @@ class CDNClient:
 
     @classmethod
     async def new(cls, client: SteamClient) -> Self:
-        self = cls()
-        self.semaphore = asyncio.Semaphore(8)  #: task semaphore
-        self.client = client  #: SteamClient instance
-        self.cell_id = self.client.cell_id
+        cls.semaphore = asyncio.Semaphore(8)  #: task semaphore
+        cls.client = client  #: SteamClient instance
+        cls.cell_id = cls.client.cell_id
 
-        self.cdn_auth_tokens = {}  #: CDN authentication token
-        self.depot_keys = {}  #: depot decryption keys
-        self.manifests = {}  #: CDNDepotManifest instances
-        self.app_depots = {}  #: app depot info
-        self.beta_passwords = {}  #: beta branch decryption keys
-        self.licensed_app_ids = set()  #: app_ids that the SteamClient instance has access to
-        self.licensed_depot_ids = set()  #: depot_ids that the SteamClient instance has access to
-        self._loaded_licenses = False
+        cls.cdn_auth_tokens = {}  #: CDN authentication token
+        cls.depot_keys = {}  #: depot decryption keys
+        cls.manifests = {}  #: CDNDepotManifest instances
+        cls.app_depots = {}  #: app depot info
+        cls.beta_passwords = {}  #: beta branch decryption keys
+        cls.licensed_app_ids = set()  #: app_ids that the SteamClient instance has access to
+        cls.licensed_depot_ids = set()  #: depot_ids that the SteamClient instance has access to
+        cls._loaded_licenses = False
 
-        if not self.servers:
-            await self.fetch_content_servers()
-
-        await self.load_licenses()
-        return self
+        result = cls()
+        if not result.servers:
+            await result.fetch_content_servers()
+        await result.load_licenses()
+        return result
 
     def clear_cache(self):
         """Cleared cached information. Next call on methods with caching will return fresh data"""
