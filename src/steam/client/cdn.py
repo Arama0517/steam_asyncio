@@ -679,21 +679,6 @@ class CDNClient:
     _chunk_cache = LRUCache(20)
     cell_id = 0  #: Cell ID to use, initialized from SteamClient instance
 
-    # def __init__(self, client):
-    #     self.semaphore = asyncio.Semaphore(8)  #: task semaphore
-    #     self.client: SteamClient = client  #: SteamClient instance
-    #     if self.client:
-    #         self.cell_id = self.client.cell_id
-
-    #     self.cdn_auth_tokens = {}  #: CDN authentication token
-    #     self.depot_keys = {}  #: depot decryption keys
-    #     self.manifests = {}  #: CDNDepotManifest instances
-    #     self.app_depots = {}  #: app depot info
-    #     self.beta_passwords = {}  #: beta branch decryption keys
-    #     self.licensed_app_ids = set()  #: app_ids that the SteamClient instance has access to
-    #     self.licensed_depot_ids = set()  #: depot_ids that the SteamClient instance has access to
-    #     self._loaded_licenses = False
-
     @classmethod
     async def new(cls, client: SteamClient) -> Self:
         cls.semaphore = asyncio.Semaphore(8)  #: task semaphore

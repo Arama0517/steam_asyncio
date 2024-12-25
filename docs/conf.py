@@ -13,6 +13,9 @@
 
 import os
 import sys
+from datetime import datetime
+
+from steam import __author__, __version__
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -48,10 +51,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-from steam import __author__, __version__
-
 project = 'steam'
-copyright = '2019, %s' % __author__
+copyright = f'{datetime.now().year}, {__author__}'
 author = __author__
 
 # The version info for the project you're documenting, acts as replacement for

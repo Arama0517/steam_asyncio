@@ -1,6 +1,5 @@
 [project]
 name = "steam"
-version = "1.6.2"
 dependencies = [
     "cachetools>=5.5.0",
     "pycryptodomex>=3.21.0",
@@ -11,6 +10,7 @@ dependencies = [
     "lxml>=5.3.0",
 ]
 requires-python = ">=3.11"
+dynamic = ["version"]
 authors = [
     {name = "Rossen Georgiev", email = "rossen@rgp.io"},
     {name = "Solstice Game Studios", email = "py-steam@solsticegamestudios.com"},
@@ -55,6 +55,9 @@ vdf = { git = "https://github.com/solsticegamestudios/vdf.git", rev = "v4.0" }
 
 [tool.uv.workspace]
 members = ["examples/login", "examples/simple_web_api", "examples/wallet_balance"]
+
+[tool.setuptools.dynamic]
+version = {attr = "steam.__version__"}
 
 [tool.coverage.run]
 branch = false
