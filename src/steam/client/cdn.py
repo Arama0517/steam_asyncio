@@ -1163,9 +1163,9 @@ class CDNClient:
                         unhexlify(egid), self.beta_passwords[(app_id, branch)]
                     )
                 else:
-                    manifest_gid = depot_info.get('manifests', {}).get('public')
+                    manifest_gid = depot_info.get('manifests', {}).get('public').get('gid')
             else:
-                manifest_gid = depot_info.get('manifests', {}).get(branch)
+                manifest_gid = depot_info.get('manifests', {}).get(branch).get('gid')
 
             if isinstance(manifest_gid, dict):
                 # For some depots, Steam has started returning a dict
